@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="980.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="middlestripb.FX1Controller">
+   <children>
+      <StackPane alignment="CENTER_LEFT" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="50.0" style="-fx-background-color: indigo;">
+         <children>
+            <Label fx:id="lb_profile" alignment="CENTER_RIGHT" prefWidth="600.0" text="BET &amp; Area (Teste)" textFill="WHITE" StackPane.alignment="CENTER_RIGHT">
+               <StackPane.margin>
+                  <Insets right="150.0" />
+               </StackPane.margin>
+               <font>
+                  <Font name="Roboto Bold" size="36.0" />
+               </font>
+            </Label>
+            <Label text="ASVP - Analise de Rotina" textFill="WHITE" StackPane.alignment="CENTER_LEFT">
+               <font>
+                  <Font name="Roboto Medium" size="36.0" />
+               </font>
+               <StackPane.margin>
+                  <Insets left="30.0" />
+               </StackPane.margin>
+            </Label>
+         </children>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
+         <padding>
+            <Insets left="20.0" />
+         </padding>
+      </StackPane>
+      <HBox VBox.vgrow="ALWAYS">
+         <children>
+            <VBox alignment="TOP_CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="200.0" styleClass="fxf-sidebar" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label fx:id="sidebar_btcycle" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" onMouseClicked="#btcycle_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Nova Analise" textAlignment="CENTER" />
+                  <Label fx:id="sidebar_btstore" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" layoutX="68.0" layoutY="11.0" onMouseClicked="#btstore_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Armazenar Analise" textAlignment="CENTER" />
+                  <Label fx:id="sidebar_btreport" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" layoutX="68.0" layoutY="11.0" onMouseClicked="#btreport_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Emitir Relatorio" textAlignment="CENTER" />
+                  <Label fx:id="sidebar_btbroadcast" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" layoutX="68.0" layoutY="11.0" onMouseClicked="#btexport_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Exportar Resultado" textAlignment="CENTER" />
+                  <Label fx:id="sidebar_btloadfile" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" layoutX="48.0" layoutY="59.0" onMouseClicked="#btloadfile_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Carregar de Arquivo" textAlignment="CENTER" />
+               </children>
+               <HBox.margin>
+                  <Insets top="10.0" />
+               </HBox.margin>
+            </VBox>
+            <VBox HBox.hgrow="ALWAYS">
+               <children>
+                  <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: aliceblue;" />
+                  <AnchorPane prefHeight="500.0" prefWidth="200.0" style="-fx-background-color: beige;">
+                     <children>
+                        <SplitPane dividerPositions="0.6757857974388825, 0.8265424912689173" layoutX="-8.0" layoutY="-8.0" prefHeight="500.0" prefWidth="1720.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <items>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="470.0" prefWidth="111.0" />
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="450.0" prefWidth="363.0" />
+                              <AnchorPane prefHeight="498.0" prefWidth="1252.0" />
+                          </items>
+                        </SplitPane>
+                     </children></AnchorPane>
+                  <AnchorPane prefWidth="200.0" style="-fx-background-color: lightCyan;" VBox.vgrow="ALWAYS" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</VBox>
