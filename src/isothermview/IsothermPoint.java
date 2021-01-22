@@ -27,10 +27,7 @@ public class IsothermPoint implements Serializable {
         this.volume_g = volume_g;
     }
 
-    
-    
-    
-    
+  
     
         private long timestamp;
 

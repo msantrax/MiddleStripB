@@ -56,18 +56,18 @@
             </VBox>
             <VBox HBox.hgrow="ALWAYS">
                <children>
-                  <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: aliceblue;" />
-                  <AnchorPane prefHeight="500.0" prefWidth="200.0" style="-fx-background-color: beige;">
+                  <AnchorPane fx:id="toppane" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: aliceblue;" />
+                  <AnchorPane prefHeight="500.0" prefWidth="200.0">
                      <children>
-                        <SplitPane dividerPositions="0.6757857974388825, 0.8265424912689173" layoutX="-8.0" layoutY="-8.0" prefHeight="500.0" prefWidth="1720.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <SplitPane fx:id="opsplit" dividerPositions="0.6, 0.8" layoutX="-8.0" layoutY="-8.0" prefHeight="500.0" prefWidth="1720.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <items>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="470.0" prefWidth="111.0" />
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="450.0" prefWidth="363.0" />
-                              <AnchorPane prefHeight="498.0" prefWidth="1252.0" />
+                            <AnchorPane fx:id="mainchartpane" minHeight="0.0" minWidth="0.0" prefHeight="470.0" prefWidth="111.0" style="-fx-background-color: white;" />
+                            <AnchorPane fx:id="infopane" minHeight="0.0" minWidth="0.0" prefHeight="450.0" prefWidth="363.0" />
+                              <AnchorPane fx:id="auxpane" prefHeight="498.0" prefWidth="1252.0" />
                           </items>
                         </SplitPane>
                      </children></AnchorPane>
-                  <AnchorPane prefWidth="200.0" style="-fx-background-color: lightCyan;" VBox.vgrow="ALWAYS" />
+                  <AnchorPane fx:id="bottompane" prefWidth="200.0" style="-fx-background-color: lightCyan;" VBox.vgrow="ALWAYS" />
                </children>
             </VBox>
          </children>

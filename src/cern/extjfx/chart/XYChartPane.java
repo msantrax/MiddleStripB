@@ -146,6 +146,7 @@ public class XYChartPane<X, Y> extends Region {
         Utils.getChartContent(baseChart).needsLayoutProperty().addListener(layoutRequestListener);
 
         getStyleClass().add("chart-pane");
+        
         overlayCharts.addListener(overlayChartsChanged);
         plugins.addListener(pluginsChanged);
 

@@ -37,10 +37,12 @@ public class IsothermBean implements Serializable {
     public Double outgas_temp;
         
     public ArrayList<IsothermPoint> points;
+    public transient ArrayList<IsothermPoint> temp_points;
     
    
     public IsothermBean() {
         points = new ArrayList<>();
+        temp_points = new ArrayList<>();
     }
     
   

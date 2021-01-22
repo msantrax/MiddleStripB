@@ -6,6 +6,7 @@
 package isothermview;
 
 
+import com.opus.syssupport.PicnoUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -80,13 +81,15 @@ public class QcrImporter {
     
     public boolean isQcrText(String fpath) throws IOException{
         filepath = fpath;
-        //payload = SystemUtils.loadFile(fpath);
+        payload = PicnoUtils.loadFile(fpath);
         if (payload.contains("Quantachrome Instruments")) return true;
         return false;
     }
     
     
-    public Isotherm getIsotherm() { return isotherm;}
+    public Isotherm getIsotherm() { 
+        return isotherm;
+    }
     
     private Date convertDate(String sdate){
         try {
@@ -196,14 +199,14 @@ public class QcrImporter {
                 pressure = Double.parseDouble(matcher.group(1));
                 volume = Double.parseDouble(matcher.group(2));
                 
-                isotherm.addPoint(pressure, volume);
+                isotherm.addTempPoint(pressure, volume);
             }
             catch (NumberFormatException ex){
                 log.finer("No point");
             }
         }
-        isotherm.findMiniMax();
-        log.info(String.format("Loaded %d points from isotherm file : %s", isotherm.getSize(), filepath));
+        isotherm.findMiniMax(true);
+        log.info(String.format("Loaded %d points from isotherm file : %s", isotherm.getSize(true), filepath));
         
     }
     
@@ -218,25 +221,25 @@ public class QcrImporter {
         StringBuilder sb = new StringBuilder();
         int ptr = 1;
         
-        sb.append(String.format("\nIsotherm points  = %d\n", isotherm.getSize()));
+        sb.append(String.format("\nIsotherm points  = %d\n", isotherm.getSize(true)));
         ArrayList<IsothermPoint> isopoints = new ArrayList<>();
         IsothermPoint isotp;
-        isopoints = isotherm.getAdsorptionPoints();
+        isopoints = isotherm.getAdsorptionPoints(true);
         sb.append(String.format("Adsorption points  = %d\n", isopoints.size()));
-        isotp = isotherm.getMinAdsorption();
+        isotp = isotherm.getMinAdsorption(true);
         sb.append(String.format("Adsorption min (pressure/vol)  = %f / %f\n", isotp.getPpo(), isotp.getVolume_g()));
-        isotp = isotherm.getMaxAdsorption();
+        isotp = isotherm.getMaxAdsorption(true);
         sb.append(String.format("Adsorption max (pressure/vol)  = %f / %f\n", isotp.getPpo(), isotp.getVolume_g()));
         for (IsothermPoint isop : isopoints){
             sb.append(String.format("\tPoint %02d: %f / %f\n", ptr++, isop.getPpo(), isop.getVolume_g()));
         }
 
-        isopoints = isotherm.getDesorptionPoints();
+        isopoints = isotherm.getDesorptionPoints(true);
         ptr= 1;
         sb.append(String.format("\nDesorption points  = %d\n", isopoints.size()));
-        isotp = isotherm.getMinDesorption();
+        isotp = isotherm.getMinDesorption(true);
         sb.append(String.format("Desorption min (pressure/vol)  = %f / %f\n", isotp.getPpo(), isotp.getVolume_g()));
-        isotp = isotherm.getMaxDesorption();
+        isotp = isotherm.getMaxDesorption(true);
         sb.append(String.format("Desorption max (pressure/vol)  = %f / %f\n", isotp.getPpo(), isotp.getVolume_g()));
         for (IsothermPoint isop : isopoints){
             sb.append(String.format("\tPoint %02d: %f / %f\n", ptr++, isop.getPpo(), isop.getVolume_g()));

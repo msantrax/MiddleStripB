@@ -6,15 +6,20 @@
 package middlestripb;
 
 
+import cern.extjfx.chart.XYChartPane;
 import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.SignalListener;
 import com.opus.syssupport.StateDescriptor;
 import com.opus.syssupport.VirnaPayload;
 import com.opus.syssupport.VirnaServiceProvider;
 import com.opus.syssupport.smstate;
+import isothermview.Isotherm;
+import isothermview.IsothermChart;
+import isothermview.QcrImporter;
 import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -39,11 +44,9 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     private LinkedBlockingQueue<SMTraffic> smqueue;
     private LinkedHashMap<String, StateDescriptor> statesptr ;
     private final ScheduledExecutorService scheduler;
- 
+
     private FX1Controller anct;
     private boolean fx1open = false;
-
-    
     
     private boolean locked = false;
     
@@ -160,8 +163,6 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     }
     
     
-    
-    
     // ===========SIGNAL HANDLING ===================================================================
         
     /** Estrutura para armazenamento dos listeners do dispositivo*/ 
@@ -212,8 +213,6 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     }
     
     
-
- 
     // ===================================================== Controllers ===================================================
  
     
@@ -223,33 +222,9 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     public boolean isFX1open() { return fx1open;}
     public void setFX1open (boolean open) { fx1open = open;}
 
-    
-//    public void setFXCALController (FX2Controller controller){
-//        this.calct = controller;   
-//    }
-//    public boolean isFX2open() { return fx2open;}
-//    public void setFX2open (boolean open) { fx2open = open;}
-//    
-//    
-//    public void setFXYARAController (FX5Controller controller){
-//        this.yaract = controller;   
-//    }
-//    public boolean isFX5open() { return fx1open;}
-//    public void setFX5open (boolean open) { fx1open = open;}
-//    
-//    
-//    
-//    public void setFXDBController (FX3Controller controller){
-//        this.dbct = controller;
-//    }
-//    
-    
-    
+
     public LinkedBlockingQueue<SMTraffic> getQueue(){ return smqueue;}
     
-    
-    
-
     
     // ======================================== STATE MACHINE ======================================================================
     @Override
@@ -439,14 +414,6 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
                 log.log(Level.SEVERE,String.format("Controller State Machine failed ..."));
                 //log.log(Level.SEVERE,String.format("Controller State Machine failed with %s @ state %s", ex.getMessage(), state));
                 ex.printStackTrace();
-                //log.log(Level.SEVERE, "Falha na maquina de estados : ", ex);
-//                ImageIcon image = ImageUtilities.loadImageIcon("com/opus/pp100/db-schema-icon.png", true);
-//                Notification noti = NotificationDisplayer.getDefault().notify(
-//                    "Kernel Controlador da Virna 3 detectou anormalidade",
-//                    image,
-//                    String.format("Falha na máquina de estados em : %s", state),
-//                    Lookups.forPath("NotificationActions").lookup(ActionListener.class)
-//                );
                 System.exit(0);
                 //startService();
                 
@@ -474,7 +441,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     
     @smstate (state = "NULLEVENT")
     public boolean st_nullEvent(SMTraffic smm){
-        //log.info(String.format("NULLEVENT was called"));
+        log.info(String.format("NULLEVENT was called"));
         return true;
     }
    
@@ -490,7 +457,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     
     @smstate (state = "INIT")
     public boolean st_init(SMTraffic smm){
-        //log.log(Level.INFO, String.format("INIT state activated with payload : %s", smm.getPayload().vstring));
+        log.log(Level.INFO, String.format("INIT state activated with payload : %s", smm.getPayload().vstring));
         return true;
     }
     
@@ -500,31 +467,13 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         // Para que isso mesmo ?
         System.setProperty("sun.java2d.cmm", "sun.java2d.cmm.kcms.KcmsServiceProvider");
         
-//        dbservice = DBService.getInstance();
-//        getDbservice().setControler(this);
-//        getDbservice().startService();
-        
-        
-//        FXFWindowManager wm = FXFWindowManager.getInstance();
-     
         SMTraffic alarm_config = new SMTraffic(0l, 0l, 0, "HOUSEKEEP", this.getClass(),
                         new VirnaPayload()
                 );
-        setAlarm (-1l, -1, alarm_config, 500l, 500l);
+        setAlarm (-1l, -1, alarm_config, 250l, 250l);
         
-//        BlaineDevice bldv = BlaineDevice.getInstance();
-//        bldv.setAppController(this);
-//        loadStates(BlaineDevice.class, bldv);
-//        
-//        SMTraffic blainealarm_config = new SMTraffic(0l, 0l, 0, "BLAINEBEAT", this.getClass(),
-//                        new VirnaPayload()
-//                );
-//        setAlarm (-1l, 1000, blainealarm_config, 1000l, 1000l);
-//        
-//        
-//        FormulaResources.getInstance().setAppController(this);
-    
-        //connect();
+
+        
         
         return true;
     }
@@ -539,25 +488,13 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     @smstate (state = "HOUSEKEEP")
     public boolean st_doHousekeep(SMTraffic smm){
 
-        //VirnaPayload payload = smm.getPayload();
+        VirnaPayload payload = smm.getPayload();
         
-        //log.info(String.format("Housekeep loop %03d @ %d", housekeep_loop++, ((System.currentTimeMillis() % 1000000))));
-//        if (currentstatus != null){
-//            if (System.currentTimeMillis() > currentstatus.getkeepAlive()){
-//                FXFHeaderband hb = FXFWindowManager.getInstance().getHeaderBand();
-//                hb.updateStatus("");
-//                currentstatus = null;
-//            }
-//        }
-//        if (!statusmessages.isEmpty()){
-//            StatusMessage sm = statusmessages.peek();
-//            if ((currentstatus == null) || sm.getPriority() > currentstatus.getPriority()){
-//                currentstatus = statusmessages.poll();
-//                currentstatus.setkeepAlive(System.currentTimeMillis() + (currentstatus.getPriority()));
-//                FXFHeaderband hb = FXFWindowManager.getInstance().getHeaderBand();
-//                hb.updateStatus(currentstatus.getMessage());
-//            }
-//        }
+//        log.info(String.format("Housekeep loop %03d @ %d", housekeep_loop++, ((System.currentTimeMillis() % 1000000))));
+        
+        if (isotherm != null && isotherm.chart_ready){
+            isotherm.transferPoint();
+        }
         
         return true;
         
@@ -568,8 +505,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     public boolean st_updateStatus(SMTraffic smm){
 
         VirnaPayload payload = smm.getPayload();
-//        StatusMessage sm = (StatusMessage)payload.vobject;
-//        
+//        StatusMessage sm = (StatusMessage)payload.vobject; 
 //        log.info(String.format("Status = [%d]%s", sm.getPriority(), sm.getMessage()));
 //        statusmessages.add(sm);
         
@@ -601,16 +537,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         
         VirnaPayload payload = smm.getPayload();
         String[] messages = payload.vstring.split("&");
-        
-//        ImageIcon image = ImageUtilities.loadImageIcon("com/opus/pp100/db-schema-icon.png", true);
-//        
-//        Notification noti = NotificationDisplayer.getDefault().notify(
-//            messages[0],
-//            image,
-//            messages[1],
-//            Lookups.forPath("NotificationActions").lookup(ActionListener.class)
-//        );
-        
+
         return true;
     }
     
@@ -620,272 +547,68 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         VirnaPayload payload = smm.getPayload();
         VirnaServiceProvider vsp = (VirnaServiceProvider)payload.getCaller();
         
-//        
-//        if (false){
-//        //if (anct != null ){
-//            FXFConfirmationDialog cdlg = new FXFConfirmationDialog()
-//                .setMessage("Já há um registro no banco com esse resultado, \r\nDevo substituir ?")
-//                .setTitle("Banco de dados")
-//                .setOwner(anct.getScene().getWindow())    
-//            ;
-//            Platform.runLater(new Runnable() {
-//                @Override
-//                public void run() {
-//                    Alert dlg = cdlg.activateAlert();
-//                    ((Stage) dlg.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
-//                    dlg.showAndWait().ifPresent(result -> {
-//                        //log.info("Result is " + result);
-//                        if (result.getButtonData() == ButtonData.CANCEL_CLOSE){
-//                            log.info("Dialog canceled");
-//                        }
-//                        else{
-//                            //storeAnaliseRecord(an);    
-//                        }
-//                    });
-//                }    
-//            });   
-//        }
-//        else{
-////            NotifyDescriptor nd = new NotifyDescriptor.Message(
-////                payload.vstring, 
-////                NotifyDescriptor.YES_NO_CANCEL_OPTION);
-////                if (payload.getAuxiliar() != null){
-////                    nd.setOptions((Object[])payload.getAuxiliar());
-////                }
-//// 
-////                Object retval = DialogDisplayer.getDefault().notify(nd);
-////                if (retval != null){
-////                    if (retval instanceof Integer){
-////                        log.info(String.format("Retval integer = %d", retval));
-////                    }
-////                    else if (retval instanceof String){
-////                        vsp.processSignal(new SMTraffic(0l, 0l, 0, payload.getCallerstate(), 
-////                                        new VirnaPayload()
-////                                        .setObject(payload.vobject)
-////                                        .setString((String)retval)
-////                                        .setCaller(this)
-////                                        .setCallerstate("SHOWOOPS")
-////                        ));
-////                    }
-////                }
-//                
-//        }
         return true;
     }
     
     
+    public Isotherm isotherm ;
+    public IsothermChart isothermchart ;
+    
+    
+    @smstate (state = "IMPORTISOTHERM")
+    public boolean st_import_isotherm(SMTraffic smm){
+        
+        Object caller;
+        VirnaPayload pload = smm.getPayload();
+        QcrImporter qcrimporter = QcrImporter.getInstance();
+        
+        if (pload != null){
+            caller = pload.vobject;
+           
+            try {
+                if (qcrimporter.isQcrBinary(pload.vstring)){
+                    qcrimporter.loadBinaryFile(pload.vstring);
+                }
+                else if (qcrimporter.isQcrText(pload.vstring)){
+                    qcrimporter.loadTextFile();
+                    qcrimporter.showStatus();
+                    isotherm = qcrimporter.getIsotherm();                    
+                    log.info(String.format("Done importing isotherm from  %s ", pload.vstring));
+                }
+                else{
+                    log.info(String.format("Importing some other file %s ", pload.vstring));
+                    return false;
+                }
+            } catch (IOException ex) {
+                log.info(String.format("Failed to load Isotherm file %s ", pload.vstring));
+                return false;
+            }    
+        }
+        return true;
+    }
+    
+    
+    @smstate (state = "LOADISOTHERMCHART")
+    public boolean st_loadIsoThermChart(SMTraffic smm){
+        
+        log.info(String.format("Loading Chart  %s ", "TESTE"));
+        
+        if (isotherm != null){
+            anct.loadMainChart(isotherm);
+//            isothermchart = new IsothermChart(isotherm);
+//            XYChartPane chartpane = isothermchart.createCernChart();
+//            anct.loadMainChart(chartpane);
+        }
+        
+        
+        
+        return true;
+    }
+
     
     
     
-//    
-//    
-//    
-//    @smstate (state = "LOCKUI")
-//    public boolean st_lockUI(SMTraffic smm){
-//        
-//        locked = (smm.getPayload().int1 == 1);
-//        
-//        if (smm.getPayload().int2 == 0){
-//            anct.lockUI(locked);
-//        }
-//        else{
-//            //calct.lockUI(locked);
-//        }
-//        
-//        return true;
-//    }
-//    
-//    
-//    
-//    @smstate (state = "LOADGUI")
-//    public boolean st_loadGUI(SMTraffic smm){
-//        
-//        //service_thread.pushState ("LOADCONFIG", null);
-//        
-//        SwingUtilities.invokeLater(new Runnable() {
-//            @Override
-//            public void run() {
-////                Mode m = WindowManager.getDefault().findMode("explorer");              
-////                ExplorerTopComponent extc = ExplorerTopComponent.findInstance();
-////                extc.setName("NAVTREE");
-////                m.dockInto(extc);
-////                extc.open();
-////                extc.requestActive();
-////                log.info(String.format("Explorer %d was created", extc.hashCode()));
-//            }    
-//        });
-//        
-//        return true;
-//    }
-//    
     
 }
 
 
-//CREATE TABLE ANALISE
-//(
-//   ID integer PRIMARY KEY NOT NULL,
-//   TIMESTP integer DEFAULT CURRENT_TIMESTAMP NOT NULL,
-//   SID varchar(2000000000) DEFAULT 'SID' NOT NULL,
-//   LOTE varchar(2000000000) DEFAULT 'LOTE' NOT NULL,
-//   NOTAS varchar(2000000000) DEFAULT 'NOTAS' NOT NULL,
-//   OWNER varchar(2000000000) DEFAULT 'Default' NOT NULL,
-//   PROFILE varchar(2000000000) DEFAULT 'Default' NOT NULL,
-//   BLAINE varchar(2000000000) DEFAULT '0.0' NOT NULL,
-//   POROSIDADE varchar(2000000000) DEFAULT '0.0' NOT NULL,
-//   DENSIDADE varchar(2000000000) DEFAULT '0.0' NOT NULL,
-//   MASSA varchar(2000000000) DEFAULT '0.0' NOT NULL,
-//   KFACTOR varchar(2000000000) DEFAULT '0.0' NOT NULL,
-//   VOLUME varchar(2000000000) DEFAULT '0.0' NOT NULL,
-//   TEMPERATURA varchar(2000000000) DEFAULT '0.0' NOT NULL,
-//   CALIBFILE varchar(2000000000) DEFAULT '' NOT NULL,
-//   FLAG integer DEFAULT 0 NOT NULL,
-//   MEDIA varchar(2000000000) DEFAULT '0.0' NOT NULL,
-//   RSD varchar(2000000000) DEFAULT '0.0' NOT NULL,
-//   RUNS varchar(2000000000) DEFAULT '' NOT NULL
-//)
-//;
-
-
-        
-//        GsonBuilder builder = new GsonBuilder(); 
-//        builder.setPrettyPrinting(); 
-//        Gson gson = builder.create();
-//        String sjson = gson.toJson(an);
-//
-//        log.info("========== JSON : ==================\n\r");
-//        log.info(sjson);
-//        log.info(String.format("Json parser loaded %d chars", sjson.length()));
-
-
-
-
-//ReportDescriptor rd = new ReportDescriptor();
-//        
-//        rd.addItem(new ReportItem("densidade"))
-//                .setXoffset(200.0)
-//                .setYoffset(200.0);
-//        rd.addItem(new ReportItem("it_porosidade"));
-//        rd.addItem(new ReportItem("it_massa_calculada"));
-//        rd.addItem(new ReportItem("media"));
-//        rd.addItem(new ReportItem("rsd"));
-//        rd.addItem(new ReportItem("it_blaineresult"));
-//        rd.addItem(new ReportItem("it_sid"));
-//        rd.addItem(new ReportItem("it_lote"));
-//        rd.addItem(new ReportItem("it_notas"));
-//        rd.addItem(new ReportItem("it_calibfile"));
-//        rd.addItem(new ReportItem("it_constantek"));
-//        rd.addItem(new ReportItem("it_layervolume"));
-//        rd.addItem(new ReportItem("temperatura"));
-//       
-//        
-//        GsonBuilder builder = new GsonBuilder(); 
-//        builder.setPrettyPrinting(); 
-//        Gson gson = builder.create();
-//        String sjson = gson.toJson(rd);
-// 
-//        String filename = String.format("pdfroot.json");
-//        Path p = Paths.get(Config.getInstance().getTemplate_dir()+filename);
-//        try {
-//            Files.write(p, sjson.getBytes(StandardCharsets.UTF_8));
-//        } catch (IOException ex) {
-//            log.severe(String.format("Failed to store ReportDescriptor @ %s", p.toFile().getAbsolutePath()));
-//        }
-//        log.info(String.format("================Stored report descriptor %s: \n\r%s", "file", sjson));
-//        
-
-
-   
-    
-    //                FXFFieldDescriptor fd = prof.getDescriptor(ri.getField());
-//                if (fd != null) {
-//                    fd.setXpos(ri.getXpos());
-//                    fd.setYpos(ri.getYpos());
-//                    fd.setReport_font(ri.getFont());
-//                    fd.setReport_format(ri.getFormat());
-//                    fd.setReport_fontsize(ri.getFontsize());
-//                    log.info(String.format("Report Descriptor %s was updated to %5.3f / %5.3f  - fontsize = %d", 
-//                            ri.getField(), ri.getXpos(), ri.getYpos(), ri.getFontsize()));
-//                }
-    
-    
-    
-    
-    
-    
-    
-//    
-//    @smstate (state = "LOADREPORTDESCRIPTOR")
-//    public boolean st_loadReportDescriptor(SMTraffic smm){
-//   
-//        VirnaPayload payload = smm.getPayload();
-//        AnaliseDescriptor and = (AnaliseDescriptor)payload.vobject;
-//        String descfile = Config.getInstance().getTemplate_dir()+"pdfroot.json";
-//        
-//        try {
-//            ReportDescriptor rd = PicnoUtils.loadAuxJson(descfile, ReportDescriptor.class); 
-//            ArrayList<ReportItem> ritems = rd.getItems();
-//            ritems.forEach((ri) -> {
-//                String value = and.getFieldAsString(ri.getDatatype());
-//                if (value == null) value = "indetermindado";
-//                log.info(String.format("Valor do campo %s é : %s", ri.getDatatype(), value));
-//                
-//
-//            });
-//            
-//        } catch (IOException ex) {
-//            log.severe(String.format("Unable to load descriptor from %s", descfile));
-//        }
-//        
-//        return true;
-//    }
-//
-
-
-//@smstate (state = "CALCLAYERVOL")
-//    public boolean st_calcLayerVol(SMTraffic smm){
-//        
-//        Double porosity;
-//        Double density;
-//        Double layervol;
-//        Double samplemass;
-//        
-//        PropertyLinkDescriptor pld = (PropertyLinkDescriptor)smm.getPayload().vobject;
-//        
-//        if (pld!= null){
-//            if (!pld.isValid()){
-//                anct.updateField ("it_volume", "", false);
-//                return true;
-//            }
-//        }
-//        
-//        porosity = getDoublePValue("porosidade", cal.getPorosidade());
-//        if (porosity.isNaN()){
-//            calct.updateField ("it_volume", "", false);
-//            return true;
-//        }
-//        
-//        density  = getDoublePValue("densidade", cal.getDensidade());
-//        if (density.isNaN()){
-//            calct.updateField ("it_volume", "", false);
-//            return true;
-//        }
-//        
-//        layervol  = getDoublePValue("volume_camada", an.getVolume_camada());
-//        if (layervol.isNaN()){
-//            calct.updateField ("it_volume", "", false);
-//            return true;
-//        }
-//        
-//        samplemass = (1 - porosity) * (density * layervol);
-//        
-//        
-//        String smass = String.format(Locale.US, "%5.3f", samplemass);
-//        log.info(String.format("Layer volume was calculated : %s", smass));
-//        calct.updateField ("it_volume", smass, false);
-//        
-//        
-//        return true;
-//        
-//    }
-//    

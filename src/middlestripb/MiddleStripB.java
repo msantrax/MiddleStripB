@@ -21,6 +21,8 @@ import javafx.stage.Stage;
 public class MiddleStripB extends Application {
 
     public static MongoLink mongolink;
+    public static Controller ctrl;
+    
     
     @Override
     public void start(Stage stage) throws Exception {
@@ -43,12 +45,15 @@ public class MiddleStripB extends Application {
     public static void main(String[] args) {
         
         
-        mongolink = new MongoLink();
+        ctrl = Controller.getInstance();
+        ctrl.startService();
+        
+//        mongolink = new MongoLink();
         
         System.out.println(PicnoUtils.getFormatedTimestamp());
         System.out.println(System.currentTimeMillis());
         
-        //launch(args);
+        launch(args);
         
         System.exit(0);
         

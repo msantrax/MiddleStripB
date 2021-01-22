@@ -25,7 +25,6 @@ public class IsoResearchModel {
 
     private static final Logger LOG = Logger.getLogger(IsoResearchModel.class.getName());
   
-   
     private IsothermBean isobean;
     private String dbblob;
     private boolean loaded = false;
@@ -45,6 +44,7 @@ public class IsoResearchModel {
         }
     
     }
+    
     
     
     public ObservableList<Map<String, Object>> getMapData(int mode){
