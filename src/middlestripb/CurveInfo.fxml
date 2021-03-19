@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<fx:root fx:id="asvp" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="500.0" minWidth="-Infinity" prefWidth="350.0" style="-fx-background-color: white;" type="AnchorPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Text layoutX="10.0" layoutY="47.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Isotherm Info" textAlignment="CENTER" wrappingWidth="330.0">
+         <font>
+            <Font name="Roboto Bold" size="26.0" />
+         </font>
+      </Text>
+      <Text layoutX="23.0" layoutY="185.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Data capture start :">
+         <font>
+            <Font name="Roboto" size="10.0" />
+         </font>
+      </Text>
+      <TextField layoutX="23.0" layoutY="189.0" prefHeight="25.0" prefWidth="305.0" styleClass="fxf-label-field" />
+      <Text layoutX="28.0" layoutY="85.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Strategy Profile :">
+         <font>
+            <Font name="Roboto" size="10.0" />
+         </font>
+      </Text>
+      <TextField layoutX="23.0" layoutY="89.0" prefHeight="28.0" prefWidth="203.0" styleClass="fxf-label-field" text="BET Fast / Interpolated">
+         <font>
+            <Font name="Roboto" size="12.0" />
+         </font>
+      </TextField>
+      <CheckBox layoutX="230.0" layoutY="95.0" mnemonicParsing="false" selected="true" text="Concluded" />
+   </children>
+</fx:root>

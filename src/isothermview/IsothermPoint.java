@@ -15,6 +15,7 @@ import java.util.logging.Logger;
  */
 public class IsothermPoint implements Serializable {
 
+    
     private static final Logger log = Logger.getLogger(IsothermPoint.class.getName());
 
     
@@ -27,7 +28,6 @@ public class IsothermPoint implements Serializable {
         this.volume_g = volume_g;
     }
 
-  
     
         private long timestamp;
 
@@ -91,7 +91,6 @@ public class IsothermPoint implements Serializable {
         this.adsorption = adsorption;
     }
 
-    //public double offset;
-    //public double slope;
+  
     
 }

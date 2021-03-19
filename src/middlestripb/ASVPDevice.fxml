@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.opus.fxsupport.FXFBargraph?>
+<?import com.opus.fxsupport.FXFCountdownTimer?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<fx:root fx:id="asvp" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="500.0" minWidth="-Infinity" prefWidth="350.0" style="-fx-background-color: white;" styleClass="info-pane" type="AnchorPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <VBox layoutX="30.0" layoutY="79.0" spacing="15.0" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="75.0">
+         <children>
+            <Label fx:id="led_fail" alignment="CENTER" prefHeight="22.0" prefWidth="120.0" styleClass="fxf-ledfail-off" text="Fail" textAlignment="CENTER" textFill="#d06262">
+               <effect>
+                  <DropShadow />
+               </effect></Label>
+            <Label fx:id="led_charge" alignment="CENTER" prefHeight="22.0" prefWidth="120.0" styleClass="fxf-ledcharge-off" text="Load" textAlignment="CENTER">
+               <effect>
+                  <DropShadow />
+               </effect></Label>
+            <Label fx:id="led_final" alignment="CENTER" prefHeight="22.0" prefWidth="120.0" styleClass="fxf-ledwait-off" text="Waiting" textAlignment="CENTER">
+               <effect>
+                  <DropShadow />
+               </effect></Label>
+            <Label fx:id="led_final1" alignment="CENTER" layoutX="10.0" layoutY="84.0" prefHeight="22.0" prefWidth="120.0" styleClass="fxf-ledfinal-off" text="Sampling" textAlignment="CENTER">
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+         </children>
+      </VBox>
+      <Label layoutX="30.0" layoutY="241.0" text="Mode :">
+         <font>
+            <Font name="Roboto" size="16.0" />
+         </font>
+      </Label>
+      <Label fx:id="opmodo" layoutX="108.0" layoutY="241.0" prefWidth="220.0" text="Manual">
+         <font>
+            <Font name="Roboto" size="16.0" />
+         </font>
+      </Label>
+      <FXFCountdownTimer fx:id="cdt" layoutX="188.0" layoutY="65.0" prefHeight="163.0" />
+      <FXFBargraph fx:id="press_bgrf" layoutX="18.0" layoutY="277.0" style="-fx-background-color: transparent;" styleClass="fxf-bargraph" />
+      <FXFBargraph fx:id="deltap_bgrf" layoutX="21.0" layoutY="328.0" style="-fx-background-color: transparent;" />
+      <Text layoutX="10.0" layoutY="47.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Analysis  - Data Capture" textAlignment="CENTER" wrappingWidth="330.0">
+         <font>
+            <Font name="Roboto Bold" size="26.0" />
+         </font>
+      </Text>
+      <Label fx:id="startbt" contentDisplay="TOP" graphicTextGap="10.0" layoutX="43.0" layoutY="441.0" onMouseClicked="#start_action" prefHeight="50.0" prefWidth="60.0" styleClass="infopanelbt" text="Start" textAlignment="CENTER" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="38.0" />
+      <Label fx:id="stopbt" contentDisplay="TOP" graphicTextGap="10.0" layoutX="128.0" layoutY="429.0" onMouseClicked="#stop_action" prefHeight="50.0" prefWidth="80.0" styleClass="infopanelbt" text="Stop" textAlignment="CENTER" AnchorPane.bottomAnchor="10.0" />
+      <Label fx:id="pausebt" contentDisplay="TOP" graphicTextGap="10.0" layoutX="246.0" layoutY="429.0" onMouseClicked="#pause_action" prefHeight="50.0" prefWidth="60.0" styleClass="infopanelbt" text="Pause" textAlignment="CENTER" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="40.0" />
+      <FXFBargraph fx:id="sigma" layoutX="21.0" layoutY="374.0" style="-fx-background-color: transparent;" />
+   </children>
+</fx:root>

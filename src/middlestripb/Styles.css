@@ -78,6 +78,17 @@
 }
 
 
+
+#fxf-chartbt{
+    -fx-background-color: transparent; 
+}
+
+#fxf-chartbt:hover {
+    /*-fx-border-color : transparent transparent -focused-shadow-color transparent;*/
+    -fx-effect: dropshadow(three-pass-box, blue, 1.0, 0, 1.0, 1.0);
+}
+
+
 .fxf-sidebarbt{
     -fx-background-color: white; 
     -fx-text-fill : white;
@@ -164,13 +175,12 @@
 
 
 
-
-
 .fxf-bargraph{
     -fx-font-family: "Lato-Reg";
     -fx-font-size: 7px;
     -fx-fill: black;
     -fx-stroke : black;
+	-fx-background-color : transparent;
 }
 
 .fxf-bargraphframe{
@@ -400,7 +410,17 @@
     -fx-text-fill : white;
 }
 
+.fxf-ledwait-off{
+    -fx-background-radius : 10;
+    -fx-background-color : darkorange;
+    -fx-text-fill : yellow;
+}
 
+.fxf-ledwait-on{
+    -fx-background-radius : 10;
+    -fx-background-color : radial-gradient(focus-angle 0deg , focus-distance 0% , center 50% 50% , radius 63% , gold, darkorange);
+    -fx-text-fill : white;
+}
 
 
 .modal-dialog {
@@ -411,8 +431,10 @@
    -fx-background-color: aliceblue;
    /*-fx-effect: dropshadow(three-pass-box, black, 10.0, 0, 5.0, 5.0);*/
    
-   
 }
+
+
+
 
 
 .simplebutton:default {
@@ -521,9 +543,116 @@
   visibility: hidden ;
 }
 
+
+
+
+
+
+
 .split-pane > .split-pane-divider {  
-    -fx-padding: 0 0.25em 0 0.25em;  
+    /*-fx-padding: 0 0.25em 0 0.25em;*/
+    -fx-padding: 0 0 0 0;  
 } 
+
+.info-pane {
+   /*-fx-background-color: linear-gradient(to bottom, lightyellow, derive(white, 20%));*/ 
+   -fx-background-radius: 30;
+   /*-fx-margin: 0 50 0 0;*/
+   /*-fx-border-color: black;*/
+   -fx-effect: innershadow(three-pass-box, black, 10.0, 0, 2.0, 2.0);
+   -fx-background-color: white;
+   /*-fx-effect: dropshadow(three-pass-box, black, 10.0, 0, 5.0, 5.0);*/
+   
+}
+
+
+.dosetable {
+   -fx-border-color : transparent;
+}
+
+.dosetable:hover {
+  -fx-effect: dropshadow(three-pass-box, black, 10.0, 0, 3.0, 3.0);
+}
+
+.dosetable-column {
+    -fx-border-color : transparent;
+    -fx-font-family: "Lato-Bold";
+    -fx-font-size: 10px;
+    
+}
+
+.dosetable .table-cell{
+    -fx-border-color: transparent;
+    -fx-padding: 0 0 0 0px;
+    -fx-font-family: 'Roboto-Regular';
+    -fx-font-size: 12px;
+    -fx-text-fill : black;
+}
+
+
+.dosetable .column-header-background .filler {
+    -fx-background-color: transparent;
+    -fx-border-color : transparent;
+}
+
+.dosetable .column-header-background{
+    -fx-background-color: linear-gradient(to bottom, #1dbbdd44, #93f9b944);
+    -fx-background-radius: 7px 7px 0px 0px;
+    -fx-background-insets: 0 0 0 0;
+    -fx-padding: 0 0 5px 0;
+}
+
+.dosetable .column-header {
+    -fx-background-color: transparent;
+}
+
+
+.infopanelbt{
+    -fx-background-color: white; 
+    -fx-text-fill : white;
+    -fx-font-family: 'Roboto-Regular';
+    -fx-font-size: 11px;
+}
+
+.infopanelbt:hover{
+    -fx-text-fill : lightslategray;
+ 
+}
+
+.infopanelbt:focused {
+    -fx-border-color : transparent transparent -focused-shadow-color transparent;
+    -fx-effect: dropshadow(three-pass-box, -focused-shadow-color, 10.0, 0, 5.0, 5.0);
+}
+
+.infopanel-label {
+    -fx-font-family: 'Roboto-Regular';
+    -fx-font-size: 11px;
+    -fx-text-fill : black;
+}
+
+.infopanel-field {
+    -fx-font-family: 'Roboto-Regular';
+    -fx-font-size: 12px;
+    -fx-text-fill : black;
+    -fx-border-color : white white -fx-text-box-border white;
+    -fx-background-color: white;
+}
+
+.infopanel-field:hover {
+  -fx-effect: dropshadow(three-pass-box, black, 10.0, 0, 3.0, 3.0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

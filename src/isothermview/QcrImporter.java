@@ -27,8 +27,6 @@ public class QcrImporter {
 
     private static final Logger log = Logger.getLogger(QcrImporter.class.getName());
 
-    
-    
     final Pattern ptrn_isothermpoints = Pattern.compile("\\s{25}(.{11})\\s{36}(.{9})");
     final Pattern ptrn_absolutepoints = Pattern.compile("\\s{25}(.{11})\\s{36}(.{9})");
     final Pattern ptrn_rawpoints = Pattern.compile("\\s{25}(.{11})\\s{36}(.{9})");
@@ -46,9 +44,11 @@ public class QcrImporter {
     final Pattern outgas_temp = Pattern.compile("OutgasTemp:(.*)");
     
     
-    
-    private Isotherm isotherm ;
+    private Isothermv isotherm ;
     private IsothermBean isotherm_bean;
+    private boolean useTemp = true;
+
+    
     
     private Matcher matcher;
     private Double pressure =0.0;
@@ -69,7 +69,7 @@ public class QcrImporter {
     
     
     public QcrImporter() {
-        //isotherm = new Isotherm();
+        //isotherm = new Isothermv();
     }
     
     
@@ -87,7 +87,7 @@ public class QcrImporter {
     }
     
     
-    public Isotherm getIsotherm() { 
+    public Isothermv getIsotherm() { 
         return isotherm;
     }
     
@@ -113,7 +113,7 @@ public class QcrImporter {
     public void loadTextFile(){
         
         String temp;
-        isotherm = new Isotherm();
+        isotherm = new Isothermv();
         isotherm_bean = isotherm.getIsothermBean();
         
         isotherm_bean.source = "Importado-QChrome";
@@ -199,14 +199,15 @@ public class QcrImporter {
                 pressure = Double.parseDouble(matcher.group(1));
                 volume = Double.parseDouble(matcher.group(2));
                 
-                isotherm.addTempPoint(pressure, volume);
+                isotherm.addPoint(pressure, volume);
+                
             }
             catch (NumberFormatException ex){
                 log.finer("No point");
             }
         }
-        isotherm.findMiniMax(true);
-        log.info(String.format("Loaded %d points from isotherm file : %s", isotherm.getSize(true), filepath));
+        isotherm.findMiniMax();
+        log.info(String.format("Loaded %d points from isotherm file : %s", isotherm.getSize(), filepath));
         
     }
     
@@ -221,25 +222,25 @@ public class QcrImporter {
         StringBuilder sb = new StringBuilder();
         int ptr = 1;
         
-        sb.append(String.format("\nIsotherm points  = %d\n", isotherm.getSize(true)));
+        sb.append(String.format("\nIsotherm points  = %d\n", isotherm.getSize()));
         ArrayList<IsothermPoint> isopoints = new ArrayList<>();
         IsothermPoint isotp;
-        isopoints = isotherm.getAdsorptionPoints(true);
+        isopoints = isotherm.getAdsorptionPoints();
         sb.append(String.format("Adsorption points  = %d\n", isopoints.size()));
-        isotp = isotherm.getMinAdsorption(true);
+        isotp = isotherm.getMinAdsorption();
         sb.append(String.format("Adsorption min (pressure/vol)  = %f / %f\n", isotp.getPpo(), isotp.getVolume_g()));
-        isotp = isotherm.getMaxAdsorption(true);
+        isotp = isotherm.getMaxAdsorption();
         sb.append(String.format("Adsorption max (pressure/vol)  = %f / %f\n", isotp.getPpo(), isotp.getVolume_g()));
         for (IsothermPoint isop : isopoints){
             sb.append(String.format("\tPoint %02d: %f / %f\n", ptr++, isop.getPpo(), isop.getVolume_g()));
         }
 
-        isopoints = isotherm.getDesorptionPoints(true);
+        isopoints = isotherm.getDesorptionPoints();
         ptr= 1;
         sb.append(String.format("\nDesorption points  = %d\n", isopoints.size()));
-        isotp = isotherm.getMinDesorption(true);
+        isotp = isotherm.getMinDesorption();
         sb.append(String.format("Desorption min (pressure/vol)  = %f / %f\n", isotp.getPpo(), isotp.getVolume_g()));
-        isotp = isotherm.getMaxDesorption(true);
+        isotp = isotherm.getMaxDesorption();
         sb.append(String.format("Desorption max (pressure/vol)  = %f / %f\n", isotp.getPpo(), isotp.getVolume_g()));
         for (IsothermPoint isop : isopoints){
             sb.append(String.format("\tPoint %02d: %f / %f\n", ptr++, isop.getPpo(), isop.getVolume_g()));
@@ -251,5 +252,13 @@ public class QcrImporter {
     }
     
     
+    
+    public boolean isUseTemp() {
+        return useTemp;
+    }
+
+    public void setUseTemp(boolean useTemp) {
+        this.useTemp = useTemp;
+    }
     
 }

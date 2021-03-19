@@ -6,20 +6,18 @@
 package middlestripb;
 
 
-import cern.extjfx.chart.XYChartPane;
+import Entities.Entity;
+import Entities.Isotherm;
+import com.mongodb.client.model.Filters;
 import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.SignalListener;
 import com.opus.syssupport.StateDescriptor;
 import com.opus.syssupport.VirnaPayload;
 import com.opus.syssupport.VirnaServiceProvider;
 import com.opus.syssupport.smstate;
-import isothermview.Isotherm;
-import isothermview.IsothermChart;
-import isothermview.QcrImporter;
 import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -47,6 +45,11 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
 
     private FX1Controller anct;
     private boolean fx1open = false;
+    private ASVPDevice asvpdev;
+    private MongoLink mongolink;
+    
+    private Context context;
+    
     
     private boolean locked = false;
     
@@ -59,6 +62,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     }
 
     
+    
     public Controller() {
         
         smqueue = new LinkedBlockingQueue<>();
@@ -66,6 +70,15 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         
         alarms = new LinkedHashMap<>();
         scheduler = Executors.newScheduledThreadPool(5); 
+        
+        mongolink = MongoLink.getInstance();
+        mongolink.setAppController(this);
+        loadStates(MongoLink.class, mongolink);
+        
+        context = Context.getInstance();
+        
+        
+        
         
         addSignalListener(this);
 //        sys_services = Lookup.getDefault().lookup(SystemServicesProvider.class).getDefault();
@@ -217,13 +230,20 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
  
     
     public void setFXANController (FX1Controller controller){
-        this.anct = controller;   
+        this.anct = controller;
+        loadStates(FX1Controller.class, anct);
     }
+    
     public boolean isFX1open() { return fx1open;}
     public void setFX1open (boolean open) { fx1open = open;}
 
 
     public LinkedBlockingQueue<SMTraffic> getQueue(){ return smqueue;}
+    
+    
+    public MongoLink getMongolink() {
+        return mongolink;
+    }
     
     
     // ======================================== STATE MACHINE ======================================================================
@@ -263,7 +283,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
                 }
                 else{
                     statesptr.put(annot.state(), stdesc);
-                    //log.info(String.format("Registering state %s @ %s", stdesc.getSID(), stdesc.getClazz().getName()));
+//                    log.info(String.format("Registering state %s @ %s", stdesc.getSID(), stdesc.getClazz().getName()));
                 }
             }
         }
@@ -294,7 +314,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
                 }
                 else{
                     statesptr.put(annot.state(), stdesc);
-                    //log.info(String.format("Registering state %s @ %s", stdesc.getSID(), stdesc.getClazz().getName()));
+                    log.info(String.format("Registering state %s @ %s", stdesc.getSID(), stdesc.getClazz().getName()));
                 }
             }
         }
@@ -401,7 +421,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
                             m = stdesc.getMethod();
                             smm = stdesc.getContext();
                             if (!state.equals("HOUSEKEEP") && !state.equals("BLAINEBEAT")){
-                                log.log(Level.INFO, String.format("Activating state %s @ %d", state, System.currentTimeMillis()-start_tick));
+//                                log.log(Level.INFO, String.format("Activating state %s @ %d", state, System.currentTimeMillis()-start_tick));
                             }
                             Boolean ret = (Boolean)m.invoke(stdesc.getInstance(), smm);
                             if (!ret){
@@ -428,16 +448,10 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
             
     };
     
-    
-    
     // =========================================================================================================================
     // ========================================   STATES  ======================================================================
     // =========================================================================================================================
-    
-    
-    
-    
-    
+  
     
     @smstate (state = "NULLEVENT")
     public boolean st_nullEvent(SMTraffic smm){
@@ -470,15 +484,17 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         SMTraffic alarm_config = new SMTraffic(0l, 0l, 0, "HOUSEKEEP", this.getClass(),
                         new VirnaPayload()
                 );
-        setAlarm (-1l, -1, alarm_config, 250l, 250l);
+        setAlarm (-1l, -1, alarm_config, 200l, 200l);
         
-
+        asvpdev = ASVPDevice.getInstance();
+        asvpdev.setAppController(this);
+        asvpdev.setFXController(anct);
+        
+        asvpdev.connect();
         
         
         return true;
     }
-    
-    
     
     
     private int housekeep_loop = 0;
@@ -492,15 +508,26 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         
 //        log.info(String.format("Housekeep loop %03d @ %d", housekeep_loop++, ((System.currentTimeMillis() % 1000000))));
         
-        if (isotherm != null && isotherm.chart_ready){
-            isotherm.transferPoint();
+        if (mongolink != null){
+            mongolink.flush();
         }
-        
         return true;
         
     }
     
+    @smstate (state = "EXIT")
+    public boolean st_doExit(SMTraffic smm){
+        
+        asvpdev.disconnect();
+        System.exit(0);
+        
+        return true;
+    }
+      
     
+    
+    
+    // ================================================== EXTERNAL INTERFACES ====================================================
     @smstate (state = "UPDATESTATUS")
     public boolean st_updateStatus(SMTraffic smm){
 
@@ -511,7 +538,6 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         
         return true;
     }
-    
     
     @smstate (state = "ADD_NOTIFICATION")
     public boolean st_addNotification(SMTraffic smm){
@@ -531,7 +557,6 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         return true;
     }
     
-
     @smstate (state = "REGISTERNOTIFICATION")
     public boolean st_registerNotification(SMTraffic smm){
         
@@ -551,57 +576,73 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     }
     
     
-    public Isotherm isotherm ;
-    public IsothermChart isothermchart ;
+// ============================================== ISOTHERM SERVIVES ============================================================    
     
     
-    @smstate (state = "IMPORTISOTHERM")
-    public boolean st_import_isotherm(SMTraffic smm){
+    @smstate (state = "LOADISO")
+    public boolean st_loadIso(SMTraffic smm){
         
-        Object caller;
-        VirnaPayload pload = smm.getPayload();
-        QcrImporter qcrimporter = QcrImporter.getInstance();
+        VirnaPayload payload = smm.getPayload();
+        String substate = payload.getCallerstate();
         
-        if (pload != null){
-            caller = pload.vobject;
-           
-            try {
-                if (qcrimporter.isQcrBinary(pload.vstring)){
-                    qcrimporter.loadBinaryFile(pload.vstring);
-                }
-                else if (qcrimporter.isQcrText(pload.vstring)){
-                    qcrimporter.loadTextFile();
-                    qcrimporter.showStatus();
-                    isotherm = qcrimporter.getIsotherm();                    
-                    log.info(String.format("Done importing isotherm from  %s ", pload.vstring));
-                }
-                else{
-                    log.info(String.format("Importing some other file %s ", pload.vstring));
-                    return false;
-                }
-            } catch (IOException ex) {
-                log.info(String.format("Failed to load Isotherm file %s ", pload.vstring));
-                return false;
-            }    
+        Long suid = 0L ;
+        
+        switch(substate){
+            
+            case "ASKUSER" :
+                suid = 1615509387066L;
+                processSignal(new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
+                                   new VirnaPayload()
+                                            .setCallerstate("LOADPHASE1")
+                                            .setLong1(suid)
+                                            .setInt1(10)));  
+                break;
+            
+            case "LOADPHASE1" :
+                EntityDescriptor ed = new EntityDescriptor()
+                .setClazz(Isotherm.class)
+                .setBson(Filters.eq("iso_num", payload.int1))
+                .setCascade(Boolean.FALSE)
+                .setAction(new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
+                        new VirnaPayload().setCallerstate("LOADPHASE2")));         
+                mongolink.getTask_descriptors().offer(ed);
+                break;
+                
+            case "LOADPHASE2" :
+                Entity etph2 = (Entity)payload.vobject;
+                etph2.loadChildren(false, new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
+                        new VirnaPayload().setCallerstate("LOADPHASE3"))); 
+                break;
+                
+            case "LOADPHASE3" :
+                Entity et = (Entity)payload.vobject;
+                et.loadChildren(false, null);
+                context.setIsotherm((Isotherm)et);
+                anct.updateIsothermChart();
+                context.getAuxIso();
+                break;
+          
         }
+        
+        return true;
+    }
+    
+    @smstate (state = "UPDATEISOTHERMCHART")
+    public boolean st_updateIsothermChart(SMTraffic smm){
+        
+        //log.info(String.format("Loading Chart  %s ", "TESTE"));
+        anct.updateIsothermChart();
         return true;
     }
     
     
-    @smstate (state = "LOADISOTHERMCHART")
-    public boolean st_loadIsoThermChart(SMTraffic smm){
+    @smstate (state = "RESETCHARTS")
+    public boolean st_resetCharts(SMTraffic smm){
         
-        log.info(String.format("Loading Chart  %s ", "TESTE"));
-        
-        if (isotherm != null){
-            anct.loadMainChart(isotherm);
-//            isothermchart = new IsothermChart(isotherm);
-//            XYChartPane chartpane = isothermchart.createCernChart();
-//            anct.loadMainChart(chartpane);
+        //log.info(String.format("Loading Chart  %s ", "TESTE"));
+        if (asvpdev.getIsotherm() != null){
+            anct.loadMainCharts();
         }
-        
-        
-        
         return true;
     }
 
@@ -612,3 +653,56 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//@smstate (state = "IMPORTISOTHERM")
+//    public boolean st_import_isotherm(SMTraffic smm){
+//        
+//        Object caller;
+//        VirnaPayload pload = smm.getPayload();
+//        QcrImporter qcrimporter = QcrImporter.getInstance();
+//        
+//        if (pload != null){
+//            caller = pload.vobject;
+//           
+//            try {
+//                if (qcrimporter.isQcrBinary(pload.vstring)){
+//                    qcrimporter.loadBinaryFile(pload.vstring);
+//                }
+//                else if (qcrimporter.isQcrText(pload.vstring)){
+//                    qcrimporter.loadTextFile();
+//                    qcrimporter.showStatus();
+//                    asvpdev.setIsotherm(qcrimporter.getIsotherm());    
+//                    log.info(String.format("Done importing isotherm from  %s ", pload.vstring));
+//                }
+//                else{
+//                    asvpdev.setIsotherm(null);
+//                    log.info(String.format("Importing some other file %s ", pload.vstring));
+//                    return false;
+//                }
+//            } catch (IOException ex) {
+//                asvpdev.setIsotherm(null);
+//                log.info(String.format("Failed to load Isotherm file %s ", pload.vstring));
+//                return false;
+//            }    
+//        }
+//        return true;
+//    }
+    

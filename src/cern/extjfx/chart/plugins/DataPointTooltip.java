@@ -4,10 +4,15 @@
 
 package cern.extjfx.chart.plugins;
 
+import com.opus.syssupport.SMTraffic;
+import com.opus.syssupport.SignalListener;
+import com.opus.syssupport.VirnaPayload;
+import isothermview.IsothermPoint;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -19,6 +24,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Pair;
 
@@ -33,6 +39,10 @@ import javafx.util.Pair;
  * @param <Y> type of Y values
  */
 public class DataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, Y> {
+
+    private static final Logger LOG = Logger.getLogger(DataPointTooltip.class.getName());
+    
+    
     /**
      * Name of the CSS class of the tool tip label.
      */
@@ -48,6 +58,40 @@ public class DataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, Y> {
     private static final int LABEL_Y_OFFSET = 5;
 
     private final Label label = new Label();
+    
+    private DataPoint dataPoint;
+    
+    
+    // Signal SMTraffic events to listeners
+    private transient ArrayList<SignalListener> listeners = new ArrayList<>();
+    
+    /** Método de registro do listener do dispositivo serial
+     * @param l */
+    public void addSignalListener (SignalListener l){
+        listeners.add(l);
+    }
+
+    /** Método de remoção do registro do listener do dispositivo serial
+     * @param l */
+    public void removeSignalListener (SignalListener l){
+        listeners.remove(l);
+    }
+
+    /** Esse método é chamado quando algo acontece no dispositivo
+     * @param uid_addr
+     * @param signal */
+    protected void notifySignalListeners(SMTraffic smt) {
+
+        if (!listeners.isEmpty()){      
+            //log.fine("Notifying "+ uid_addr);
+            for (SignalListener sl : listeners){
+                sl.processSignal(smt);
+            }
+        }
+    }
+    
+    
+    
 
     /**
      * Creates a new instance of DataPointTooltip class with {{@link #pickingDistanceProperty() picking distance}
@@ -56,6 +100,7 @@ public class DataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, Y> {
     public DataPointTooltip() {
         label.getStyleClass().add(STYLE_CLASS_LABEL);
         registerMouseEventHandler(MouseEvent.MOUSE_MOVED, mouseMoveHandler);
+        registerMouseEventHandler(MouseEvent.MOUSE_CLICKED, mouseClickHandler);
     }
 
     /**
@@ -110,9 +155,35 @@ public class DataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, Y> {
         updateToolTip(event);
     };
 
+    private final EventHandler<MouseEvent> mouseClickHandler = (MouseEvent event) -> {
+        
+        
+        //LOG.info(String.format("Mouse event : %s ", event.getEventType().getName()));
+        if (event.getButton() == MouseButton.PRIMARY){
+            if (dataPoint == null){
+                SMTraffic psel = new SMTraffic(0l, "CLEARPOINT", 0, "", null,new VirnaPayload());
+                notifySignalListeners(psel);
+                //LOG.info(String.format("Mouse primary clicked - no selection"));
+            }
+            else{
+                //IsothermPoint ip = (IsothermPoint)dataPoint.data.getExtraValue();
+                SMTraffic psel = new SMTraffic(0l, "POINTSELECTED", 0, "", dataPoint.getClass(),
+                        new VirnaPayload().setObject(dataPoint)
+                );
+                notifySignalListeners(psel);
+                //LOG.info(String.format("Mouse primary clicked - selection on "));
+            }
+        }
+        else{
+            LOG.info(String.format("Mouse secondary clicked")); 
+        }
+        
+    };
+    
     private void updateToolTip(MouseEvent event) {
+       
         Bounds plotAreaBounds = getChartPane().getPlotAreaBounds();
-        DataPoint dataPoint = findDataPoint(event, plotAreaBounds);
+        dataPoint = findDataPoint(event, plotAreaBounds);
 
         if (dataPoint == null) {
             getChartChildren().remove(label);
@@ -146,6 +217,7 @@ public class DataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, Y> {
         return nearestDataPoint;
     }
 
+    
     private DataPoint findNearestDataPointWithinPickingDistance(XYChart<X, Y> chart, Point2D mouseLocation) {
         DataPoint nearestDataPoint = null;
 
@@ -233,6 +305,7 @@ public class DataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, Y> {
     }
 
     private void updateLabel(MouseEvent event, Bounds plotAreaBounds, DataPoint dataPoint) {
+        
         label.setText(dataPoint.series.getName() + "\n" + formatDataPoint(dataPoint));
 
         double mouseX = event.getX();
@@ -256,14 +329,25 @@ public class DataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, Y> {
         return formatData(dataPoint.series.getChart().getYAxis(), dataPoint.data);
     }
 
-    private class DataPoint {
+    public class DataPoint {
         final Series<X, Y> series;
         final Data<X, Y> data;
+
+        public Series<X, Y> getSeries() {
+            return series;
+        }
+
+        public Data<X, Y> getData() {
+            return data;
+        }
         double distanceFromMouse;
 
         DataPoint(Series<X, Y> series, Data<X, Y> data) {
             this.series = series;
             this.data = data;
         }
+        
+        
+        
     }
 }

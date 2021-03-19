@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<fx:root fx:id="isoinfo" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="350.0" styleClass="info-pane" type="AnchorPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Text layoutX="10.0" layoutY="38.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-fill: indigo;" text="Point Info" textAlignment="CENTER" wrappingWidth="330.0">
+         <font>
+            <Font name="Roboto Bold" size="26.0" />
+         </font>
+      </Text>
+      <AnchorPane fx:id="generalpane" layoutX="10.0" layoutY="68.0" prefHeight="368.0" prefWidth="334.0" AnchorPane.bottomAnchor="68.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="65.0">
+         <children>
+            <Text layoutX="11.0" layoutY="61.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Measurement Start :" AnchorPane.leftAnchor="14.0">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="init_ts" editable="false" layoutX="119.0" layoutY="46.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="200.0" styleClass="fxf-label-field" AnchorPane.rightAnchor="4.0" />
+            <Text layoutX="14.0" layoutY="17.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Calc. Strategy :" AnchorPane.leftAnchor="14.0">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="strategy" editable="false" layoutX="123.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="200.0" styleClass="fxf-label-field" text="Global - Isotherm" AnchorPane.rightAnchor="4.0">
+               <font>
+                  <Font name="Roboto" size="12.0" />
+               </font>
+            </TextField>
+            <TableView fx:id="doses_table" layoutX="6.0" layoutY="250.0" prefHeight="110.0" prefWidth="318.0" style="-fx-border-color: white;" styleClass="dosetable" />
+            <Text layoutY="230.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-fill: indigo;" text="Doses" textAlignment="CENTER" wrappingWidth="330.0">
+               <font>
+                  <Font name="Roboto Bold" size="20.0" />
+               </font>
+            </Text>
+            <Text layoutX="15.0" layoutY="99.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Measurement End :" AnchorPane.leftAnchor="14.0">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="end_ts" editable="false" layoutX="119.0" layoutY="84.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="200.0" styleClass="fxf-label-field" AnchorPane.rightAnchor="4.0" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Point Status is : " AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="130.0">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="point_status" alignment="CENTER" editable="false" layoutX="130.0" layoutY="124.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="200.0" styleClass="fxf-label-field" text="TIMED OUT" AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="124.0" />
+            <Text layoutX="14.0" layoutY="188.0" strokeType="OUTSIDE" strokeWidth="0.0" text="After : ">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="point_timing" editable="false" layoutX="51.0" layoutY="172.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="279.0" styleClass="fxf-label-field" text="498 s @ last attempt  /  2536 s in 5 doses" />
+         </children>
+      </AnchorPane>
+      <Label fx:id="btgeneral" alignment="BOTTOM_CENTER" contentDisplay="TOP" graphicTextGap="10.0" layoutX="38.0" layoutY="430.0" onMouseClicked="#btgeneral_action" prefHeight="50.0" prefWidth="60.0" styleClass="infopanelbt" text="General" textAlignment="CENTER" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="38.0" />
+      <Label fx:id="btvolume" alignment="BOTTOM_CENTER" contentDisplay="TOP" graphicTextGap="10.0" layoutX="135.0" layoutY="440.0" onMouseClicked="#btvolume_action" prefHeight="50.0" prefWidth="80.0" styleClass="infopanelbt" text="Calculation" textAlignment="CENTER" AnchorPane.bottomAnchor="10.0" />
+      <Label fx:id="btextra" alignment="BOTTOM_CENTER" contentDisplay="TOP" graphicTextGap="10.0" layoutX="268.0" layoutY="445.0" onMouseClicked="#btextra_action" prefHeight="50.0" prefWidth="60.0" styleClass="infopanelbt" text="Details" textAlignment="CENTER" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="40.0" />
+      <AnchorPane fx:id="calcpane" layoutX="10.0" layoutY="68.0" visible="false" AnchorPane.bottomAnchor="68.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="65.0">
+         <children>
+            <Text layoutX="14.0" layoutY="52.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="P0 pressure :" AnchorPane.leftAnchor="14.0">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="p0_pressure" editable="false" layoutX="130.0" layoutY="37.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="114.0" styleClass="infopanel-field" text="700.35 (global)" AnchorPane.rightAnchor="90.0" />
+            <Text layoutX="265.0" layoutY="51.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="mmHg">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <Text layoutX="14.0" layoutY="85.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="Amb. Temperature :">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="amb_temp" editable="false" layoutX="130.0" layoutY="70.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="114.0" styleClass="infopanel-field" text="24.3" />
+            <Text layoutX="265.0" layoutY="84.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="°C">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <Text layoutX="14.0" layoutY="116.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="Dewar Status :">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="dewar" editable="false" layoutX="130.0" layoutY="101.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="170.0" styleClass="infopanel-field" text="77.8 K @ 102.5 mm" />
+            <Text layoutX="22.0" layoutY="160.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Calculated Volume @ STP (cm³/g) :" textAlignment="CENTER" wrappingWidth="289.5546875" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="22.4453125">
+               <font>
+                  <Font name="Roboto Bold" size="14.0" />
+               </font>
+            </Text>
+            <TextField fx:id="volume" alignment="CENTER" editable="false" layoutX="82.0" layoutY="172.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" prefWidth="170.0" text="22.7856">
+               <font>
+                  <Font name="Roboto Bold" size="18.0" />
+               </font>
+            </TextField>
+            <Text layoutX="14.0" layoutY="244.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="Start pressure :">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="start_pressure" editable="false" layoutX="130.0" layoutY="229.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="114.0" styleClass="infopanel-field" text="123.56" />
+            <Text layoutX="265.0" layoutY="243.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="mmHg">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <Text layoutX="14.0" layoutY="284.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="End pressure :">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="end_pressure" editable="false" layoutX="130.0" layoutY="269.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="114.0" styleClass="infopanel-field" text="132.7" />
+            <Text layoutX="265.0" layoutY="283.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="mmHg">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+         </children>
+      </AnchorPane>
+      <AnchorPane fx:id="detailspane" layoutX="18.0" layoutY="75.0" visible="false" AnchorPane.bottomAnchor="68.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="65.0">
+         <children>
+            <Text layoutX="11.0" layoutY="61.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="Void Volume :" AnchorPane.leftAnchor="14.0">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="void_vol" editable="false" layoutX="143.0" layoutY="45.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="111.0" styleClass="infopanel-field" AnchorPane.rightAnchor="80.0" />
+            <Text layoutX="280.0" layoutY="60.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="cm³/g :">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <Text layoutX="14.0" layoutY="105.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="VTC_SW :">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="vtc_sw" editable="false" layoutX="143.0" layoutY="89.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="111.0" styleClass="infopanel-field" />
+            <Text layoutX="280.0" layoutY="104.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="cm³/g :">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <Text layoutX="14.0" layoutY="139.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="VVOID_SW :">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="vvoid_sw" editable="false" layoutX="143.0" layoutY="123.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="111.0" styleClass="infopanel-field" />
+            <Text layoutX="280.0" layoutY="138.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="cm³/g :">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <Text layoutX="14.0" layoutY="200.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="Delta V :">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="dv" editable="false" layoutX="143.0" layoutY="184.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="111.0" styleClass="infopanel-field" text="0.00428" />
+            <Text layoutX="14.0" layoutY="239.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="TAN :">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="tan" editable="false" layoutX="143.0" layoutY="223.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="111.0" styleClass="infopanel-field" text="340.8" />
+            <Text layoutX="14.0" layoutY="279.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="infopanel-label" text="TTC :">
+               <font>
+                  <Font name="Roboto" size="11.0" />
+               </font>
+            </Text>
+            <TextField fx:id="ttc" editable="false" layoutX="143.0" layoutY="263.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="24.0" prefWidth="111.0" styleClass="infopanel-field" text="0.76" />
+         </children>
+      </AnchorPane>
+   </children>
+</fx:root>

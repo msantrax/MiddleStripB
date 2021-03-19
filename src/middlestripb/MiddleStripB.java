@@ -5,10 +5,10 @@
  */
 package middlestripb;
 
+import Entities.Isotherm;
 import com.opus.syssupport.PicnoUtils;
-import java.util.Calendar;
+import isothermview.Isothermv;
 import javafx.application.Application;
-import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -48,14 +48,14 @@ public class MiddleStripB extends Application {
         ctrl = Controller.getInstance();
         ctrl.startService();
         
-//        mongolink = new MongoLink();
+//        ctrl.getMongolink().testDesc();
         
-        System.out.println(PicnoUtils.getFormatedTimestamp());
-        System.out.println(System.currentTimeMillis());
+//        System.out.println(PicnoUtils.getFormatedTimestamp());
+//        System.out.println(System.currentTimeMillis());
         
         launch(args);
         
-        System.exit(0);
+//        System.exit(0);
         
     }
     

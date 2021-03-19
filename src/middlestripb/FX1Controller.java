@@ -6,14 +6,17 @@
 package middlestripb;
 
 
+import Entities.Entity;
+import Entities.Point;
 import cern.extjfx.chart.XYChartPane;
+import com.mongodb.client.model.Filters;
 import com.opus.fxsupport.PropertyLinkDescriptor;
 import com.opus.fxsupport.FXFController;
 import com.opus.glyphs.FontAwesomeIcon;
 import com.opus.glyphs.GlyphsBuilder;
 import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.VirnaPayload;
-import isothermview.Isotherm;
+import com.opus.syssupport.smstate;
 import isothermview.IsothermChart;
 
 
@@ -22,14 +25,24 @@ import java.util.LinkedHashMap;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
+import org.controlsfx.control.HiddenSidesPane;
 import org.controlsfx.validation.ValidationSupport;
 
 
@@ -41,6 +54,19 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     private String profilepath = ""; 
     private Controller appctrl = Controller.getInstance();
     
+    private IsothermChart isothermchart; 
+    private AuxChart auxchart;
+    
+    private XYChartPane chartpane;
+    private XYChartPane auxchartpane;
+    
+    private ASVPDevice asvpdevice;
+
+    private LinkedHashMap<String, AnchorPane> infopanes;
+    private String current_infopane;
+    
+    private Context ctx;
+    private MongoLink mongolink;
     
     
     
@@ -75,17 +101,18 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     private SplitPane opsplit;
 
     @FXML
-    private AnchorPane mainchartpane;
+    private HiddenSidesPane mainchartpane;
 
     @FXML
-    private AnchorPane infopane;
+    private StackPane infopane;
 
     @FXML
-    private AnchorPane auxpane;
+    private HiddenSidesPane auxpane;
 
     @FXML
     private AnchorPane bottompane;
 
+    
     
     
     public FX1Controller() {
@@ -105,9 +132,12 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     
 
     
+    
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         LOG.info(String.format("FX1Controller initializing with profile : %s", profilepath));
+        
         update();
     }
     
@@ -116,7 +146,9 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     @Override
     public void update(){
       
-        //this.setScene(scene);
+        ctx = Context.getInstance();
+        mongolink = MongoLink.getInstance();
+        
         vs = new ValidationSupport(); 
         validators = new LinkedHashMap<>();
         
@@ -128,35 +160,261 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         sidebar_btbroadcast.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.SHARE_ALT, "black", 4));
         sidebar_btloadfile.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.ARCHIVE, "black", 4));
         
+        infopanes = new LinkedHashMap<>();
         
-        appctrl.processSignal (new SMTraffic(0l, 0l, 0, "IMPORTISOTHERM", this.getClass(),
-                        new VirnaPayload().setString("/Bascon/ASVP/Quantawin/sample_a (Isotherm).txt")));
+        infopanes.put("asvpdevice", new ASVPDeviceController() );
+        infopanes.put("isotherminfo", new IsothermInfoController(this) );
+        infopanes.put("pointinfo", new PointInfoController(this) );
+            
+        infopane.getChildren().addAll(infopanes.values());
         
-        appctrl.processSignal (new SMTraffic(0l, 0l, 0, "LOADISOTHERMCHART", this.getClass(), new VirnaPayload()));
+        showInfoPane("asvpdevice");
         
-             
+        loadMainCharts();
+        asvpdevice = ASVPDevice.getInstance();
+        
+    }
+    
+    public void clearInfoPanes() {
+    
+        for (AnchorPane pane : infopanes.values()){
+            pane.setVisible(false);
+        }
+    }
+
+    public void showInfoPane (String id){
+        
+        clearInfoPanes();
+        AnchorPane ap = infopanes.get(id);
+        if (ap != null){
+            ap.setVisible(true);
+            current_infopane = id;
+        }
+    }
+
+    
+    
+    @smstate (state = "ACTIVATEPOINT")
+    public boolean st_activatePoint(SMTraffic smm){
+        
+        VirnaPayload payload = smm.getPayload();
+        String substate = payload.getCallerstate();
+    
+        switch(substate){
+            
+            case "REGISTERPOINT" :
+                PointInfoCTX ptctx = ctx.registerPoint(payload.double1, true);
+                if (ptctx != null){
+                    Point pt = ptctx.getPoint();
+                    if (pt.getDoses().get(0) instanceof Long){
+                        pt.loadChildren(false, new SMTraffic(0l, 0l, 0, "ACTIVATEPOINT", this.getClass(),
+                                                new VirnaPayload()
+                                                    .setDouble1(payload.double1)
+                                                    .setCallerstate("LOADPHASE3"))); 
+                    }
+                    else{
+                        appctrl.processSignal(new SMTraffic(0l, 0l, 0, "ACTIVATEPOINT", this.getClass(),
+                                                new VirnaPayload()
+                                                    .setCallerstate("PREPARECTX")
+                                                    .setDouble1(payload.double1) ));  
+                    }             
+                }
+                else{
+                    LOG.severe(" No point to register !!!");
+                }
+                break;
+                
+            case "LOADPHASE3" :
+                Entity ph3et = (Entity)payload.vobject;
+                ph3et.loadChildren(false, null);
+                appctrl.processSignal(new SMTraffic(0l, 0l, 0, "ACTIVATEPOINT", this.getClass(),
+                                                new VirnaPayload()
+                                                    .setCallerstate("UPDATEUI")
+                                                    .setDouble1(payload.double1) )); 
+                break;
+            
+            case "UPDATEUI" :
+                PointInfoCTX uptctx = ctx.updatePoint(payload.double1);
+                PointInfoController pic = (PointInfoController)infopanes.get("pointinfo");
+                uptctx.update();
+                pic.update(uptctx);
+                
+                
+                if (!current_infopane.equals("pointinfo")){
+                    showInfoPane("pointinfo");
+                }
+                
+                ctx.aux = uptctx.aux;
+                getAuxchart().refreshChart();
+                
+        }
+    
+        return true;
+    }    
+     
+    
+    public void activatePoint (Double Pressure){
+        ctx.registerPoint(Pressure, true);    
     }
     
     
-    public void loadMainChart (Isotherm isotherm){
+    public void updateIsothermChart(){
+        isothermchart.refreshChart();
+        showInfoPane("isotherminfo");
+        ctx.getAuxIso();
+        ctx.aux = ctx.isoaux;
+        getAuxchart().refreshChart();
+    }
+    
+    
+    
+    public void loadMainCharts(){
         
-        IsothermChart isothermchart = new IsothermChart(isotherm);
-        XYChartPane chartpane = isothermchart.createCernChart();
+        isothermchart = new IsothermChart(this);
+        chartpane = isothermchart.createCernChart();
+//        String ccs = getClass().getClassLoader().getResource("middlestripb/isochart.css").toExternalForm();
+        chartpane.getStylesheets().add(getClass().getClassLoader().getResource("middlestripb/isochart.css").toExternalForm());
+        
+        setAuxchart(new AuxChart());
+        auxchartpane = getAuxchart().createCernChart();
+        auxchartpane.getStylesheets().add(getClass().getClassLoader().getResource("middlestripb/auxchart.css").toExternalForm());
+        
         
         Platform.runLater(() -> {
             
             chartpane.setMinWidth(mainchartpane.getWidth());
             chartpane.setMinHeight(mainchartpane.getHeight());
-            mainchartpane.getChildren().add(chartpane);
-            isotherm.chart_ready = true;
+            mainchartpane.setContent(chartpane);
+            
+            ChartsToolbar chtb = new ChartsToolbar(Side.LEFT, mainchartpane);
+            mainchartpane.setLeft(chtb);
+            
+            
+            auxchartpane.setMinWidth(auxpane.getWidth());
+            auxchartpane.setMinHeight(auxpane.getHeight());
+            auxpane.setContent(auxchartpane);
+            
+            SideNode bottom = new SideNode("Bottom", Side.BOTTOM, auxpane);
+            bottom.setStyle("-fx-background-color: rgba(255,255,255,1);"
+                    + "-fx-effect :  dropshadow(three-pass-box, black, 5.0, 0, 1.0, 1.0);");
+            auxpane.setBottom(bottom);
+     
         });
-      
+    
+        
     }
     
     
     
+    // Charts Toolbar =====================================================================================================
+    class ChartsToolbar extends VBox {
+        
+        public ChartsToolbar( final Side side, final HiddenSidesPane pane) {
+            
+            Button bt1;
+            Tooltip tt;
+            
+            setAlignment(Pos.TOP_CENTER);
+            setPrefSize(35, 200);
+            setSpacing(20);
+            
+            setStyle("-fx-background-color: rgba(255,255,255,1);"
+                    + "-fx-effect :  dropshadow(three-pass-box, black, 8.0, 0, 1.0, 1.0);"
+                    + "-fx-background-radius: 6;" 
+                    + "-fx-border-radius: 6;"
+                    + "-fx-padding: 60 0 0 0"
+                    + "-fx-border-insets: 15 0 5 0;" 
+                    + "-fx-background-insets: 15 0 5 0;");
+            
+            Rectangle r = new Rectangle(20, 30);
+            r.setStyle( "-fx-background-color: transparent;"
+                    +   "-fx-fill: transparent;" );
+            this.getChildren().add(r);
+            
+            
+            bt1 = new Button();
+            bt1.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.REFRESH, "black", 2));
+            bt1.setId("fxf-chartbt");
+            tt = new Tooltip("Tooltip buttom 1");
+            tt.setShowDelay(Duration.millis(500));
+            bt1.setTooltip(tt);
+            this.getChildren().add(bt1);
+            bt1.setOnMousePressed(new EventHandler<MouseEvent>(){
+                @Override 
+                public void handle(MouseEvent event) {
+                    LOG.info(String.format("Chart Toolbar buttom 1 pressed"));
+ 
+                }  
+            });   
+            
+            
+            bt1 = new Button();
+            bt1.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.ANCHOR, "black", 2));
+            bt1.setId("fxf-chartbt");
+            tt = new Tooltip("Tooltip buttom 2");
+            tt.setShowDelay(Duration.millis(500));
+            bt1.setTooltip(tt);
+            this.getChildren().add(bt1);
+       
+            
+            setOnMouseClicked(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    if (pane.getPinnedSide() != null) {
+                        setStyle("-fx-background-color: rgba(255,255,255,1);"
+                                + "-fx-effect :  dropshadow(three-pass-box, black, 8.0, 0, 1.0, 1.0);"
+                                + "-fx-background-radius: 6;" 
+                                + "-fx-border-radius: 6;"
+                                + "-fx-padding: 60 0 0 0"
+                                + "-fx-border-insets: 15 0 5 0;" 
+                                + "-fx-background-insets: 15 0 5 0;");
+                        pane.setPinnedSide(null);
+                    } else {
+                        setStyle("-fx-background-color: rgba(255,255,255,1);"
+                                + "-fx-effect :  dropshadow(three-pass-box, red, 8.0, 0, 1.0, 1.0);"
+                                + "-fx-background-radius: 6;" 
+                                + "-fx-border-radius: 6;"
+                                + "-fx-padding: 60 0 0 0"
+                                + "-fx-border-insets: 15 0 5 0;" 
+                                + "-fx-background-insets: 15 0 5 0;");
+                        pane.setPinnedSide(side);
+                    }
+                }
+            });
+            
+        }
+      
+    }
     
     
+    class SideNode extends Label {
+
+        public SideNode(final String text, final Side side,final HiddenSidesPane pane) {
+
+            super(text + " (Click to pin / unpin)");
+
+            setAlignment(Pos.CENTER);
+            setPrefSize(50, 200);
+
+            setOnMouseClicked(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    if (pane.getPinnedSide() != null) {
+                        setText(text + " (unpinned)");
+                        pane.setPinnedSide(null);
+                    } else {
+                        setText(text + " (pinned)");
+                        pane.setPinnedSide(side);
+                    }
+                }
+            });
+        }
+    }
+
+    
+    
+    
+    // =====================================================================================================================
     
     @Override
     public void sendSignal (PropertyLinkDescriptor pld, String sigtype){
@@ -198,37 +456,45 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     
     @FXML
     void btcycle_action(MouseEvent event) {
-        System.exit(0);
+        showInfoPane("asvpdevice");
     }
 
     @FXML
     void btexport_action(MouseEvent event) {
-        MiddleStripB.mongolink.loadAsJson(UID);
-        MiddleStripB.mongolink.loadAsBean(UID);
+//        MiddleStripB.mongolink.loadAsJson(UID);
+//        MiddleStripB.mongolink.loadAsBean(UID);
+//        appctrl.processSignal (new SMTraffic(0l, 0l, 0, "IMPORTISOTHERM", this.getClass(),
+//                        new VirnaPayload().setString("/Bascon/ASVP/Quantawin/sample_a (Isotherm).txt")));
+//        appctrl.processSignal (new SMTraffic(0l, 0l, 0, "UPDATEISOTHERMCHART", this.getClass(),
+//                        new VirnaPayload()));
+        
     }
 
     @FXML
     void btreport_action(MouseEvent event) {
-        MiddleStripB.mongolink.saveNewRecords();
+        appctrl.processSignal(new SMTraffic(0l, 0l, 0, "EXIT", this.getClass(),
+                                   new VirnaPayload()));
+        
     }
 
     @FXML
     void btstore_action(MouseEvent event) {
-        MiddleStripB.mongolink.savetoJsonFile();
+//        MiddleStripB.mongolink.savetoJsonFile();
+//        isothermchart.test1();
+        
+
     }
     
     @FXML
     void btloadfile_action(MouseEvent event) {
-        MiddleStripB.mongolink.report();
+        appctrl.processSignal(new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
+                                   new VirnaPayload().setCallerstate("ASKUSER")));
+        
     }
     
     @FXML
     void btrun_action(MouseEvent event) {
-        //Random rand = new Random();
-        //addTimeEntry (String.format(Locale.US, "%5.2f", 125.0 + (rand.nextDouble()-0.5)*2));
-        //checklist1.addEntry(160 + ((rand.nextDouble()-0.5)*2), "Normal");
-        appctrl.processSignal(new SMTraffic(0l, 0l, 0, "INITRUNS", this.getClass(),
-                                   new VirnaPayload()));
+        
     }
     
    
@@ -241,7 +507,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     @FXML
     void canvas_clicked(MouseEvent event) {
         //LOG.info("Canvas clicked ...");
-        clearCanvas();
+        //clearCanvas();
     }
     
     
@@ -250,13 +516,25 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
 
     }
   
+    
+    
+    
+    
+    
     public Scene getScene() { return getScene();}
 
-    
     
     private static final String UID = "FX1";
     @Override
     public String getUID() { return UID;}
+
+    public AuxChart getAuxchart() {
+        return auxchart;
+    }
+
+    public void setAuxchart(AuxChart auxchart) {
+        this.auxchart = auxchart;
+    }
 
     
 
@@ -429,3 +707,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
 ////            }
 ////        });
 ////        
+
+
+
+//                LOG.info(String.format("Loaded = %d", mongolink.getLoaded_descriptors().size()));
