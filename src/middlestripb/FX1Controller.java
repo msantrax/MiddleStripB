@@ -9,7 +9,7 @@ package middlestripb;
 import Entities.Entity;
 import Entities.Point;
 import cern.extjfx.chart.XYChartPane;
-import com.mongodb.client.model.Filters;
+import cern.extjfx.chart.plugins.XValueIndicator;
 import com.opus.fxsupport.PropertyLinkDescriptor;
 import com.opus.fxsupport.FXFController;
 import com.opus.glyphs.FontAwesomeIcon;
@@ -131,8 +131,11 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     }
     
 
-    
-    
+    private static FX1Controller instance; 
+    public static FX1Controller getInstance(){
+//        if (instance == null) {instance = new ASVPDevice();}
+        return instance;
+    }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -148,6 +151,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
       
         ctx = Context.getInstance();
         mongolink = MongoLink.getInstance();
+        asvpdevice = ASVPDevice.getInstance();
         
         vs = new ValidationSupport(); 
         validators = new LinkedHashMap<>();
@@ -162,7 +166,9 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         
         infopanes = new LinkedHashMap<>();
         
-        infopanes.put("asvpdevice", new ASVPDeviceController() );
+        ASVPDeviceController asvpdevctrl = new ASVPDeviceController(appctrl, this, asvpdevice);
+        asvpdevice.setASVPDevController(asvpdevctrl);
+        infopanes.put("asvpdevice", asvpdevctrl);
         infopanes.put("isotherminfo", new IsothermInfoController(this) );
         infopanes.put("pointinfo", new PointInfoController(this) );
             
@@ -171,7 +177,8 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         showInfoPane("asvpdevice");
         
         loadMainCharts();
-        asvpdevice = ASVPDevice.getInstance();
+        
+        instance = this;
         
     }
     
@@ -239,13 +246,12 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                 uptctx.update();
                 pic.update(uptctx);
                 
-                
                 if (!current_infopane.equals("pointinfo")){
                     showInfoPane("pointinfo");
                 }
                 
-                ctx.aux = uptctx.aux;
-                getAuxchart().refreshChart();
+//                ctx.current_auxdescriptor = uptctx.chdesc;
+                getAuxchart().refreshChart("point");
                 
         }
     
@@ -258,12 +264,12 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     }
     
     
+    
     public void updateIsothermChart(){
         isothermchart.refreshChart();
         showInfoPane("isotherminfo");
-        ctx.getAuxIso();
-        ctx.aux = ctx.isoaux;
-        getAuxchart().refreshChart();
+        ctx.geIsoTimeDomainPoints();
+        getAuxchart().refreshChart("isotimedomain");
     }
     
     
@@ -272,7 +278,6 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         
         isothermchart = new IsothermChart(this);
         chartpane = isothermchart.createCernChart();
-//        String ccs = getClass().getClassLoader().getResource("middlestripb/isochart.css").toExternalForm();
         chartpane.getStylesheets().add(getClass().getClassLoader().getResource("middlestripb/isochart.css").toExternalForm());
         
         setAuxchart(new AuxChart());
@@ -293,11 +298,14 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
             auxchartpane.setMinWidth(auxpane.getWidth());
             auxchartpane.setMinHeight(auxpane.getHeight());
             auxpane.setContent(auxchartpane);
+           
             
             SideNode bottom = new SideNode("Bottom", Side.BOTTOM, auxpane);
             bottom.setStyle("-fx-background-color: rgba(255,255,255,1);"
                     + "-fx-effect :  dropshadow(three-pass-box, black, 5.0, 0, 1.0, 1.0);");
             auxpane.setBottom(bottom);
+            
+            appctrl.loadStates(AuxChart.class, this.auxchart);
      
         });
     
@@ -457,6 +465,9 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     @FXML
     void btcycle_action(MouseEvent event) {
         showInfoPane("asvpdevice");
+        ctx.switchTask("checkp0task");
+        
+        
     }
 
     @FXML
@@ -479,11 +490,59 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
 
     @FXML
     void btstore_action(MouseEvent event) {
+
+
+        appctrl.processSignal(new SMTraffic(0l, 0l, 0, "SETAUTO", this.getClass(),
+                                       new VirnaPayload()
+                                               .setString("SETVALVES=BUILDP")
+                                               .setFlag1(Boolean.TRUE)));
+
+
+        
+//        if (event.isControlDown()){
+//            appctrl.processSignal(new SMTraffic(0l, 0l, 0, "AUXDOMESSAGES", this.getClass(),
+//                                       new VirnaPayload()
+//                                               .setServicestatus("")
+//                                               .setString("isotimedomain")
+//                                               .setFlag1(Boolean.FALSE)));
+//        }
+//        else{
+//            appctrl.processSignal(new SMTraffic(0l, 0l, 0, "AUXDOMESSAGES", this.getClass(),
+//                                       new VirnaPayload()
+//                                               .setServicestatus("Mes:"+ System.currentTimeMillis())
+//                                               .setString("isotimedomain")
+//                                               .setFlag1(Boolean.TRUE)));
+//        }
+        
+//        if (event.isControlDown()){
+//            appctrl.processSignal(new SMTraffic(0l, 0l, 0, "AUXCLEARINDICATOR", this.getClass(),
+//                                       new VirnaPayload()
+//                                               .setServicestatus("showindicator1")
+//                                               .setString("isotimedomain")
+//                                               .setObjectType("XValue")));
+//        }
+//        else{
+//            XValueIndicator<Number> indicator = AuxChartDescriptor.XValIndicatorFactory ("showindicator1", "Test Event", 10000.0, null);
+////           ValueIndicator<Number> indicator = AuxChartDescriptor.XValIndicatorFactory ("showindicator1", "Test Event", 10000.0, null);
+//            appctrl.processSignal(new SMTraffic(0l, 0l, 0, "AUXSHOWINDICATOR", this.getClass(),
+//                                       new VirnaPayload().setObject(indicator)
+//                                               .setLong1(2000L)
+//                                               .setServicestatus("showindicator1")
+//                                               .setString("isotimedomain")
+//                                               .setObjectType("XValue")));
+//        }
+        
+                
 //        MiddleStripB.mongolink.savetoJsonFile();
 //        isothermchart.test1();
-        
 
+                
+                
+        
     }
+
+
+
     
     @FXML
     void btloadfile_action(MouseEvent event) {
@@ -516,8 +575,6 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
 
     }
   
-    
-    
     
     
     

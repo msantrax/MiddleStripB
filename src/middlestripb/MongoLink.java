@@ -181,10 +181,7 @@ public class MongoLink {
 //                pointList.stream()
 //                  .sorted(Comparator.comparing(Point::getSuid))
 //                  .collect(Collectors.toList());
-        
-        
-        
-        
+     
         return true;
     }
     
@@ -221,7 +218,7 @@ public class MongoLink {
                         boolean next = obj.loadChildren(ed.getCascade(), null);
                     }
                     
-                    LOG.info(String.format("Mongolink loaded entity %s : %d", ed.getReference(), ed.getSuid()));
+//                    LOG.info(String.format("Mongolink loaded entity %s : %d", ed.getReference(), ed.getSuid()));
                     
                 } catch (Exception ex) {
                     LOG.severe(String.format("Load Entity failed to load due %s ", ex.getMessage()));

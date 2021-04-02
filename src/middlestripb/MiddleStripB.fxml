@@ -60,7 +60,7 @@
                   <AnchorPane fx:id="toppane" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-color: white;" />
                   <AnchorPane prefHeight="500.0" style="-fx-border-color: white;">
                      <children>
-                        <SplitPane fx:id="opsplit" dividerPositions="0.6, 0.5" layoutX="-8.0" layoutY="-8.0" prefHeight="502.0" prefWidth="1700.0" style="-fx-border-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="0.0">
+                        <SplitPane fx:id="opsplit" dividerPositions="0.6, 0.5" layoutX="-8.0" layoutY="-8.0" prefHeight="502.0" prefWidth="1700.0" style="-fx-border-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <items>
                               <HiddenSidesPane fx:id="mainchartpane" animationDuration="100.0ms" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="666.0" style="-fx-background-color: white; -fx-border-color: white;" triggerDistance="20.0">
                                  <opaqueInsets>

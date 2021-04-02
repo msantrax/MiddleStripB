@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.opus.fxsupport.FXFBargraph?>
+<?import com.opus.fxsupport.FXFCenterBargraph?>
 <?import com.opus.fxsupport.FXFCountdownTimer?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.effect.DropShadow?>
@@ -44,15 +45,15 @@
       </Label>
       <FXFCountdownTimer fx:id="cdt" layoutX="188.0" layoutY="65.0" prefHeight="163.0" />
       <FXFBargraph fx:id="press_bgrf" layoutX="18.0" layoutY="277.0" style="-fx-background-color: transparent;" styleClass="fxf-bargraph" />
-      <FXFBargraph fx:id="deltap_bgrf" layoutX="21.0" layoutY="328.0" style="-fx-background-color: transparent;" />
       <Text layoutX="10.0" layoutY="47.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Analysis  - Data Capture" textAlignment="CENTER" wrappingWidth="330.0">
          <font>
             <Font name="Roboto Bold" size="26.0" />
          </font>
       </Text>
-      <Label fx:id="startbt" contentDisplay="TOP" graphicTextGap="10.0" layoutX="43.0" layoutY="441.0" onMouseClicked="#start_action" prefHeight="50.0" prefWidth="60.0" styleClass="infopanelbt" text="Start" textAlignment="CENTER" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="38.0" />
-      <Label fx:id="stopbt" contentDisplay="TOP" graphicTextGap="10.0" layoutX="128.0" layoutY="429.0" onMouseClicked="#stop_action" prefHeight="50.0" prefWidth="80.0" styleClass="infopanelbt" text="Stop" textAlignment="CENTER" AnchorPane.bottomAnchor="10.0" />
-      <Label fx:id="pausebt" contentDisplay="TOP" graphicTextGap="10.0" layoutX="246.0" layoutY="429.0" onMouseClicked="#pause_action" prefHeight="50.0" prefWidth="60.0" styleClass="infopanelbt" text="Pause" textAlignment="CENTER" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="40.0" />
-      <FXFBargraph fx:id="sigma" layoutX="21.0" layoutY="374.0" style="-fx-background-color: transparent;" />
+      <Label fx:id="startbt" alignment="CENTER" contentDisplay="TOP" graphicTextGap="10.0" layoutX="43.0" layoutY="441.0" onMouseClicked="#start_action" prefHeight="50.0" prefWidth="60.0" styleClass="infopanelbt" text="Start" textAlignment="CENTER" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="38.0" />
+      <Label fx:id="stopbt" alignment="CENTER" contentDisplay="TOP" graphicTextGap="10.0" layoutX="135.0" layoutY="436.0" onMouseClicked="#stop_action" prefHeight="50.0" prefWidth="80.0" styleClass="infopanelbt" text="Stop" textAlignment="CENTER" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="135.0" AnchorPane.rightAnchor="135.0" />
+      <Label fx:id="pausebt" alignment="CENTER" contentDisplay="TOP" graphicTextGap="10.0" layoutX="246.0" layoutY="429.0" onMouseClicked="#pause_action" prefHeight="50.0" prefWidth="60.0" styleClass="infopanelbt" text="Pause" textAlignment="CENTER" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="38.0" />
+      <FXFCenterBargraph fx:id="sigma_brgf" layoutX="21.0" layoutY="374.0" />
+      <FXFBargraph fx:id="deltap_bgrf" layoutX="21.0" layoutY="324.0" />
    </children>
 </fx:root>

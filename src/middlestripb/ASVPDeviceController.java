@@ -6,15 +6,15 @@
 package middlestripb;
 
 import com.opus.fxsupport.FXFBargraph;
-import com.opus.fxsupport.FXFControllerInterface;
+import com.opus.fxsupport.FXFCenterBargraph;
 import com.opus.fxsupport.FXFCountdownTimer;
-import com.opus.fxsupport.FXFFieldDescriptor;
-import com.opus.fxsupport.WidgetContext;
 import com.opus.glyphs.FontAwesomeIcon;
 import com.opus.glyphs.GlyphsBuilder;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -69,25 +69,81 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
     private Label pausebt;
 
     @FXML
-    private FXFBargraph sigma;
+    private FXFCenterBargraph sigma_brgf;
 
+    
     @FXML
     void pause_action(MouseEvent event) {
-
+//        ctrl.processSignal(new SMTraffic(0l, 0l, 0, "PAUSEACTION", this.getClass(), new VirnaPayload()));
+        LOG.info("pause clicked @ " + System.currentTimeMillis());
+        press_bgrf.setValue(213.27);
+        deltap_bgrf.setValue(1.8);
+        sigma_brgf.setValue(-1.1);
+        
+//        Timer timer = new Timer();
+//      
+//        TimerTask task = new TimerTask(){
+//            Double vl = 0.0;
+//            @Override
+//            public void run(){
+//                Platform.runLater(() -> {
+//                    LOG.info(String.format("Vl = %f @ %d", vl, System.currentTimeMillis()));
+//                    press_bgrf.setValue(vl);
+//                    deltap_bgrf.setValue(1.8);
+//                    sigma_brgf.setValue(-1.1);
+//                    vl +=20.0;
+//                    if (vl > 780.0) timer.cancel();
+//                });
+//            }
+//        };
+//
+//        
+//        timer.schedule(task, 0l , 250l);
+        
+        LOG.info("pause finished @ " + System.currentTimeMillis());
+        
+       
     }
 
     @FXML
     void start_action(MouseEvent event) {
-
+//        ctrl.processSignal(new SMTraffic(0l, 0l, 0, "STARTACTION", this.getClass(), new VirnaPayload()));
+        LOG.info("start clicked @ " + System.currentTimeMillis());
+        press_bgrf.setValue(956.0);
+        deltap_bgrf.setValue(-0.2);
+        sigma_brgf.setValue(1.1);
+        LOG.info("start finished @ " + System.currentTimeMillis());
     }
 
     @FXML
     void stop_action(MouseEvent event) {
-
+//        ctrl.processSignal(new SMTraffic(0l, 0l, 0, "STOPACTION", this.getClass(), new VirnaPayload()));
+        LOG.info("Stop clicked @ " + System.currentTimeMillis());
+        press_bgrf.setValue(-120.0);
+        deltap_bgrf.setValue(2.8);
+        sigma_brgf.setValue(0.5);
+        LOG.info("stop finished @ " + System.currentTimeMillis());
     }
     
     
-    public ASVPDeviceController() {
+    
+    public enum Status { STOPPED, RUNNING, PAUSED, TEST };
+    
+    private FX1Controller anct;
+    private Controller ctrl;
+    private ASVPDevice asvpdev;
+    private ASVPDEVBargraphDescriptor bgraphdesc;
+    
+    
+    public ASVPDeviceController(Controller ctrl, FX1Controller anct, ASVPDevice asvpdev ) {
+        
+        
+        this.anct = anct;
+        this.ctrl = ctrl;
+        this.asvpdev = asvpdev;
+        
+        bgraphdesc = new ASVPDEVBargraphDescriptor();
+        
         
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ASVPDevice.fxml"));
         fxmlLoader.setRoot(this);
@@ -99,44 +155,42 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
             throw new RuntimeException(exception);
         }
       
-    }
-
     
-    // =========================================== WIDGET CONTEXT & MANAGEMENT =======================================
-    private FXFControllerInterface controller;
-    private WidgetContext wctx;
-    private Integer focusPosition = 0;
-    
-    
-    public void setManagement(FXFControllerInterface controller, Integer idx, WidgetContext wctx){
-        this.controller = controller;
-        this.focusPosition = idx;
-        this.wctx = wctx;
-    }
-    
-    public void setFocusPosition(Integer pos){
-        this.focusPosition = pos;
-    }
-    
-    public Integer getFocusPosition (){
-        return focusPosition;
-    }
-    
-    public void setFocus(boolean set){
         
-        if (set){
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    requestFocus();
-                }
-            });
-        }
-        else{
-           setFocused(false); 
-        }
     }
 
+    
+    
+    
+    // ==========================================   WIDGETS INTERFACE ============================================================
+    
+    public void setStatus (Status sts){
+          
+        switch (sts){
+            
+            case STOPPED:
+                startbt.setDisable(false);
+                stopbt.setDisable(true);
+                pausebt.setDisable(true);
+                break;
+            case RUNNING:
+                startbt.setDisable(true);
+                stopbt.setDisable(false);
+                pausebt.setDisable(false);
+                break;    
+            case PAUSED:
+                startbt.setDisable(false);
+                stopbt.setDisable(false);
+                pausebt.setDisable(true);
+                break;    
+            case TEST:
+                startbt.setDisable(false);
+                stopbt.setDisable(false);
+                pausebt.setDisable(false);
+                break;    
+        }
+        
+    }
     
     public void activateLed (String id, boolean status, boolean blink){
         
@@ -173,68 +227,41 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
    
     }
     
-    public void updateProfile(){
-         
-  
-    }
     
-    
-    public void setMode ( boolean running, String message){
+    public void updateBarGraphs(Double value, Double dp, Double var){
         
-       
+        press_bgrf.setValue(value);
+        deltap_bgrf.setValue(dp);
+        sigma_brgf.setValue(var);
+        
+        
     }
     
-    
-    
-    public void initProfile (FXFFieldDescriptor fxfd, FXFFieldDescriptor average, FXFFieldDescriptor rsd){
-//        
-//        this.fxfd = fxfd;
-//        this.analisefd = average;
-//        //this.analisefield = analisefd.getField(FXFTextField.class);
-//        this.rsdfd = rsd;
-//        //this.rsdfield = rsdfd.getField(FXFTextField.class);
-//        
-//        if (fxfd.getCustom() instanceof LinkedTreeMap){
-//            LinkedTreeMap ltm = (LinkedTreeMap)fxfd.getCustom();
-//            setBfd(new BlaineFieldDescriptor());
-//            if (ltm.size() != 0){
-//                Gson gson = new Gson();
-//                JsonObject jobj = gson.toJsonTree(ltm).getAsJsonObject();
-//                getBfd().setOpmode(jobj.get("opmode").getAsString());
-//                getBfd().setMaxruns(jobj.get("maxruns").getAsInt());
-//                getBfd().setSkipfirst(jobj.get("skipfirst").getAsBoolean());
-//                getBfd().setInterrun(jobj.get("interrun").getAsDouble());
-//                getBfd().setAn_timeout(jobj.get("an_timeout").getAsDouble());
-//                getBfd().setAuto_timeout(jobj.get("auto_timeout").getAsDouble());
-//            }
-//        }
-//        else{
-//            setBfd((BlaineFieldDescriptor)fxfd.getCustom());
-//        }
-//        
-//        updateProfile();
+    public void initBarGraphs(){
+        
+        press_bgrf.setTitle(bgraphdesc.main_label);
+        press_bgrf.setRange(bgraphdesc.main_rangeformat, bgraphdesc.main_low, bgraphdesc.main_high,
+                                    bgraphdesc.main_threshold, bgraphdesc.main_inverted);
+        
+        deltap_bgrf.setTitle(bgraphdesc.dpdt_label);
+        deltap_bgrf.setRange(bgraphdesc.dpdt_rangeformat, bgraphdesc.dpdt_low, bgraphdesc.dpdt_high,
+                                    bgraphdesc.dpdt_threshold, bgraphdesc.dpdt_inverted);
+        
+        sigma_brgf.setTitle(bgraphdesc.sigma_label);
+        sigma_brgf.setRange(bgraphdesc.sigma_rangeformat, bgraphdesc.sigma_range,
+                                    bgraphdesc.sigma_threshold, bgraphdesc.sigma_inverted);
+        
+        
+        
+        press_bgrf.setValue(200.0);
+        deltap_bgrf.setValue(2.4);
+        sigma_brgf.setValue(0.0);
+      
+        
         
     }
     
     
-    
-    // Application controller link 
-    private Controller ctrl;
-    public void setAppController (Controller ctrl){
-        this.ctrl = ctrl;
-//        cdt.setCtrl((com.opus.syssupport.VirnaServiceProvider)ctrl);
-    }
-    
-    public FXFCountdownTimer getCDT() {
-        return cdt;
-    }
-    
-    
-    
-    
-    public void initAnalises(){
-    
-    }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -248,6 +275,9 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
         
         cdt.setPclock_mode("SECONDS");
         cdt.setSclock_mode("SEGMENT_SECONDS");
+        
+        this.initBarGraphs();
+        this.setStatus(Status.TEST);
         
         
         cdt.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
@@ -268,6 +298,62 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
     
     }
     
+    
+    
+    public FXFCountdownTimer getCDT() {
+        return cdt;
+    }
+    
+    
+    
 }
 
 
+
+
+ 
+//        final Timeline timeline = new Timeline();
+//        //timeline.setCycleCount(Timeline.INDEFINITE);
+//        //timeline.setAutoReverse(true);
+////        
+////        AnimationTimer timer = new AnimationTimer() {
+////            @Override
+////            public void handle(long l) {
+////                LOG.info("timer...");
+////            }
+//// 
+////        };
+////        
+//        Duration duration = Duration.millis(4000);
+////        //one can add a specific action when the keyframe is reached
+////        EventHandler onFinished = new EventHandler<ActionEvent>() {
+////            public void handle(ActionEvent t) {
+////                LOG.info("finished");
+////            }
+////        };
+////        
+//        final KeyValue kv = new KeyValue(press_bgrf.getVdata(), 800);
+//        final KeyFrame kf = new KeyFrame(duration, kv);
+//        timeline.getKeyFrames().add(kf);
+//        timeline.play();
+////        
+//        
+
+
+//Timer timer = new Timer();
+//      
+//        TimerTask task = new TimerTask(){
+//            Double vl = 0.0;
+//            @Override
+//            public void run(){
+//                Platform.runLater(() -> {
+//                    LOG.info(String.format("Vl = %f", vl));
+//                    press_bgrf.setValue(vl);
+//                    vl +=5.0;
+//                    if (vl > 780.0) timer.cancel();
+//                });
+//            }
+//        };
+//
+//        
+//        timer.schedule(task, 0l , 50l);

@@ -41,7 +41,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     private Controller.SMThread service_thread;     
     private LinkedBlockingQueue<SMTraffic> smqueue;
     private LinkedHashMap<String, StateDescriptor> statesptr ;
-    private final ScheduledExecutorService scheduler;
+    
 
     private FX1Controller anct;
     private boolean fx1open = false;
@@ -94,6 +94,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     
     
     // ================================================================ALARMS  =====================================================
+    private final ScheduledExecutorService scheduler;
     private LinkedHashMap<Integer, AlarmHandle> alarms;
     private static Integer alarmid = 1;
     
@@ -116,25 +117,29 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
             return;
         }
         
-        log.fine(String.format("Setting alarm to %d with id = %d", addr, id));
+//        log.fine(String.format("Setting alarm to %d with id = %d", addr, id));
         
         final Runnable alarm = new Runnable() {
             
             public void run() {
                 Controller al_ctrl = Controller.getInstance();
-                al_ctrl.notifySignalListeners(addr, message);             
-                log.finest(String.format("Alarm to addr %d : %s to %d",
-                        addr,
-                        message.getState(),
-                        message.getHandle()
-                )) ; 
+                al_ctrl.notifySignalListeners(addr, message);
+                if (message.getHandle() == 1L){
+                    alarms.remove(id);
+                }
+//                log.finest(String.format("Alarm to addr %d : %s to %d",addr,message.getState(),message.getHandle())) ; 
             }
         };
         
-        final ScheduledFuture<?> alarmhandle = scheduler.scheduleAtFixedRate(alarm, init, period, TimeUnit.MILLISECONDS); 
-        
-        alarms.put(id, new AlarmHandle(addr, 0l, alarmhandle));
-        
+        if (period == 0L){
+            final ScheduledFuture<?> alarmhandle = scheduler.schedule(alarm, init, TimeUnit.MILLISECONDS);
+            alarms.put(id, new AlarmHandle(addr, 0l, alarmhandle));
+        }
+        else{
+            final ScheduledFuture<?> alarmhandle = scheduler.scheduleAtFixedRate(alarm, init, period, TimeUnit.MILLISECONDS);
+            alarms.put(id, new AlarmHandle(addr, 0l, alarmhandle));
+        }
+     
     }
 
     @Override
@@ -198,14 +203,12 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         smqueue.offer(signal);
     }
     
-     /** Método de registro do listener do dispositivo serial
-     * @param l */
+     /** Método de registro do listener do dispositivo */
     public void addSignalListener (SignalListener l){
         listeners.add(l);
     }
 
-    /** Método de remoção do registro do listener do dispositivo serial
-     * @param l */
+    /** Método de remoção do registro do listener do dispositivo  */
     public void removeSignalListener (SignalListener l){
         listeners.remove(l);
     }
@@ -232,6 +235,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     public void setFXANController (FX1Controller controller){
         this.anct = controller;
         loadStates(FX1Controller.class, anct);
+        loadStates(ASVPDevice.class, ASVPDevice.getInstance());
     }
     
     public boolean isFX1open() { return fx1open;}
@@ -297,10 +301,6 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         smstate annot;
         StateDescriptor stdesc;
         
-        
-        // Loading FX1
-        //c = FX1SMachine.getInstance().getClass();
-        
         for (Method mt : c.getDeclaredMethods()){
             annot = mt.getAnnotation(smstate.class);
             if (annot != null){
@@ -320,6 +320,9 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         }
     }
     
+    public boolean hasState (String name){
+        return statesptr.containsKey(name);
+    }
     
     
     
@@ -497,6 +500,9 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     }
     
     
+    
+    
+    
     private int housekeep_loop = 0;
 //    private PriorityQueue<StatusMessage> statusmessages = new PriorityQueue<>();
 //    private StatusMessage currentstatus;
@@ -619,7 +625,8 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
                 et.loadChildren(false, null);
                 context.setIsotherm((Isotherm)et);
                 anct.updateIsothermChart();
-                context.getAuxIso();
+                // Load Isotherm time domain points
+                context.geIsoTimeDomainPoints();
                 break;
           
         }
@@ -647,10 +654,68 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     }
 
     
+    // ============================================== DUMMY TEST STATES============================================================    
+    
+    @smstate (state = "DUMMY1")
+    public boolean st_Dummy1(SMTraffic smm){
+        
+        VirnaPayload payload = smm.getPayload();
+    
+        log.info(String.format("Dummy 1 called with %s", payload.vstring));
+        
+        return true;
+    }
+    
+    
+    @smstate (state = "DUMMY2")
+    public boolean st_Dummy2(SMTraffic smm){
+        
+        VirnaPayload payload = smm.getPayload();
+        log.info(String.format("Dummy 2 called with %s", payload.vstring));
+    
+        return true;
+    }
+    
+    
+    // ============================================== RUN STATE MACHINE ============================================================  
+    
+    
+    @smstate (state = "STARTACTION")
+    public boolean st_actionStart(SMTraffic smm){
+        
+        VirnaPayload payload = smm.getPayload();
+        log.info(String.format("Start Action called"));
+        
+        return true;
+    }
+    
+    @smstate (state = "STOPACTION")
+    public boolean st_actionStop(SMTraffic smm){
+        
+        VirnaPayload payload = smm.getPayload();
+        log.info(String.format("Stop Action called"));
+        
+        return true;
+    }
+    
+    @smstate (state = "PAUSEACTION")
+    public boolean st_actionPause(SMTraffic smm){
+        
+        VirnaPayload payload = smm.getPayload();
+        log.info(String.format("Pause Action called"));
+        
+        return true;
+    }
+    
     
     
     
 }
+
+
+
+
+
 
 
 

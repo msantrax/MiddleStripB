@@ -180,7 +180,7 @@
     -fx-font-size: 7px;
     -fx-fill: black;
     -fx-stroke : black;
-	-fx-background-color : transparent;
+    -fx-background-color : transparent;
 }
 
 .fxf-bargraphframe{
@@ -189,12 +189,15 @@
 }
     
 .fxf-bargraph-lineframe{
-    -fx-stroke : linear-gradient(to right, #7cfc00 53% , #ff0000 72% );
+    -fx-stroke : linear-gradient(to left, #7cfc00 13% , #ffff00 20% );
 }
 
 .fxf-bargraph-line{
     -fx-stroke : derive(-fx-base, -20%);
 }
+
+
+
 
 .fxf-bargraph-tags{
     -fx-font-family: "Lato-Bold";
@@ -377,12 +380,12 @@
 .fxf-ledfail-off{
     -fx-background-radius : 10;
     -fx-background-color : darkred;
-    -fx-text-fill : orange;
+    -fx-text-fill : derive(darkred, +60%);;
 }
 
 .fxf-ledfail-on{
     -fx-background-radius : 10;
-    -fx-background-color : radial-gradient(focus-angle 0deg , focus-distance 0% , center 50% 50% , radius 63% , orange, darkred);
+    -fx-background-color : radial-gradient(focus-angle 0deg , focus-distance 0% , center 50% 50% , radius 73% , orange, darkred);
     -fx-text-fill : white;
 }
 
@@ -413,7 +416,7 @@
 .fxf-ledwait-off{
     -fx-background-radius : 10;
     -fx-background-color : darkorange;
-    -fx-text-fill : yellow;
+    -fx-text-fill : derive(darkorange, +40%);
 }
 
 .fxf-ledwait-on{
@@ -642,13 +645,82 @@
   -fx-effect: dropshadow(three-pass-box, black, 10.0, 0, 3.0, 3.0);
 }
 
+.chartoverlay-header {
+    -fx-font-family: 'Lato-Bold';
+    -fx-font-size: 18px;
+    -fx-text-fill : blue;
+    -fx-background-color : transparent;
+}
+
+.chartoverlay-messagelabel {
+    -fx-font-family: 'Lato-Reg';
+    -fx-font-size: 10px;
+    -fx-text-fill : black;
+    -fx-background-color : transparent;
+}
 
 
+.x-value-indicator-label { 
+    -fx-font-family: 'Lato-Reg';
+    -fx-font-size: 9 px;
+    -fx-text-fill : black;
+    -fx-background-color: yellow;
+    -fx-border-color : white;
+    /*-fx-opacity : 0.7 ;*/
+    -fx-effect: dropshadow(three-pass-box, gray, 4.0, 0, 3.0, 3.0);
+}
+.x-value-indicator-line  {
+    -fx-stroke: pink;
+    -fx-stroke-width: 2;
+/*    -fx-rotate : 90;*/
+}
 
 
+.y-value-indicator-label {
+    -fx-font-family: 'Lato-Reg';
+    -fx-font-size: 9 px;
+    -fx-text-fill : black;
+    -fx-background-color: yellow;
+    -fx-border-color : white;
+    /*-fx-opacity : 0.7 ;*/
+    -fx-effect: dropshadow(three-pass-box, gray, 4.0, 0, 3.0, 3.0);
+   
+}
+.y-value-indicator-line {
+    -fx-stroke: red;
+}
 
 
+.x-range-indicator-label {
+    -fx-font-family: 'Lato-Reg';
+    -fx-font-size: 9 px;
+    -fx-text-fill : black;
+    -fx-background-color: orange;
+    -fx-border-color : white;
+    /*-fx-opacity : 0.7 ;*/
+    -fx-effect: dropshadow(three-pass-box, gray, 4.0, 0, 3.0, 3.0);
+}
 
+
+.x-range-indicator-rect {
+    -fx-fill: rgba(173, 255, 47, 0.5);
+}
+ 
+
+.y-range-indicator-label {
+    -fx-font-family: 'Lato-Reg';
+    -fx-font-size: 9 px;
+    -fx-text-fill : black;
+    -fx-background-color: orange;
+    -fx-border-color : white;
+    /*-fx-opacity : 0.7 ;*/
+    -fx-effect: dropshadow(three-pass-box, gray, 4.0, 0, 3.0, 3.0);
+}
+
+.y-range-indicator-rect {
+    -fx-stroke: orange;
+    -fx-fill: #416ef468;
+}
 
 
 

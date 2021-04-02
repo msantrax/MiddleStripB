@@ -72,6 +72,7 @@ public class SerialDevice implements Serializable{
             CMD_BUILDSMALL,
             CMD_BUILDHEAVY,
             CMD_BUILDBEACON,
+            CMD_BUILDTICK,
             DONE
     };
     public SERIAL_STATE serialstate = SERIAL_STATE.LISTENING;
@@ -83,7 +84,7 @@ public class SerialDevice implements Serializable{
     private final int FLAGHEAVY = 0xFD;
     
     private final int FLAGBEACON = 0xFC;
-    
+    private final int FLAGTICK = 0xFA;
    
     private final int SMALLLENGTH = 3;
     private final int HEAVYLENGTH = 32;
@@ -151,7 +152,7 @@ public class SerialDevice implements Serializable{
                                 while ((data = in.read()) > -1){
                                     // Se o token de dados é a flag de bloco parta para montar comando binário
                                     if ( data == FLAGHEADER) {
-                                        LOG.log(Level.INFO, "Achei delimitador : {0}", String.valueOf(data) );
+                                        //LOG.log(Level.INFO, "Achei delimitador : {0}", String.valueOf(data) );
                                         //Se há dados de Listening, livre-se deles
                                         if (bufferptr !=0){
                                             notifyTraffic(SerialDevice.Event.EVENT_TERM, messagetag, buffer, bufferptr);
@@ -183,7 +184,7 @@ public class SerialDevice implements Serializable{
                                 break;
                                 
                             case CMD_REQUEST :                               
-                                LOG.log(Level.INFO,"Em CMD_RQS (available = {0}" , in.available());
+                                //LOG.log(Level.INFO,"Em CMD_RQS (available = {0}" , in.available());
                                 
                                 data = in.read();
                                 if (data == FLAGSMALL) {
@@ -205,6 +206,11 @@ public class SerialDevice implements Serializable{
                                     bufferptr = 0; // inicie o buffer
                                     serialstate=SerialDevice.SERIAL_STATE.CMD_BUILDBEACON;
                                 }
+                                else if (data == FLAGTICK){
+                                    // Header de bloco de mensagem identificado - ASVP BEACON
+                                    bufferptr = 0; // inicie o buffer
+                                    serialstate=SerialDevice.SERIAL_STATE.CMD_BUILDTICK;
+                                }
                                 else{
                                     //serialstate= SerialDevice.SERIAL_STATE.LISTENING;
                                     serialstate= SerialDevice.SERIAL_STATE.CMD_REQUEST;
@@ -214,12 +220,12 @@ public class SerialDevice implements Serializable{
                             
                             case CMD_BUILDBEACON :
                                 while ((data = in.read()) > -1){
-                                        LOG.log(Level.INFO,"Building beacon : available={0} - Data={1} / {2}" , 
-                                                new Object[] {in.available(), Character.toString((char)data), data});
+//                                        LOG.log(Level.INFO,"Building beacon : available={0} - Data={1} / {2}" , 
+//                                                new Object[] {in.available(), Character.toString((char)data), data});
                                         if (data == FLAGEND) {
                                             //serialstate=SerialDevice.SERIAL_STATE.DONE;
                                             serialstate=SerialDevice.SERIAL_STATE.LISTENING;
-                                            LOG.log(Level.INFO,"OK ! - Enviando comando {0}", buffer[0]); 
+                                            LOG.log(Level.INFO,"OK ! - Enviando BUILBEACON {0}", buffer[0]); 
                                             // O bloco está completo, despache para o aplicativo
                                             in.skip(in.available());
                                             notifyTraffic(SerialDevice.Event.EVENT_BEACON, messagetag, buffer, bufferptr);
@@ -231,12 +237,31 @@ public class SerialDevice implements Serializable{
                                     break;
                                 }
                                 break;    
-                                
+                            
+                            case CMD_BUILDTICK :
+                                while ((data = in.read()) > -1){
+//                                        LOG.log(Level.INFO,"Building beacon : available={0} - Data={1} / {2}" , 
+//                                                new Object[] {in.available(), Character.toString((char)data), data});
+                                        if (data == FLAGEND) {
+                                            //serialstate=SerialDevice.SERIAL_STATE.DONE;
+                                            serialstate=SerialDevice.SERIAL_STATE.LISTENING;
+                                            //LOG.log(Level.INFO,"OK ! - Enviando BUILTICK {0}", buffer[0]); 
+                                            // O bloco está completo, despache para o aplicativo
+                                            in.skip(in.available());
+                                            notifyTraffic(SerialDevice.Event.EVENT_TICK, messagetag, buffer, bufferptr);
+                                            bufferptr = 0;
+                                        }
+                                        else{
+                                            buffer[bufferptr++] = (byte)data; 
+                                        }
+                                    break;
+                                }
+                                break;      
                                 
                             case CMD_BUILDSMALL :
                                 while ((data = in.read()) > -1){
-                                        LOG.log(Level.INFO,"Building small : available={0} - Data={1} / {2}" , 
-                                                new Object[] {in.available(), Character.toString((char)data), data});
+//                                        LOG.log(Level.INFO,"Building tick : available={0} - Data={1} / {2}" , 
+//                                                new Object[] {in.available(), Character.toString((char)data), data})
                                         if (data == FLAGEND) {
                                             //serialstate=SerialDevice.SERIAL_STATE.DONE;
                                             serialstate=SerialDevice.SERIAL_STATE.LISTENING;
@@ -398,6 +423,7 @@ public class SerialDevice implements Serializable{
         public static final int EVENT_TERM   = 5;  // Caracteres simples para o terminal
         public static final int EVENT_CMDR   = 6;  // Retorno de comando generico
         public static final int EVENT_BEACON = 7;  // Retorno de comando generico
+        public static final int EVENT_TICK   = 8;  // Retorno de comando generico
         
         public int eventType;
         public long tag;

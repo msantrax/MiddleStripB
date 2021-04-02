@@ -39,7 +39,7 @@ public class PointInfoCTX {
     public ArrayList<DosesTblRow> dosestbl;
     
     
-    public AuxChartDescriptor aux;
+    public AuxChartDescriptor chdesc;
     
     public boolean updated = false;
     
@@ -48,7 +48,7 @@ public class PointInfoCTX {
         this.pressure = pressure;
         zoneid = ZoneId.systemDefault();
         dosestbl = new ArrayList<>();
-        aux = new AuxChartDescriptor();
+        chdesc = new AuxChartDescriptor();
         ctx = Context.getInstance();
     }
    
@@ -74,7 +74,7 @@ public class PointInfoCTX {
     
     public void update(){
        
-        if (updated) return;
+        //if (updated) return;
         
         ArrayList<Dose> doses = point.getObjDoses();
         
@@ -86,7 +86,7 @@ public class PointInfoCTX {
         String start, end, type;
         Double lastp = 0.0;
         String deltat = "0.0";
-        
+       
         
         for (int i = 0; i < doses.size(); i++) {
             Dose d = doses.get(i);
@@ -112,25 +112,36 @@ public class PointInfoCTX {
             ));
             
             if (i == 0) chts_start = doses.get(0).getTs_Init();
-            if (i == 0) aux.ymin = lastp;
+            if (i == 0) chdesc.ymin = lastp;
             
             data.add(new XYChart.Data<Number, Number>(ctx.getSecTS(d.getTs_Init(), chts_start), lastp));
             data.add(new XYChart.Data<Number, Number>(ctx.getSecTS(d.getTs_Ach(), chts_start), d.getAchieved()));
             data.add(new XYChart.Data<Number, Number>(ctx.getSecTS(d.getTs_Stabinit(), chts_start), d.getAchieved()));
             data.add(new XYChart.Data<Number, Number>(ctx.getSecTS(d.getTs_Stabend(), chts_start), lastp));
             
-            aux.xmax = ctx.getSecTS (d.getTs_Stabend(), chts_start) ;
+            chdesc.xmax = ctx.getSecTS (d.getTs_Stabend(), chts_start) ;
             
-            int maxflag = Double.compare(d.getAchieved() , (Double)aux.ymax);
-            aux.ymax = maxflag > 0  ? d.getAchieved() : aux.ymax  ;
+            int maxflag = Double.compare(d.getAchieved() , (Double)chdesc.ymax);
+            chdesc.ymax = maxflag > 0  ? d.getAchieved() : chdesc.ymax  ;
             
-            int minflag = Double.compare(lastp , (Double)aux.ymin);
-            aux.ymin = minflag < 0  ? lastp : aux.ymin;
-            
+            int minflag = Double.compare(lastp , (Double)chdesc.ymin);
+            chdesc.ymin = minflag < 0  ? lastp : chdesc.ymin;
             
         }
         
-        aux.steps = FXCollections.observableArrayList(data);
+        chdesc.xlabel = "Time(sec)";
+        chdesc.ylabel = "Pressure (mmHg)";
+
+        chdesc.xmin = chdesc.xmin - 10;
+        chdesc.xmax = chdesc.xmax + (chdesc.xmax / 10);
+        chdesc.ymin = chdesc.ymin - (chdesc.ymin / 10);
+        chdesc.ymax = chdesc.ymax + (chdesc.ymax / 10);
+        
+        chdesc.series.put("Doses", FXCollections.observableArrayList(data));
+        
+        
+        chdesc.dirty = false;
+        ctx.auxcharts.put("point", chdesc);
         
         updated = true;
         

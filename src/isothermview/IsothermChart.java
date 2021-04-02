@@ -83,10 +83,11 @@ public class IsothermChart implements SignalListener {
         }
     }
     
+    
     private void selectPoint (DataPointTooltip.DataPoint dp){
         
         if (dp != null){
-            
+            // Show Point Doses on Aux
             if (selectedNode != null){
                 //Node symbol = selectedNode.lookup(".chart-line-symbol");
                 selectedNode.setStyle("");
@@ -104,7 +105,7 @@ public class IsothermChart implements SignalListener {
                                            .setDouble1(pressure)));
         }
         else{
-            
+            // Show Isotherm Time Domain on current_auxdescriptor
             if (selectedNode != null){
                 //Node symbol = selectedNode.lookup(".chart-line-symbol");
                 selectedNode.setStyle("");
@@ -112,9 +113,8 @@ public class IsothermChart implements SignalListener {
             }
             
             anct.showInfoPane("isotherminfo");
-            ctx.getAuxIso();
-            ctx.aux = ctx.isoaux;
-            anct.getAuxchart().refreshChart();
+            ctx.geIsoTimeDomainPoints();
+            anct.getAuxchart().refreshChart("isotimedomain");
         }
         
     }
@@ -128,7 +128,7 @@ public class IsothermChart implements SignalListener {
             lineChart.getData().clear();
             Context ctx = Context.getInstance();
             
-            adspoints = ctx.getIsoPoints( true, true, true);
+            adspoints = ctx.getIsoDataDomainPoints( true, true, true);
             ads_series = new XYChart.Series<>("Adsorption", adspoints);
             lineChart.getData().add((javafx.scene.chart.XYChart.Series<Number, Number>)ads_series);
 //            Node n1 = ads_series.nodeProperty().get();
@@ -137,7 +137,7 @@ public class IsothermChart implements SignalListener {
             Node sdn = ads_series.getNode();
             sdn.setOnMouseClicked(e -> System.out.println("Click on series"));
 
-            despoints = ctx.getIsoPoints( false, true, true);
+            despoints = ctx.getIsoDataDomainPoints( false, true, true);
             des_series = new XYChart.Series<>("Desorption", despoints);
             lineChart.getData().add(des_series);
 //            Node n2 = des_series.nodeProperty().get();
@@ -343,7 +343,7 @@ public class IsothermChart implements SignalListener {
 //                lineChart.getData().clear();
 //                
 //                
-//                adspoints = asvpdev.getIsoPoints( true, true, true);
+//                adspoints = asvpdev.getIsoDataDomainPoints( true, true, true);
 //                ads_series = new XYChart.Series<>("Adsorption", adspoints);
 //                lineChart.getData().add((javafx.scene.chart.XYChart.Series<Number, Number>)ads_series);
 //        //        Node n1 = ads_series.nodeProperty().get();
@@ -352,7 +352,7 @@ public class IsothermChart implements SignalListener {
 //                Node sdn = ads_series.getNode();
 //                sdn.setOnMouseClicked(e -> System.out.println("Click on series"));
 //
-//                despoints = asvpdev.getIsoPoints( false, true, true);
+//                despoints = asvpdev.getIsoDataDomainPoints( false, true, true);
 //                des_series = new XYChart.Series<>("Desorption", despoints);
 //                lineChart.getData().add(des_series);
 //                Node n2 = des_series.nodeProperty().get();
