@@ -10,6 +10,8 @@ import com.opus.fxsupport.FXFCenterBargraph;
 import com.opus.fxsupport.FXFCountdownTimer;
 import com.opus.glyphs.FontAwesomeIcon;
 import com.opus.glyphs.GlyphsBuilder;
+import com.opus.syssupport.SMTraffic;
+import com.opus.syssupport.VirnaPayload;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -42,11 +44,14 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
     private Label led_charge;
 
     @FXML
-    private Label led_final;
+    private Label led_wait;
 
     @FXML
-    private Label led_final1;
+    private Label led_sampling;
 
+    
+    
+    
     @FXML
     private Label opmodo;
 
@@ -72,58 +77,55 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
     private FXFCenterBargraph sigma_brgf;
 
     
+    
+    
     @FXML
     void pause_action(MouseEvent event) {
-//        ctrl.processSignal(new SMTraffic(0l, 0l, 0, "PAUSEACTION", this.getClass(), new VirnaPayload()));
-        LOG.info("pause clicked @ " + System.currentTimeMillis());
-        press_bgrf.setValue(213.27);
-        deltap_bgrf.setValue(1.8);
-        sigma_brgf.setValue(-1.1);
-        
-//        Timer timer = new Timer();
-//      
-//        TimerTask task = new TimerTask(){
-//            Double vl = 0.0;
-//            @Override
-//            public void run(){
-//                Platform.runLater(() -> {
-//                    LOG.info(String.format("Vl = %f @ %d", vl, System.currentTimeMillis()));
-//                    press_bgrf.setValue(vl);
-//                    deltap_bgrf.setValue(1.8);
-//                    sigma_brgf.setValue(-1.1);
-//                    vl +=20.0;
-//                    if (vl > 780.0) timer.cancel();
-//                });
-//            }
-//        };
-//
-//        
-//        timer.schedule(task, 0l , 250l);
-        
-        LOG.info("pause finished @ " + System.currentTimeMillis());
-        
        
+        if (event.isControlDown()){
+            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
+                                             .setString("SETINSTRU=DOWN")
+                                         ));
+        }   
+        else{
+            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
+                                             .setString("SETINSTRU=UP")
+                                         ));
+        }
     }
 
     @FXML
     void start_action(MouseEvent event) {
-//        ctrl.processSignal(new SMTraffic(0l, 0l, 0, "STARTACTION", this.getClass(), new VirnaPayload()));
-        LOG.info("start clicked @ " + System.currentTimeMillis());
-        press_bgrf.setValue(956.0);
-        deltap_bgrf.setValue(-0.2);
-        sigma_brgf.setValue(1.1);
-        LOG.info("start finished @ " + System.currentTimeMillis());
+    
+        asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
+                                             .setString("SETSETRADUMP=0.56")
+                                         ));
+ 
     }
 
     @FXML
     void stop_action(MouseEvent event) {
-//        ctrl.processSignal(new SMTraffic(0l, 0l, 0, "STOPACTION", this.getClass(), new VirnaPayload()));
-        LOG.info("Stop clicked @ " + System.currentTimeMillis());
-        press_bgrf.setValue(-120.0);
-        deltap_bgrf.setValue(2.8);
-        sigma_brgf.setValue(0.5);
-        LOG.info("stop finished @ " + System.currentTimeMillis());
+        
+        if (event.isControlDown()){
+            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
+                                             .setString("BEACONLOCK=OFF")
+                                         ));
+        }   
+        else if (event.isAltDown()){
+            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
+                                             .setString("RESTARTINSTRU")
+                                         ));
+        }
+        else{
+            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
+                                             .setString("BEACONLOCK=ON")
+                                         ));
+        }
+        
+
     }
+    
+    
     
     
     
@@ -154,14 +156,9 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
-      
-    
-        
+  
     }
 
-    
-    
-    
     // ==========================================   WIDGETS INTERFACE ============================================================
     
     public void setStatus (Status sts){
@@ -192,7 +189,19 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
         
     }
     
-    public void activateLed (String id, boolean status, boolean blink){
+    public void activateLed (String id, boolean status, boolean clear){
+        
+        if (clear){
+            led_fail.getStyleClass().remove("fxf-ledfail-on");
+            led_fail.getStyleClass().add("fxf-ledfail-off");
+            led_charge.getStyleClass().remove("fxf-ledcharge-on");
+            led_charge.getStyleClass().add("fxf-ledcharge-off");
+            led_wait.getStyleClass().remove("fxf-ledwait-on");
+            led_wait.getStyleClass().add("fxf-ledwait-off");
+            led_sampling.getStyleClass().remove("fxf-ledfinal-on");
+            led_sampling.getStyleClass().add("fxf-ledfinal-off");
+        }
+        
         
         if (id.equals("fail")){
             if (status){
@@ -214,17 +223,27 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
                 led_charge.getStyleClass().add("fxf-ledcharge-off");
             }
         }
-        else if (id.equals("final")){
+        else if (id.equals("wait")){
             if (status){
-                led_final.getStyleClass().remove("fxf-ledfinal-off");
-                led_final.getStyleClass().add("fxf-ledfinal-on");
+                led_wait.getStyleClass().remove("fxf-ledwait-off");
+                led_wait.getStyleClass().add("fxf-ledwait-on");
             }
             else{
-                led_final.getStyleClass().remove("fxf-ledfinal-on");
-                led_final.getStyleClass().add("fxf-ledfinal-off");
+                led_wait.getStyleClass().remove("fxf-ledwait-on");
+                led_wait.getStyleClass().add("fxf-ledwait-off");
             }
         }
-   
+        else if (id.equals("final")){
+            if (status){
+                led_sampling.getStyleClass().remove("fxf-ledfinal-off");
+                led_sampling.getStyleClass().add("fxf-ledfinal-on");
+            }
+            else{
+                led_sampling.getStyleClass().remove("fxf-ledfinal-on");
+                led_sampling.getStyleClass().add("fxf-ledfinal-off");
+            }
+        }
+        
     }
     
     
@@ -233,8 +252,7 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
         press_bgrf.setValue(value);
         deltap_bgrf.setValue(dp);
         sigma_brgf.setValue(var);
-        
-        
+       
     }
     
     public void initBarGraphs(){
@@ -252,13 +270,10 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
                                     bgraphdesc.sigma_threshold, bgraphdesc.sigma_inverted);
         
         
-        
         press_bgrf.setValue(200.0);
         deltap_bgrf.setValue(2.4);
         sigma_brgf.setValue(0.0);
       
-        
-        
     }
     
     
@@ -272,6 +287,8 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
         stopbt.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.STOP, "black", 3));
         pausebt.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.PAUSE, "black", 3));
         
+        cdt.setCtrl(ctrl);
+        ctrl.addTickListener(cdt);
         
         cdt.setPclock_mode("SECONDS");
         cdt.setSclock_mode("SEGMENT_SECONDS");
@@ -297,8 +314,6 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
         });
     
     }
-    
-    
     
     public FXFCountdownTimer getCDT() {
         return cdt;

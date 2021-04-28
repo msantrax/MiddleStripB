@@ -7,7 +7,6 @@ package middlestripb;
 
 import Entities.Entity;
 import Entities.Isotherm;
-import Entities.Point;
 import java.util.logging.Logger;
 
 
@@ -22,9 +21,8 @@ import com.mongodb.client.model.Filters;
 import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.VirnaPayload;
 import com.opus.syssupport.smstate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import org.bson.Document;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -36,7 +34,7 @@ import org.bson.codecs.pojo.PojoCodecProvider;
  *
  * @author opus
  */
-public class MongoLink {
+public class MongoLink implements PropertyChangeListener{
 
     private static final Logger LOG = Logger.getLogger(MongoLink.class.getName());
 
@@ -98,11 +96,17 @@ public class MongoLink {
             if (ed != null){
                 Entity e = (Entity)ed.getInstance();
                 MongoCollection<Document> coll = getDatabase().getCollection(ed.getCollection());
-                coll.insertOne(e.getDocument());
-                LOG.info(String.format("Entity %s was flushed...", e.toString()));
+                if (coll.findOneAndReplace(Filters.eq("suid", ed.getSuid()), e.getDocument()) == null){
+                    coll.insertOne(e.getDocument());
+                    LOG.info(String.format("Entity %s was created...", e.toString()));
+                }
+                else{
+                    LOG.info(String.format("Entity %s was updated...", e.toString()));
+                }
             }   
 //        }
         
+
         while (!getTask_descriptors().isEmpty()){
             EntityDescriptor tsked = getTask_descriptors().poll();
             if (tsked != null){
@@ -113,8 +117,7 @@ public class MongoLink {
 //                            et.loadChildren(true);
                             SMTraffic smt = tsked.getAction();
                             smt.getPayload().vobject = et;
-                            ctrl.processSignal(smt);
-                            
+                            ctrl.processSignal(smt);                            
 //                            LOG.info("Loading Final phase ...");
                         }
                         else{  // it is the first -> proccess and reinsert on wire
@@ -136,58 +139,7 @@ public class MongoLink {
         }
     }
 
-    
-    public void testDesc(){
-        
-//        Isotherm iso = Isotherm.getInstance(1L);
-//        iso.addPoint();
-//        iso.addPoint();
-//        iso.addPoint();
-
-        EntityDescriptor ed = new EntityDescriptor()
-                .setClazz(Isotherm.class)
-                .setBson(Filters.eq("suid", 1614971484317L))
-                .setCascade(Boolean.FALSE)
-                .setAction(new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
-                        new VirnaPayload()
-                ));        
-        this.getTask_descriptors().offer(ed);
-        
-    }
-    
-    
-    
-    
-//    @smstate (state = "LOADISO")
-//    public boolean st_loadIso(SMTraffic smm){
-//        
-//        VirnaPayload payload = smm.getPayload();
-//        Entity et = (Entity)payload.vobject;
-//        et.loadChildren(false, new SMTraffic(0l, 0l, 0, "ISOLOADED", this.getClass(),new VirnaPayload())); 
-//        
-//        return true;
-//    }
-//    
-    @smstate (state = "ISOLOADED")
-    public boolean st_IsolOADED(SMTraffic smm){
-        
-        VirnaPayload payload = smm.getPayload();
-        Entity et = (Entity)payload.vobject;
-        et.loadChildren(false, null);
-        
-//        Isotherm isoth = (Isotherm)et;
-//        List<Long> pointList = isoth.getPoints();
-//        List<Long> personListSorted =
-//                pointList.stream()
-//                  .sorted(Comparator.comparing(Point::getSuid))
-//                  .collect(Collectors.toList());
-     
-        return true;
-    }
-    
-    
-    
-    
+   
     
     public EntityDescriptor registerEntity (EntityDescriptor ed){
         
@@ -217,21 +169,16 @@ public class MongoLink {
                     if (ed.getCascade()){
                         boolean next = obj.loadChildren(ed.getCascade(), null);
                     }
-                    
-//                    LOG.info(String.format("Mongolink loaded entity %s : %d", ed.getReference(), ed.getSuid()));
-                    
+                    LOG.info(String.format("Mongolink loaded entity %s : %d", ed.getReference(), ed.getSuid()));                    
                 } catch (Exception ex) {
                     LOG.severe(String.format("Load Entity failed to load due %s ", ex.getMessage()));
+                    
                 }
             };
         });
     }
     
     
-    
-    
-    
-  
     
    
     
@@ -259,6 +206,16 @@ public class MongoLink {
         
         while (System.currentTimeMillis() == suid);
         return System.currentTimeMillis();
+    }
+
+    
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+//        LOG.info(String.format("Property Change")); 
+        EntityDescriptor ed = this.loaded_descriptors.findByInstance(evt.getSource());
+        if (ed != null){
+            this.dirty_descriptors.add(ed);
+        }
     }
 
 
@@ -422,3 +379,67 @@ public class MongoLink {
 //        } catch (ClassNotFoundException ex) {
 //            log.severe(String.format("Unable to instantiate class %s ", ed.getReference()));
 //        }
+
+
+
+   
+    
+    
+//    @smstate (state = "LOADISO")
+//    public boolean st_loadIso(SMTraffic smm){
+//        
+//        VirnaPayload payload = smm.getPayload();
+//        Entity et = (Entity)payload.vobject;
+//        et.loadChildren(false, new SMTraffic(0l, 0l, 0, "ISOLOADED", this.getClass(),new VirnaPayload())); 
+//        
+//        return true;
+//    }
+//    
+//    @smstate (state = "ISOLOADED")
+//    public boolean st_IsolOADED(SMTraffic smm){
+//        
+//        VirnaPayload payload = smm.getPayload();
+//        Entity et = (Entity)payload.vobject;
+//        et.loadChildren(false, null);
+//        
+////        Isotherm isoth = (Isotherm)et;
+////        List<Long> pointList = isoth.getPoints();
+////        List<Long> personListSorted =
+////                pointList.stream()
+////                  .sorted(Comparator.comparing(Point::getSuid))
+////                  .collect(Collectors.toList());
+//     
+//        return true;
+//    }
+//    
+
+   
+    
+    
+//    @smstate (state = "LOADISO")
+//    public boolean st_loadIso(SMTraffic smm){
+//        
+//        VirnaPayload payload = smm.getPayload();
+//        Entity et = (Entity)payload.vobject;
+//        et.loadChildren(false, new SMTraffic(0l, 0l, 0, "ISOLOADED", this.getClass(),new VirnaPayload())); 
+//        
+//        return true;
+//    }
+//    
+//    @smstate (state = "ISOLOADED")
+//    public boolean st_IsolOADED(SMTraffic smm){
+//        
+//        VirnaPayload payload = smm.getPayload();
+//        Entity et = (Entity)payload.vobject;
+//        et.loadChildren(false, null);
+//        
+////        Isotherm isoth = (Isotherm)et;
+////        List<Long> pointList = isoth.getPoints();
+////        List<Long> personListSorted =
+////                pointList.stream()
+////                  .sorted(Comparator.comparing(Point::getSuid))
+////                  .collect(Collectors.toList());
+//     
+//        return true;
+//    }
+    

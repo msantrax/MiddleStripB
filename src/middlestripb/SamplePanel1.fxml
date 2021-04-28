@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.opus.fxsupport.validation.FXFTextField?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import org.controlsfx.control.ToggleSwitch?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="1628.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="middlestripb.SamplePanelController">
+   <children>
+      <FXFTextField layoutX="159.0" layoutY="74.0" prefHeight="26.0" prefWidth="334.0" styleClass="fxf-text-field" />
+      <ChoiceBox layoutX="159.0" layoutY="27.0" prefHeight="28.0" prefWidth="238.0" stylesheets="@Styles.css" />
+      <Label layoutX="22.0" layoutY="33.0" text="Sample I.D. :">
+         <font>
+            <Font name="Lato-Regular" size="13.0" />
+         </font>
+      </Label>
+      <Label layoutX="22.0" layoutY="79.0" text="Sample Description :">
+         <font>
+            <Font name="Lato-Regular" size="13.0" />
+         </font>
+      </Label>
+      <Label layoutX="22.0" layoutY="120.0" text="Comments :">
+         <font>
+            <Font name="Lato-Regular" size="13.0" />
+         </font>
+      </Label>
+      <FXFTextField layoutX="159.0" layoutY="115.0" prefHeight="26.0" prefWidth="334.0" styleClass="fxf-text-field" />
+      <FXFTextField layoutX="662.0" layoutY="28.0" prefHeight="26.0" prefWidth="83.0" promptText="Enter Mass" styleClass="fxf-text-field" text="0.17147" />
+      <Label layoutX="557.0" layoutY="33.0" text="Sample weight :">
+         <font>
+            <Font name="Lato-Regular" size="13.0" />
+         </font>
+      </Label>
+      <Label layoutX="763.0" layoutY="33.0" prefHeight="16.0" prefWidth="8.0" text="g">
+         <font>
+            <Font name="Lato-Regular" size="13.0" />
+         </font>
+      </Label>
+      <FXFTextField layoutX="670.0" layoutY="74.0" prefHeight="26.0" prefWidth="70.0" promptText="Enter Value" styleClass="fxf-text-field" text="3.9" />
+      <Label layoutX="557.0" layoutY="79.0" text="Sample Density :">
+         <font>
+            <Font name="Lato-Regular" size="13.0" />
+         </font>
+      </Label>
+      <Label layoutX="762.0" layoutY="79.0" text="g/cm³">
+         <font>
+            <Font name="Lato-Regular" size="13.0" />
+         </font>
+      </Label>
+      <FXFTextField layoutX="669.0" layoutY="115.0" prefHeight="26.0" prefWidth="83.0" promptText="Calculated" styleClass="fxf-text-field" text="0.04505" />
+      <Label layoutX="556.0" layoutY="120.0" text="Sample Volume :">
+         <font>
+            <Font name="Lato-Regular" size="13.0" />
+         </font>
+      </Label>
+      <Label layoutX="767.0" layoutY="120.0" text="cm³">
+         <font>
+            <Font name="Lato-Regular" size="13.0" />
+         </font>
+      </Label>
+      <AnchorPane layoutX="1116.0" layoutY="13.0" prefWidth="400.0" AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="120.0" AnchorPane.topAnchor="2.0">
+         <children>
+            <ChoiceBox layoutX="100.0" layoutY="35.0" prefHeight="28.0" prefWidth="200.0" styleClass="fxf-text-field" stylesheets="@Styles.css" AnchorPane.rightAnchor="115.0" />
+            <Label layoutX="4.0" layoutY="41.0" text="Adsorbate :" AnchorPane.leftAnchor="4.0">
+               <font>
+                  <Font name="Lato-Regular" size="13.0" />
+               </font>
+            </Label>
+            <FXFTextField layoutX="107.0" layoutY="140.0" prefHeight="26.0" prefWidth="83.0" promptText="Enter Volume" styleClass="fxf-text-field" text="600" AnchorPane.bottomAnchor="30.0">
+               <tooltip>
+                  <Tooltip text="Adsorbate volume @ analysis start. \nDewar control manager will use this value to orient the empty detector estimator" width="120.0" />
+               </tooltip>
+            </FXFTextField>
+            <Label layoutY="145.0" text="Bath Volume :" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="4.0">
+               <font>
+                  <Font name="Lato-Regular" size="13.0" />
+               </font>
+            </Label>
+            <Label layoutX="213.0" layoutY="146.0" prefHeight="16.0" prefWidth="22.0" text="ml" AnchorPane.bottomAnchor="35.0">
+               <font>
+                  <Font name="Lato-Regular" size="13.0" />
+               </font>
+            </Label>
+            <ChoiceBox layoutX="100.0" layoutY="92.0" prefHeight="28.0" prefWidth="200.0" styleClass="fxf-text-field" stylesheets="@Styles.css" AnchorPane.rightAnchor="115.0" />
+            <Label layoutX="4.0" layoutY="98.0" text="Cell I.D :" AnchorPane.leftAnchor="4.0">
+               <font>
+                  <Font name="Lato-Regular" size="13.0" />
+               </font>
+            </Label>
+            <Label layoutX="345.0" layoutY="98.0" text="Certified" AnchorPane.rightAnchor="4.0">
+               <font>
+                  <Font name="Lato-Regular" size="13.0" />
+               </font>
+               <tooltip>
+                  <Tooltip text="(Trace) Show Cell Last Calibration" />
+               </tooltip>
+            </Label>
+            <Label layoutX="345.0" layoutY="41.0" text="Certified" AnchorPane.rightAnchor="4.0">
+               <font>
+                  <Font name="Lato-Regular" size="13.0" />
+               </font>
+               <tooltip>
+                  <Tooltip text="(Trace) Show Archived Gas Certificate." />
+               </tooltip>
+            </Label>
+            <ToggleSwitch layoutX="256.0" layoutY="144.0" text="Notify Empty " AnchorPane.bottomAnchor="35.0" AnchorPane.rightAnchor="4.0">
+               <tooltip>
+                  <Tooltip text="Send Message when close to empty Dewar \nSet the estimator on Dewar Panel below." />
+               </tooltip>
+            </ToggleSwitch>
+         </children>
+      </AnchorPane>
+      <Separator layoutX="1676.0" layoutY="-5.0" orientation="VERTICAL" prefHeight="200.0" />
+   </children>
+</AnchorPane>

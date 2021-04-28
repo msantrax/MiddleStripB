@@ -1,0 +1,321 @@
+{
+  "TASKINIT": {
+    "callstate": "TASKIDLE",
+    "statecmd": "",
+    "imediate": "SETAUTO_RESET",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0,
+    "chronosegs": [
+      {
+        "label": "",
+        "lenght": 0,
+        "color": "red",
+        "callback": "",
+        "mute": false
+      }
+    ]
+  },
+  "SETAUTO_RESET": {
+    "callstate": "SETAUTO",
+    "statecmd": "RESTARTINSTRU",
+    "imediate": "NOTIFY_RESET",
+    "failed": "",
+    "timedout": "TASKTIMERCALLBACK",
+    "timeout": 3000,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0
+  },
+  "NOTIFY_RESET": {
+    "callstate": "NOTIFYAUX",
+    "statecmd": "Automation is ready",
+    "imediate": "SCALETOORIGINAL",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0
+  },
+  
+  "SCALETOORIGINAL": {
+    "callstate": "SCALEMAINAXIS",
+    "statecmd": "",
+    "imediate": "SETDUMPGAINTOINIT",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0
+  },
+  
+  "SETDUMPGAINTOINIT": {
+    "callstate": "SETAUTO",
+    "statecmd": "SETSETRADUMPGAIN=0.97",
+    "imediate": "ENABLEBEACON",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0
+  },
+  
+  "ENABLEBEACON": {
+    "callstate": "SETAUTO",
+    "statecmd": "STARTBC",
+    "imediate": "SETAUTO_INITBUILD",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0
+  },
+  "SETAUTO_INITBUILD": {
+    "callstate": "SETAUTO",
+    "statecmd": "SETVALVES\u003dBUILDP",
+    "imediate": "DELAYSTART",
+    "failed": "",
+    "timedout": "TASKTIMERCALLBACK",
+    "timeout": 3000,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "charge",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0
+  },
+  
+  "DELAYSTART": {
+    "callstate": "DELAYTASK",
+    "statecmd": "",
+    "imediate": "NONE",
+    "failed": "",
+    "timedout": "SETAUTO_PUMPINIT",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0,
+    "chronosegs": [
+        {
+          "label": "Delay between analysis",
+          "lenght": 3000,
+          "color": "DODGERBLUE",
+          "callback": "",
+          "mute": false
+        }
+    ]    
+  },
+  
+  "SETAUTO_PUMPINIT": {
+    "callstate": "SETAUTO",
+    "statecmd": "SETVALVES\u003dPUMP",
+    "imediate": "NOTIFY_INITPUMP",
+    "failed": "",
+    "timedout": "TASKTIMERCALLBACK",
+    "timeout": 10000,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "charge",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0
+  },
+  "NOTIFY_INITPUMP": {
+    "callstate": "NOTIFYAUX",
+    "statecmd": "Pumping Manifold",
+    "imediate": "ENABLECAPTURE",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0
+  },
+  
+  "ENABLECAPTURE": {
+    "callstate": "ENABLECAPTURE",
+    "statecmd": "",
+    "imediate": "MONITORXDUCERBASE",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": true,
+    "value1": 0.0,
+    "value2": 0.0
+  },
+  
+  "MONITORXDUCERBASE": {
+    "callstate": "MONITORVALUES",
+    "statecmd": "",
+    "imediate": "SCALETOZEROP",
+    "failed": "",
+    "timedout": "NOTIFY_PUMPERROR",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 10.0,
+    "value2": 0.0,
+    "chronosegs": [
+        {
+          "label": "Wait for pressure go down",
+          "lenght": 20000,
+          "color": "GREEN",
+          "callback": "",
+          "mute": false
+        }
+    ]     
+  },
+  
+  "SCALETOZEROP": {
+    "callstate": "SCALEMAINAXIS",
+    "statecmd": "",
+    "imediate": "MONITORXDUCERBASEDP",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 20.0,
+    "value2": 0.0
+  },
+  
+  "MONITORXDUCERBASEDP": {
+    "callstate": "MONITORVALUES",
+    "statecmd": "",
+    "imediate": "SCALETOZERODP",
+    "failed": "",
+    "timedout": "NOTIFY_PUMPERROR",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.05,
+    "chronosegs": [
+        {
+          "label": "Wait to stab threshold",
+          "lenght": 30000,
+          "color": "LIGHTGREEN",
+          "callback": "",
+          "mute": false
+        }
+    ]     
+  },
+  
+  "SCALETOZERODP": {
+    "callstate": "SCALEMAINAXIS",
+    "statecmd": "",
+    "imediate": "SHOWINITSTAB",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": true,
+    "value1": 0.15,
+    "value2": 0.0
+  },
+  
+  "SHOWINITSTAB": {
+    "callstate": "SHOWEVENT",
+    "statecmd": "Stab Init",
+    "imediate": "NOTIFY_INITSTABLE",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0
+  },
+  
+  
+  "NOTIFY_INITSTABLE": {
+    "callstate": "NOTIFYAUX",
+    "statecmd": "Sensor began to stablize",
+    "imediate": "NONE",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0
+  },
+  
+  
+  "NOTIFY_PUMPERROR": {
+    "callstate": "NOTIFYAUX",
+    "statecmd": "ERROR PUMPING MANIFOLD",
+    "imediate": "NONE",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0
+  },
+  
+  
+  "NOTIFY_BUILDP": {
+    "callstate": "NOTIFYAUX",
+    "statecmd": "Instrument set to Build Pressure",
+    "imediate": "ENABLEBEACON",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "value1": 0.0,
+    "value2": 0.0
+  }
+}

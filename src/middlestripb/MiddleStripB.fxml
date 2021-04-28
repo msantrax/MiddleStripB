@@ -8,73 +8,118 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
 <?import org.controlsfx.control.HiddenSidesPane?>
 
-<VBox prefHeight="980.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="middlestripb.FX1Controller">
+<StackPane fx:id="rootpane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="middlestripb.FX1Controller">
    <children>
-      <StackPane alignment="CENTER_LEFT" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="50.0" style="-fx-background-color: indigo;">
+      <VBox prefHeight="980.0" prefWidth="1920.0">
          <children>
-            <Label fx:id="lb_profile" alignment="CENTER_RIGHT" prefWidth="600.0" text="BET &amp; Area (Teste)" textFill="WHITE" StackPane.alignment="CENTER_RIGHT">
-               <StackPane.margin>
-                  <Insets right="150.0" />
-               </StackPane.margin>
-               <font>
-                  <Font name="Roboto Bold" size="36.0" />
-               </font>
-            </Label>
-            <Label text="ASVP - Analise de Rotina" textFill="WHITE" StackPane.alignment="CENTER_LEFT">
-               <font>
-                  <Font name="Roboto Medium" size="36.0" />
-               </font>
-               <StackPane.margin>
-                  <Insets left="30.0" />
-               </StackPane.margin>
-            </Label>
-         </children>
-         <opaqueInsets>
-            <Insets />
-         </opaqueInsets>
-         <VBox.margin>
-            <Insets />
-         </VBox.margin>
-         <padding>
-            <Insets left="20.0" />
-         </padding>
-      </StackPane>
-      <HBox VBox.vgrow="ALWAYS">
-         <children>
-            <VBox alignment="TOP_CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="200.0" styleClass="fxf-sidebar" HBox.hgrow="ALWAYS">
+            <StackPane alignment="CENTER_LEFT" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="50.0" style="-fx-background-color: indigo;">
                <children>
-                  <Label fx:id="sidebar_btcycle" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" onMouseClicked="#btcycle_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Nova Analise" textAlignment="CENTER" />
-                  <Label fx:id="sidebar_btstore" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" layoutX="68.0" layoutY="11.0" onMouseClicked="#btstore_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Armazenar Analise" textAlignment="CENTER" />
-                  <Label fx:id="sidebar_btreport" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" layoutX="68.0" layoutY="11.0" onMouseClicked="#btreport_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Emitir Relatorio" textAlignment="CENTER" />
-                  <Label fx:id="sidebar_btbroadcast" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" layoutX="68.0" layoutY="11.0" onMouseClicked="#btexport_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Exportar Resultado" textAlignment="CENTER" />
-                  <Label fx:id="sidebar_btloadfile" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" layoutX="48.0" layoutY="59.0" onMouseClicked="#btloadfile_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Carregar de Arquivo" textAlignment="CENTER" />
+                  <Label fx:id="lb_profile" alignment="CENTER_RIGHT" prefWidth="600.0" text="BET &amp; Area (Teste)" textFill="WHITE" StackPane.alignment="CENTER_RIGHT">
+                     <StackPane.margin>
+                        <Insets right="150.0" />
+                     </StackPane.margin>
+                     <font>
+                        <Font name="Roboto Bold" size="36.0" />
+                     </font>
+                  </Label>
+                  <Label text="ASVP - Analise de Rotina" textFill="WHITE" StackPane.alignment="CENTER_LEFT">
+                     <font>
+                        <Font name="Roboto Medium" size="36.0" />
+                     </font>
+                     <StackPane.margin>
+                        <Insets left="30.0" />
+                     </StackPane.margin>
+                  </Label>
                </children>
-               <HBox.margin>
-                  <Insets top="10.0" />
-               </HBox.margin>
-            </VBox>
-            <VBox style="-fx-border-color: white;" HBox.hgrow="ALWAYS">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <padding>
+                  <Insets left="20.0" />
+               </padding>
+            </StackPane>
+            <HBox VBox.vgrow="ALWAYS">
                <children>
-                  <AnchorPane fx:id="toppane" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-color: white;" />
-                  <AnchorPane prefHeight="500.0" style="-fx-border-color: white;">
+                  <VBox fx:id="sidebar" alignment="TOP_CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="200.0" styleClass="fxf-sidebar" HBox.hgrow="ALWAYS">
                      <children>
-                        <SplitPane fx:id="opsplit" dividerPositions="0.6, 0.5" layoutX="-8.0" layoutY="-8.0" prefHeight="502.0" prefWidth="1700.0" style="-fx-border-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                          <items>
-                              <HiddenSidesPane fx:id="mainchartpane" animationDuration="100.0ms" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="666.0" style="-fx-background-color: white; -fx-border-color: white;" triggerDistance="20.0">
-                                 <opaqueInsets>
+                        <Label fx:id="sidebar_btcycle" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" onMouseClicked="#btcycle_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Nova Analise" textAlignment="CENTER" />
+                        <Label fx:id="sidebar_btstore" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" layoutX="68.0" layoutY="11.0" onMouseClicked="#btstore_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Armazenar Analise" textAlignment="CENTER" />
+                        <Label fx:id="sidebar_btreport" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" layoutX="68.0" layoutY="11.0" onMouseClicked="#btreport_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Emitir Relatorio" textAlignment="CENTER" />
+                        <Label fx:id="sidebar_btbroadcast" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" layoutX="68.0" layoutY="11.0" onMouseClicked="#btexport_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Exportar Resultado" textAlignment="CENTER" />
+                        <Label fx:id="sidebar_btloadfile" alignment="BOTTOM_CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="25.0" layoutX="48.0" layoutY="59.0" onMouseClicked="#btloadfile_action" prefHeight="80.0" styleClass="fxf-sidebarbt" text="Carregar de Arquivo" textAlignment="CENTER" />
+                     </children>
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                     <padding>
+                        <Insets top="10.0" />
+                     </padding>
+                  </VBox>
+                  <VBox style="-fx-border-color: white;" HBox.hgrow="ALWAYS">
+                     <children>
+                        <HBox fx:id="toppane" prefHeight="200.0" style="-fx-background-color: transparent;">
+                           <children>
+                              <VBox fx:id="tpn_naveg" alignment="TOP_CENTER" prefHeight="200.0" prefWidth="80.0" spacing="10.0" style="-fx-background-color: white;">
+                                 <HBox.margin>
                                     <Insets />
-                                 </opaqueInsets></HiddenSidesPane>
-                              <StackPane fx:id="infopane" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="350.0" style="-fx-background-color: white;" />
-                              <HiddenSidesPane fx:id="auxpane" prefHeight="500.0" prefWidth="604.0" style="-fx-background-color: white;" />
-                          </items>
-                        </SplitPane>
-                     </children></AnchorPane>
-                  <AnchorPane fx:id="bottompane" prefWidth="200.0" style="-fx-background-color: white; -fx-border-color: white;" VBox.vgrow="ALWAYS" />
+                                 </HBox.margin>
+                                 <padding>
+                                    <Insets top="10.0" />
+                                 </padding></VBox>
+                              <HiddenSidesPane fx:id="tophspane" style="-fx-background-color: white;" />
+                           </children>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                        </HBox>
+                        <AnchorPane prefHeight="500.0" style="-fx-border-color: white;">
+                           <children>
+                              <SplitPane fx:id="opsplit" dividerPositions="0.6, 0.5" layoutX="-8.0" layoutY="-8.0" prefHeight="502.0" prefWidth="1700.0" style="-fx-border-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <items>
+                                    <HiddenSidesPane fx:id="mainchartpane" animationDuration="100.0ms" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="666.0" style="-fx-background-color: white; -fx-border-color: white;" triggerDistance="20.0">
+                                       <opaqueInsets>
+                                          <Insets />
+                                       </opaqueInsets>
+                                    </HiddenSidesPane>
+                                    <StackPane fx:id="infopane" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="350.0" style="-fx-background-color: white;" />
+                                    <HiddenSidesPane fx:id="auxpane" prefHeight="500.0" prefWidth="604.0" style="-fx-background-color: white;" />
+                                </items>
+                              </SplitPane>
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="bottompane" prefWidth="200.0" style="-fx-background-color: white; -fx-border-color: white;" VBox.vgrow="ALWAYS">
+                           <children>
+                              <VBox fx:id="bpn_naveg" alignment="TOP_CENTER" prefHeight="210.0" prefWidth="70.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <padding>
+                                    <Insets top="10.0" />
+                                 </padding></VBox>
+                              <HiddenSidesPane fx:id="bpn_main" prefWidth="1150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="70.0" AnchorPane.topAnchor="0.0" />
+                              <AnchorPane fx:id="bpn_sinoptic" prefWidth="440.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="10.0" />
+                           </children></AnchorPane>
+                     </children>
+                  </VBox>
                </children>
-            </VBox>
+            </HBox>
          </children>
-      </HBox>
+      </VBox>
+      <TextFlow fx:id="snack" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="720.0" styleClass="modal-snack" stylesheets="@Styles.css" visible="false">
+         <children>
+            <Text fx:id="snacktext" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-fill: white;" styleClass="modal-snack-text" />
+         </children>
+         <StackPane.margin>
+            <Insets />
+         </StackPane.margin>
+         <padding>
+            <Insets bottom="20.0" left="30.0" right="20.0" top="20.0" />
+         </padding>
+      </TextFlow>
+      <AnchorPane fx:id="inputdialog" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="700.0" styleClass="modal-dialog" stylesheets="@Styles.css" visible="false" />
    </children>
-</VBox>
+</StackPane>

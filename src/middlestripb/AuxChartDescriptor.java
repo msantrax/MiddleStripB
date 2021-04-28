@@ -37,6 +37,8 @@ public class AuxChartDescriptor {
     public Double ytick = null;
     public Double auxtick = null;
     
+    public Integer windowsize = 120;
+    
     
     public String xlabel = "";
     public String ylabel = "";
@@ -129,9 +131,9 @@ public class AuxChartDescriptor {
         }
         
         range.setLabelHorizontalAnchor(HPos.RIGHT);
-        range.setLabelHorizontalPosition(0.95);
+        range.setLabelHorizontalPosition(hposition);
         range.setLabelVerticalAnchor(VPos.TOP);
-        range.setLabelVerticalPosition(0.95);
+        range.setLabelVerticalPosition(vposition);
         
         return range;
         

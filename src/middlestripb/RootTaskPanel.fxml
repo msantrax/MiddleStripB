@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="660.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="middlestripb.RootTaskController">
+   <children>
+      <Label fx:id="lb_checkp0" graphicTextGap="15.0" layoutX="83.0" layoutY="61.0" onMouseClicked="#checkp0_action" styleClass="controlpanelbutton" text="Transducer Zero Point and Atm. Pressure - Pre Conditioning" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="90.0">
+         <font>
+            <Font name="Roboto Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label alignment="CENTER" layoutX="141.0" layoutY="14.0" style="-fx-border-color: white white dodgerblue white; -fx-text-fill: dodgerblue;" text="Isotherm Data Capture Tasks" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+         <font>
+            <Font name="Lato-Bold" size="24.0" />
+         </font>
+      </Label>
+      <Label fx:id="lb_isotherm" disable="true" graphicTextGap="15.0" layoutX="83.0" layoutY="111.0" styleClass="controlpanelbutton" text="Dose and Capture Isotherm Points - Data Generation" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="150.0">
+         <font>
+            <Font name="Roboto Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label fx:id="lb_analysis" disable="true" graphicTextGap="15.0" layoutX="83.0" layoutY="163.0" styleClass="controlpanelbutton" text="Perform Analytical Procedures - Results Generation" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="210.0">
+         <font>
+            <Font name="Roboto Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label fx:id="lb_autoreport" disable="true" graphicTextGap="10.0" layoutX="42.0" layoutY="249.0" prefWidth="200.0" styleClass="controlpanelbuttonsmall" text="Report and Store Data" AnchorPane.bottomAnchor="120.0" AnchorPane.leftAnchor="60.0" />
+      <Label fx:id="lb_autotransmit" disable="true" graphicTextGap="10.0" layoutX="42.0" layoutY="292.0" prefWidth="200.0" styleClass="controlpanelbuttonsmall" text="Transmit and Export" AnchorPane.bottomAnchor="75.0" AnchorPane.leftAnchor="60.0">
+         <tooltip>
+            <Tooltip text="Auto Transmit to Control-e Server" />
+         </tooltip>
+      </Label>
+      <Label fx:id="lb_xducercal" graphicTextGap="10.0" layoutX="367.0" layoutY="239.0" prefWidth="200.0" styleClass="controlpanelbuttonsmall" text="Transducer Calibration" AnchorPane.bottomAnchor="130.0" AnchorPane.rightAnchor="55.0" />
+      <Label fx:id="lb_sampleholdercal" graphicTextGap="10.0" layoutX="367.0" layoutY="282.0" prefWidth="200.0" styleClass="controlpanelbuttonsmall" text="Sample Holder Calibration" AnchorPane.bottomAnchor="90.0" AnchorPane.rightAnchor="55.0" />
+      <Label fx:id="lb_controlstandardcal" graphicTextGap="10.0" layoutX="367.0" layoutY="327.0" prefWidth="200.0" styleClass="controlpanelbuttonsmall" text="Control Standard" AnchorPane.bottomAnchor="50.0" AnchorPane.rightAnchor="55.0" />
+      <Label alignment="CENTER" layoutX="417.0" layoutY="209.0" prefWidth="240.0" style="-fx-border-color: white white dodgerblue white; -fx-text-fill: dodgerblue;" text="Traceability" textAlignment="CENTER" AnchorPane.bottomAnchor="160.0" AnchorPane.rightAnchor="40.0">
+         <font>
+            <Font name="Roboto Bold" size="16.0" />
+         </font>
+      </Label>
+      <Label alignment="CENTER" layoutX="66.0" layoutY="209.0" prefWidth="220.0" style="-fx-border-color: white white dodgerblue white; -fx-text-fill: dodgerblue;" text="Automatic Post Process" AnchorPane.bottomAnchor="160.0" AnchorPane.leftAnchor="40.0">
+         <font>
+            <Font name="Roboto Bold" size="16.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

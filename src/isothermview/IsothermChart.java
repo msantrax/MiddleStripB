@@ -47,7 +47,6 @@ public class IsothermChart implements SignalListener {
     private XYChart.Series<Number, Number> des_series;
     private XYChart.Series<Number, Number> ads_series;
     
-    
     private NumericAxis yAxis;
     private NumericAxis xAxis;
     
@@ -67,6 +66,8 @@ public class IsothermChart implements SignalListener {
     
     private final String selectedStyle = "-fx-background-color: red, red;" ;
 
+    
+    
     
     private void changeSymbol (XYChart.Series<Number,Number> series, int index, String style){
         
@@ -214,15 +215,16 @@ public class IsothermChart implements SignalListener {
     
     @Override
     public Long getContext() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     @Override
     public Long getUID() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     
+    // ================================== SIGNAL PROCESSING TO POINT SELECTIONS SERVICES ======================================
     
     @Override
     public void processSignal(SMTraffic signal) {
@@ -237,7 +239,6 @@ public class IsothermChart implements SignalListener {
             LOG.info(String.format("Clearing Isothermv Point Selection"));
             selectPoint(null); 
         }
-        
         
     }
     

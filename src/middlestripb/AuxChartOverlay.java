@@ -57,10 +57,11 @@ public class AuxChartOverlay extends AnchorPane implements Initializable {
         messages = new VBox();
         AnchorPane.setTopAnchor(messages, 40.0);
         AnchorPane.setRightAnchor(messages, 10.0);
-        messages.setPrefSize(175.0, 153.0);
+        messages.setPrefSize(275.0, 153.0);
         messages.setAlignment(Pos.TOP_RIGHT);
         addMessage("Chart is ready to display data");
-        addMessage("But there is no estimator defined");
+        addMessage("There is no estimator defined yet");
+        addMessage("Waiting some task to call");
         
         this.getChildren().addAll(label,messages);
         

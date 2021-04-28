@@ -1,0 +1,135 @@
+{
+  "TASKINIT": {
+    "callstate": "TASKIDLE",
+    "statecmd": "",
+    "imediate": "SETAUTO_RESET",
+    "succeed": "",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0
+  },
+  "SETAUTO_RESET": {
+    "callstate": "SETAUTO",
+    "statecmd": "RESTARTINSTRU",
+    "imediate": "SNACK_RESETOK",
+    "succeed": "",
+    "failed": "",
+    "timedout": "TASKTIMERCALLBACK",
+    "timeout": 3000
+  },
+  "SNACK_RESETOK": {
+    "callstate": "SHOWSNACK",
+    "statecmd": "Automation informed is ready to execute tasks",
+    "imediate": "NOTIFY_RESET",
+    "succeed": "",
+    "failed": "",
+    "timedout": "",
+    "timeout": 500
+  },
+  "NOTIFY_RESET": {
+    "callstate": "NOTIFYAUX",
+    "statecmd": "Automation is ready",
+    "imediate": "ASKDUMPGAIN",
+    "succeed": "",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0
+  },
+  
+  "ASKDUMPGAIN": {
+    "callstate": "SHOWINPUTDIALOG",
+    "statecmd": "",
+    "imediate": "",
+    "succeed": "SETAUTO_SETDUMPGAIN",
+    "failed": "SNACK_NODUMPVALUE",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": [
+      "Please enter the dump factor (0.5 to 0.99)",
+      "0.98"
+    ],
+    "loadtype": ""
+  },
+  
+  
+  "SETAUTO_SETDUMPGAIN": {
+    "callstate": "SETAUTO",
+    "statecmd": "",
+    "imediate": "NOTIFY_SETDUMPGAIN",
+    "succeed": "",
+    "failed": "",
+    "timedout": "TASKTIMERCALLBACK",
+    "timeout": 3000
+  },
+  "NOTIFY_SETDUMPGAIN": {
+    "callstate": "NOTIFYAUX",
+    "statecmd": "Dump Gain was set",
+    "imediate": "SETAUTO_PUMPINIT",
+    "succeed": "",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0
+  },
+  
+  
+  "SNACK_NODUMPVALUE": {
+    "callstate": "SHOWSNACK",
+    "statecmd": "No Dump Value is set",
+    "imediate": "SETAUTO_PUMPINIT",
+    "succeed": "",
+    "failed": "",
+    "timedout": "",
+    "timeout": 1500
+  },
+  
+  
+  
+  "SETAUTO_PUMPINIT": {
+    "callstate": "SETAUTO",
+    "statecmd": "SETVALVES\u003dPUMP",
+    "imediate": "NOTIFY_INITPUMP",
+    "succeed": "",
+    "failed": "",
+    "timedout": "TASKTIMERCALLBACK",
+    "timeout": 3000
+  },
+  "NOTIFY_INITPUMP": {
+    "callstate": "NOTIFYAUX",
+    "statecmd": "Pumping Manifold",
+    "imediate": "ENABLEBEACON",
+    "succeed": "",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0
+  },
+  "ENABLEBEACON": {
+    "callstate": "SETAUTO",
+    "statecmd": "STARTBC",
+    "imediate": "NONE",
+    "succeed": "",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0
+  },
+  
+  
+  "SETAUTO_BUILDP": {
+    "callstate": "SETAUTO",
+    "statecmd": "SETVALVES\u003dBUILDP",
+    "imediate": "NOTIFY_BUILDP",
+    "succeed": "",
+    "failed": "",
+    "timedout": "TASKTIMERCALLBACK",
+    "timeout": 3000
+  },
+  "NOTIFY_BUILDP": {
+    "callstate": "NOTIFYAUX",
+    "statecmd": "Instrument set to Build Pressure",
+    "imediate": "ENABLEBEACON",
+    "succeed": "",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0
+  }
+}

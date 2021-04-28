@@ -92,9 +92,14 @@ public class SerialDevice implements Serializable{
     private VirnaServiceProvider ctrl;
     private SerialPort sport;
     
-    
+    private byte[] sbuf = new byte[64];
     
     public SerialDevice(SerialPort sport, Controller ctrl) {
+        
+        sbuf[0] = (byte)0xff;
+        sbuf[1] = (byte)0xfe;
+        sbuf[62] = (byte)0xff;
+        sbuf[63] = (byte)0xf0;
         
         this.ctrl = ctrl;
         this.sport = sport;
@@ -152,7 +157,7 @@ public class SerialDevice implements Serializable{
                                 while ((data = in.read()) > -1){
                                     // Se o token de dados é a flag de bloco parta para montar comando binário
                                     if ( data == FLAGHEADER) {
-                                        //LOG.log(Level.INFO, "Achei delimitador : {0}", String.valueOf(data) );
+//                                        LOG.log(Level.INFO, "Achei delimitador : {0}", String.valueOf(data) );
                                         //Se há dados de Listening, livre-se deles
                                         if (bufferptr !=0){
                                             notifyTraffic(SerialDevice.Event.EVENT_TERM, messagetag, buffer, bufferptr);
@@ -240,12 +245,12 @@ public class SerialDevice implements Serializable{
                             
                             case CMD_BUILDTICK :
                                 while ((data = in.read()) > -1){
-//                                        LOG.log(Level.INFO,"Building beacon : available={0} - Data={1} / {2}" , 
+//                                        LOG.log(Level.INFO,"Building tick : available={0} - Data={1} / {2}" , 
 //                                                new Object[] {in.available(), Character.toString((char)data), data});
                                         if (data == FLAGEND) {
                                             //serialstate=SerialDevice.SERIAL_STATE.DONE;
                                             serialstate=SerialDevice.SERIAL_STATE.LISTENING;
-                                            //LOG.log(Level.INFO,"OK ! - Enviando BUILTICK {0}", buffer[0]); 
+//                                            LOG.info(String.format("Message OK ! - Enviando BUILTICK @ %d", System.currentTimeMillis())); 
                                             // O bloco está completo, despache para o aplicativo
                                             in.skip(in.available());
                                             notifyTraffic(SerialDevice.Event.EVENT_TICK, messagetag, buffer, bufferptr);
@@ -260,7 +265,8 @@ public class SerialDevice implements Serializable{
                                 
                             case CMD_BUILDSMALL :
                                 while ((data = in.read()) > -1){
-//                                        LOG.log(Level.INFO,"Building tick : available={0} - Data={1} / {2}" , 
+                                        LOG.log(Level.INFO,"Building small");    
+//                                        LOG.log(Level.INFO,"Building small : available={0} - Data={1} / {2}" , 
 //                                                new Object[] {in.available(), Character.toString((char)data), data})
                                         if (data == FLAGEND) {
                                             //serialstate=SerialDevice.SERIAL_STATE.DONE;
@@ -299,6 +305,8 @@ public class SerialDevice implements Serializable{
                         }                   
                     } while (in.available() !=0 ); //|| serialstate==SerialDevice.SERIAL_STATE.DONE);
                 }
+                
+                
                 catch ( IOException e ) {
                     LOG.log(Level.SEVERE,String.format("Serial Exception (%s) = %s", e.getClass().getName(), e.getMessage())); 
                 }
@@ -325,12 +333,15 @@ public class SerialDevice implements Serializable{
     
     
     // ================================================== SERVICES =======================================================
-    public void sendMessage(byte [] load){
-    
+    public void sendMessage(byte[] load){
+  
+        for (int i = 0; i < load.length; i++) {
+            sbuf[i+2] = load[i];
+        }
+        
         try{
-            this.out.write(0xff);
-            this.out.write(0xfe);
-            this.out.write(load);
+            this.out.write(sbuf);
+            this.out.flush();
         }
         catch ( IOException e ){
             e.printStackTrace();

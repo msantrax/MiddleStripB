@@ -12,6 +12,7 @@ import com.mongodb.client.model.Filters;
 import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.SignalListener;
 import com.opus.syssupport.StateDescriptor;
+import com.opus.syssupport.TickListener;
 import com.opus.syssupport.VirnaPayload;
 import com.opus.syssupport.VirnaServiceProvider;
 import com.opus.syssupport.smstate;
@@ -34,7 +35,7 @@ import javafx.application.Platform;
 
 
 
-public class Controller implements SignalListener, VirnaServiceProvider, PropertyChangeListener {
+public class Controller implements SignalListener, TickListener, VirnaServiceProvider, PropertyChangeListener {
 
     private static final Logger log = Logger.getLogger(Controller.class.getName());
     
@@ -76,10 +77,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         loadStates(MongoLink.class, mongolink);
         
         context = Context.getInstance();
-        
-        
-        
-        
+    
         addSignalListener(this);
 //        sys_services = Lookup.getDefault().lookup(SystemServicesProvider.class).getDefault();
         
@@ -91,7 +89,10 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
 //        return dbservice;
 //    }
    
-    
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
     
     // ================================================================ALARMS  =====================================================
     private final ScheduledExecutorService scheduler;
@@ -109,6 +110,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         }
         return false;
     }
+    
     
     public void setAlarm (final Long addr, Integer id, final SMTraffic message, long init, long period){
         
@@ -142,11 +144,32 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
      
     }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public transient Long ticknr = 0L;
+    private void initTick(){
+        
+        final Runnable tickalarm = new Runnable() {
+            @Override
+            public void run() {
+                Controller al_ctrl = Controller.getInstance();
+                al_ctrl.ticknr++;
+                al_ctrl.notifyTickListeners(al_ctrl.ticknr);
+            }
+        };
+        
+        addTickListener(this);
+        final ScheduledFuture<?> alarmhandle = scheduler.scheduleAtFixedRate(tickalarm, 0, 100L, TimeUnit.MILLISECONDS);
+   
     }
-
+    
+    @Override
+    public void processTick (Long tstamp){
+        
+        //log.info(String.format("Tick loop %03d @ %d", tstamp, ((System.currentTimeMillis() % 1000000))));
+        if (mongolink != null && tstamp%4 == 0){
+            mongolink.flush();
+        }
+    }
+    
     
     private class AlarmHandle{
       
@@ -167,7 +190,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     
     public void removeAlarm(Integer id){
         
-        log.info(String.format("Removing alarm id = %d", id));
+//        log.info(String.format("Removing alarm id = %d", id));
         AlarmHandle handle = alarms.get(id); 
         
         if (handle != null){
@@ -179,6 +202,36 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     public void isAlarmSet (Long uid){
    
     }
+    
+    
+    // =========================================== ALARM SIGNAL HANDLING (VIA LISTENERS) =======================================
+    private transient ArrayList<TickListener> ticklisteners = new ArrayList<>();
+    
+    
+    /** Método de registro do listener do dispositivo */
+    @Override
+    public void addTickListener (TickListener l){
+        ticklisteners.add(l);
+    }
+
+    /** Método de remoção do registro do listener do dispositivo  */
+    public void removeTickListener (TickListener l){
+        ticklisteners.remove(l);
+    }
+
+    /** Esse método é chamado quando algo acontece no dispositivo
+     * @param uid_addr
+     * @param signal */
+    protected void notifyTickListeners(long tsamp) {
+
+        if (!ticklisteners.isEmpty()){      
+            //log.fine("Notifying "+ uid_addr);
+            for (TickListener sl : ticklisteners){
+                sl.processTick(tsamp);
+            }
+        }
+    }
+    
     
     
     // ===========SIGNAL HANDLING ===================================================================
@@ -203,7 +256,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         smqueue.offer(signal);
     }
     
-     /** Método de registro do listener do dispositivo */
+    /** Método de registro do listener do dispositivo */
     public void addSignalListener (SignalListener l){
         listeners.add(l);
     }
@@ -242,7 +295,9 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     public void setFX1open (boolean open) { fx1open = open;}
 
 
-    public LinkedBlockingQueue<SMTraffic> getQueue(){ return smqueue;}
+    public LinkedBlockingQueue<SMTraffic> getQueue(){ 
+        return smqueue;
+    }
     
     
     public MongoLink getMongolink() {
@@ -314,7 +369,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
                 }
                 else{
                     statesptr.put(annot.state(), stdesc);
-                    log.info(String.format("Registering state %s @ %s", stdesc.getSID(), stdesc.getClazz().getName()));
+//                    log.info(String.format("Registering state %s @ %s", stdesc.getSID(), stdesc.getClazz().getName()));
                 }
             }
         }
@@ -458,7 +513,7 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
     
     @smstate (state = "NULLEVENT")
     public boolean st_nullEvent(SMTraffic smm){
-        log.info(String.format("NULLEVENT was called"));
+        log.info(String.format("===========================================NULLEVENT was called"));
         return true;
     }
    
@@ -484,42 +539,23 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
         // Para que isso mesmo ?
         System.setProperty("sun.java2d.cmm", "sun.java2d.cmm.kcms.KcmsServiceProvider");
         
-        SMTraffic alarm_config = new SMTraffic(0l, 0l, 0, "HOUSEKEEP", this.getClass(),
-                        new VirnaPayload()
-                );
-        setAlarm (-1l, -1, alarm_config, 200l, 200l);
+//        SMTraffic alarm_config = new SMTraffic(0l, 0l, 0, "HOUSEKEEP", this.getClass(),
+//                        new VirnaPayload()
+//                );
+//        setAlarm (-1l, -1, alarm_config, 100l, 100l);
         
+        initTick();
+
         asvpdev = ASVPDevice.getInstance();
         asvpdev.setAppController(this);
         asvpdev.setFXController(anct);
-        
-        asvpdev.connect();
-        
-        
+ 
         return true;
     }
     
     
     
-    
-    
-    private int housekeep_loop = 0;
-//    private PriorityQueue<StatusMessage> statusmessages = new PriorityQueue<>();
-//    private StatusMessage currentstatus;
-    
-    @smstate (state = "HOUSEKEEP")
-    public boolean st_doHousekeep(SMTraffic smm){
-
-        VirnaPayload payload = smm.getPayload();
-        
-//        log.info(String.format("Housekeep loop %03d @ %d", housekeep_loop++, ((System.currentTimeMillis() % 1000000))));
-        
-        if (mongolink != null){
-            mongolink.flush();
-        }
-        return true;
-        
-    }
+// 
     
     @smstate (state = "EXIT")
     public boolean st_doExit(SMTraffic smm){
@@ -771,3 +807,25 @@ public class Controller implements SignalListener, VirnaServiceProvider, Propert
 //        return true;
 //    }
     
+
+
+   
+//    
+//    private int housekeep_loop = 0;
+////    private PriorityQueue<StatusMessage> statusmessages = new PriorityQueue<>();
+////    private StatusMessage currentstatus;
+//    
+//    @smstate (state = "HOUSEKEEP")
+//    public boolean st_doHousekeep(SMTraffic smm){
+//
+//        VirnaPayload payload = smm.getPayload();
+//        
+//        log.info(String.format("Housekeep loop %03d @ %d", housekeep_loop++, ((System.currentTimeMillis() % 1000000))));
+////        System.out.print('#');;
+//        
+//        if (mongolink != null){
+//            mongolink.flush();
+//        }
+//        return true;
+//        
+//    }

@@ -9,7 +9,6 @@ package middlestripb;
 import Entities.Entity;
 import Entities.Point;
 import cern.extjfx.chart.XYChartPane;
-import cern.extjfx.chart.plugins.XValueIndicator;
 import com.opus.fxsupport.PropertyLinkDescriptor;
 import com.opus.fxsupport.FXFController;
 import com.opus.glyphs.FontAwesomeIcon;
@@ -18,29 +17,47 @@ import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.VirnaPayload;
 import com.opus.syssupport.smstate;
 import isothermview.IsothermChart;
+import java.io.IOException;
 
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 import org.controlsfx.control.HiddenSidesPane;
 import org.controlsfx.validation.ValidationSupport;
@@ -69,6 +86,13 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     private MongoLink mongolink;
     
     
+    private Parent preppane;
+    private PrepController prepctrl;
+    
+    private ToggleButton station1bt;
+    private ToggleButton station2bt;
+    
+    
     
     @FXML
     private ResourceBundle resources;
@@ -95,8 +119,19 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     private Label sidebar_btloadfile;
 
     @FXML
-    private AnchorPane toppane;
+    private HBox toppane;
+    
+    @FXML
+    private VBox tpn_naveg;
 
+    @FXML
+    private VBox sidebar;
+    
+    
+    @FXML
+    private HiddenSidesPane tophspane;
+    
+    
     @FXML
     private SplitPane opsplit;
 
@@ -109,8 +144,29 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     @FXML
     private HiddenSidesPane auxpane;
 
+    
+
     @FXML
-    private AnchorPane bottompane;
+    private StackPane rootpane;
+    
+    @FXML
+    private TextFlow snack;
+    
+    @FXML
+    private Text snacktext;
+    
+    @FXML
+    private AnchorPane inputdialog;
+    
+    
+    @FXML
+    private VBox bpn_naveg;
+
+    @FXML
+    private HiddenSidesPane bpn_main;
+
+    @FXML
+    private AnchorPane bpn_sinoptic;
 
     
     
@@ -137,26 +193,22 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         return instance;
     }
     
+    
+    
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         LOG.info(String.format("FX1Controller initializing with profile : %s", profilepath));
         
-        update();
-    }
-    
-    
-       
-    @Override
-    public void update(){
-      
         ctx = Context.getInstance();
-        mongolink = MongoLink.getInstance();
-        asvpdevice = ASVPDevice.getInstance();
         
-        vs = new ValidationSupport(); 
-        validators = new LinkedHashMap<>();
+        Font exobold = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Exo-Bold.ttf").toExternalForm(), 10);
+        Font exo = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Exo-Regular.ttf").toExternalForm(), 10);
+        Font exothin = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Exo-Thin.ttf").toExternalForm(), 10);
         
-        appctrl.setFXANController(this);
+        Font robotobold = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Roboto-Bold.ttf").toExternalForm(), 10);
+        Font roboto = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Roboto-Regular.ttf").toExternalForm(), 10);
+        
         
         sidebar_btcycle.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.REFRESH, "black", 4));
         sidebar_btstore.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.DATABASE, "black", 4));
@@ -164,23 +216,228 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         sidebar_btbroadcast.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.SHARE_ALT, "black", 4));
         sidebar_btloadfile.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.ARCHIVE, "black", 4));
         
+        
+        
+        
+        
+//        FXMLLoader fxmlLoader;
+//        AnchorPane apane;
+//        
+//        // Load Preparation Panels
+//        try {
+//            fxmlLoader = new FXMLLoader(getClass().getResource("Prep.fxml"));
+//            preppane = fxmlLoader.load();
+//            prepctrl = fxmlLoader.<PrepController>getController();
+//        } catch (IOException ex) { 
+//            Logger.getLogger(RootTask.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        
+//        
+//        // Load Sample Panels
+//        try {
+//            URL spnl = getClass().getResource("SamplePanel.fxml");
+//            
+//            fxmlLoader = new FXMLLoader(spnl);
+//            apane = fxmlLoader.load();
+//            SamplePanelController sample1ctrl = fxmlLoader.<SamplePanelController>getController();
+//            sample1ctrl.setPane(apane);
+//            sample1ctrl.setPanelId("sample1");
+//            ctx.samplepanels.put(sample1ctrl.getPanelId(), sample1ctrl);
+//            
+//            
+//            fxmlLoader = new FXMLLoader(spnl);
+//            apane = fxmlLoader.load();
+//            SamplePanelController sample2ctrl = fxmlLoader.<SamplePanelController>getController();
+//            sample2ctrl.setPane(apane);
+//            sample2ctrl.setPanelId("sample2");
+//            ctx.samplepanels.put(sample2ctrl.getPanelId(), sample2ctrl);
+//            
+//            
+//        } catch (IOException ex) { 
+//            LOG.severe(String.format("Failed to load Sample Panels due %s", ex.getCause().getMessage()));
+//        }
+//        
+//        
+//        // Load SamplePanel Naveg Buttons  =================================================================
+//        ToggleGroup tg = new ToggleGroup();
+//        Tooltip tt;
+//        
+//        
+//        //
+//        Rectangle station1icon = new Rectangle(32, 60);
+//        station1icon.setFill(new ImagePattern(
+//                new Image(getClass().getClassLoader().getResource("middlestripb/station1.png").toExternalForm()), 
+//                0, 0, 1, 1, true));
+//        station1bt = new ToggleButton();
+//        station1bt.setGraphic(station1icon);
+//        station1bt.setId("fxf-prepbt");
+//        tt = new Tooltip("Show Analysis on Station 1");
+//        tt.setShowDelay(Duration.millis(500));
+//        station1bt.setTooltip(tt);
+//        tpn_naveg.getChildren().add(station1bt);
+//        station1bt.setToggleGroup(tg);
+//        station1bt.selectedProperty().addListener(((observable, oldValue, newValue) -> {
+//            if (!oldValue){
+////                LOG.info(String.format("sample1 selected"));
+//                sidebar.setStyle("-fx-effect: dropshadow(three-pass-box, blue, 10, 0, 3, 0);");
+//                tophspane.setContent(ctx.samplepanels.get("sample1").getPane());
+//                
+//            }
+//        }));
+//        
+//       
+//        Rectangle station2icon = new Rectangle(32, 60);
+//        station2icon.setFill(new ImagePattern(
+//                new Image(getClass().getClassLoader().getResource("middlestripb/station2.png").toExternalForm()), 
+//                0, 0, 1, 1, true));
+//        station2bt = new ToggleButton();
+//        station2bt.setGraphic(station2icon);
+//        station2bt.setId("fxf-prepbt");
+//        tt = new Tooltip("Show Analysis on Station 2");
+//        tt.setShowDelay(Duration.millis(500));
+//        station2bt.setTooltip(tt);
+//        tpn_naveg.getChildren().add(station2bt);
+//        station2bt.setToggleGroup(tg);
+//        station2bt.selectedProperty().addListener(((observable, oldValue, newValue) -> {
+//            if (!oldValue){
+////                LOG.info(String.format("sample2 selected"));
+//                sidebar.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 3, 0);");
+//                tophspane.setContent(ctx.samplepanels.get("sample2").getPane());
+//                
+//            }
+//        }));
+//        
+//        
+//        // Load Sinoptic Panel  ===================================================================================
+//        Rectangle sinop = new Rectangle(440, 150);
+//        sinop.setFill(new ImagePattern(
+//                new Image(getClass().getClassLoader().getResource("middlestripb/sinop.png").toExternalForm()), 
+//                0, 0, 1, 1, true)); 
+//        AnchorPane.setTopAnchor(sinop,20.0);
+//        AnchorPane.setLeftAnchor(sinop,0.0);
+//        bpn_sinoptic.getChildren().add(sinop);
+//              
+//        
+//        bpn_main.setContent(preppane);
+//        station1bt.setSelected(true);
+//        
+        
+
+        // Load InitBanner
+        Image inibanner = new Image(getClass().getClassLoader().getResource("middlestripb/asvpa.png").toExternalForm());
+        Rectangle initbanner = new Rectangle(284, 420);
+        initbanner.setFill(new ImagePattern(inibanner, 0, 0, 1, 1, true));
+        AnchorPane bannerpane = new AnchorPane(initbanner);
+        AnchorPane.setLeftAnchor(initbanner, 40.0);
+        AnchorPane.setTopAnchor(initbanner, 30.0);
+        bannerpane.getStyleClass().add("info-pane");
+        
         infopanes = new LinkedHashMap<>();
+        infopanes.put("initbanner", bannerpane);
+      
+        update();
+    }
+    
+    
+    
+    
+       
+    @Override
+    public void update(){
+      
+        
+        mongolink = MongoLink.getInstance();
+        asvpdevice = ASVPDevice.getInstance();
+        appctrl.setFXANController(this);
+        
+        vs = new ValidationSupport(); 
+        validators = new LinkedHashMap<>();
+        
+        setUIState("FRESHANALYSIS");
+        
         
         ASVPDeviceController asvpdevctrl = new ASVPDeviceController(appctrl, this, asvpdevice);
         asvpdevice.setASVPDevController(asvpdevctrl);
+ 
+        
         infopanes.put("asvpdevice", asvpdevctrl);
         infopanes.put("isotherminfo", new IsothermInfoController(this) );
-        infopanes.put("pointinfo", new PointInfoController(this) );
-            
+        infopanes.put("pointinfo", new PointInfoController(this) );           
         infopane.getChildren().addAll(infopanes.values());
         
-        showInfoPane("asvpdevice");
         
         loadMainCharts();
         
         instance = this;
         
+        asvpdevice.connect();
+       
     }
+    
+    
+    
+    
+    
+    public void loadMainCharts(){
+        
+        isothermchart = new IsothermChart(this);
+        chartpane = isothermchart.createCernChart();
+        chartpane.getStylesheets().add(getClass().getClassLoader().getResource("middlestripb/isochart.css").toExternalForm());
+        
+        setAuxchart(new AuxChart());
+        auxchartpane = getAuxchart().createCernChart();
+        auxchartpane.getStylesheets().add(getClass().getClassLoader().getResource("middlestripb/auxchart.css").toExternalForm());
+        
+        ctx.switchTask ("roottask");
+        JournalSideNode logsidenode = new JournalSideNode(Side.TOP, auxpane);
+        ctx.journals.put(ctx.current_anatask, new JournalSideNode(Side.TOP, auxpane));
+        
+        ctx.setFXController(this);
+        
+        Platform.runLater(() -> {
+            
+            showInfoPane("initbanner");
+            
+            chartpane.setMinWidth(mainchartpane.getWidth());
+            chartpane.setMinHeight(mainchartpane.getHeight());            
+            
+            mainchartpane.setContent(ctx.current_anatask.getMainPane());
+            
+            ChartsToolbar chtb = new ChartsToolbar(Side.LEFT, mainchartpane);
+            mainchartpane.setLeft(chtb);
+                      
+            
+            auxchartpane.setMinWidth(auxpane.getWidth());
+            auxchartpane.setMinHeight(auxpane.getHeight());
+            auxpane.setContent(auxchartpane);
+            auxpane.setTop(logsidenode);
+            
+            
+//            prepctrl.loadCharts(bpn_main, bpn_naveg) ;
+
+                       
+            String mes2 = "Virna7 Initial Config - Currente available tasks are :|CheckP01|BaseTask1|\tTask nr 3";
+            String mes3 = "Connection with Antares Controller is";
+            logsidenode.addEntry(mes2);
+            logsidenode.addEntry(mes3);
+  
+   
+            // Scan Controllers for machine states
+            appctrl.loadStates(AuxChart.class, this.auxchart);
+            appctrl.loadStates(PrepController.class, this.prepctrl);
+     
+            
+            
+        });
+    }
+    
+    
+    
+    public void showMainChart(Node content){
+      
+        mainchartpane.setContent(content);
+    }
+    
     
     public void clearInfoPanes() {
     
@@ -274,43 +531,171 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     
     
     
-    public void loadMainCharts(){
-        
-        isothermchart = new IsothermChart(this);
-        chartpane = isothermchart.createCernChart();
-        chartpane.getStylesheets().add(getClass().getClassLoader().getResource("middlestripb/isochart.css").toExternalForm());
-        
-        setAuxchart(new AuxChart());
-        auxchartpane = getAuxchart().createCernChart();
-        auxchartpane.getStylesheets().add(getClass().getClassLoader().getResource("middlestripb/auxchart.css").toExternalForm());
-        
-        
-        Platform.runLater(() -> {
-            
-            chartpane.setMinWidth(mainchartpane.getWidth());
-            chartpane.setMinHeight(mainchartpane.getHeight());
-            mainchartpane.setContent(chartpane);
-            
-            ChartsToolbar chtb = new ChartsToolbar(Side.LEFT, mainchartpane);
-            mainchartpane.setLeft(chtb);
-            
-            
-            auxchartpane.setMinWidth(auxpane.getWidth());
-            auxchartpane.setMinHeight(auxpane.getHeight());
-            auxpane.setContent(auxchartpane);
-           
-            
-            SideNode bottom = new SideNode("Bottom", Side.BOTTOM, auxpane);
-            bottom.setStyle("-fx-background-color: rgba(255,255,255,1);"
-                    + "-fx-effect :  dropshadow(three-pass-box, black, 5.0, 0, 1.0, 1.0);");
-            auxpane.setBottom(bottom);
-            
-            appctrl.loadStates(AuxChart.class, this.auxchart);
-     
-        });
     
+    
+    
+    // ============================================ SUPPORT WIDGETS =======================================================
+    
+    
+    @smstate (state = "SHOWSNACK")
+    public boolean st_showSnack(SMTraffic smm){
+        
+        VirnaPayload payload = smm.getPayload();
+        
+        if (payload.vobject instanceof BaseAnaTask){
+            BaseAnaTask tsk = (BaseAnaTask)payload.vobject;
+            TaskState tst = tsk.getCurrent_taskstate();
+
+            Long tmout = tst.getTimeout();
+            
+            SMTraffic nxt = tsk.goNext(tst.getImediate());
+            if (nxt != null){
+                Controller.getInstance().processSignal(nxt);
+            }
+          
+            showSnack(tmout, payload.vstring); 
+        }
+        else{
+           showSnack(payload.long1, payload.vstring);  
+        }
+        
+        
+        return true;
+    }
+    
+    
+    public void showSnack(Long period, String message) {
+        
+        Long showperiod = (period == null || period == 0l) ? 2500 : period;
+        
+        snacktext.setText(message);
+        LOG.info(String.format("SNACK is showing : %s", message));
+        
+        snack.setVisible(true);
+        
+        Timeline timeline = new Timeline(new KeyFrame(
+            Duration.millis(showperiod),
+            ae -> snack.setVisible(false)    
+        ));
+        timeline.play();
         
     }
+    
+    
+    
+    @smstate (state = "SHOWINPUTDIALOG")
+    public boolean st_showInputDialog(SMTraffic smm){
+
+        VirnaPayload payload = smm.getPayload();
+        
+        if (payload.vobject instanceof BaseAnaTask){
+            BaseAnaTask tsk = (BaseAnaTask)payload.vobject;
+            TaskState tst = tsk.getCurrent_taskstate();
+            ArrayList<String> load = (ArrayList<String>)tst.getLoad();
+
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    SimpleStringProperty result = showInputDialog(load.get(0), load.get(1));
+                    if (result != null){
+                        result.addListener(new ChangeListener<String>() {
+                            @Override
+                            public void changed(ObservableValue <? extends String> prop, String ov, String nv) {
+                                LOG.info(String.format("Valor : %s ", nv));
+                                hideInputDialog();
+                                if (nv != null && !nv.isEmpty() && !nv.equals("cancel")){
+                                    LOG.info(String.format("Validated."));
+                                    SMTraffic nxt = tsk.goNext(tst.getImediate());
+                                    VirnaPayload pld = nxt.getPayload();
+                                    BaseAnaTask ntsk = (BaseAnaTask)payload.vobject;
+                                    TaskState ntst = tsk.getCurrent_taskstate();
+                                    ntst.setStatecmd("SETSETRADUMPGAIN="+nv);
+                                    if (nxt != null){
+                                        Controller.getInstance().processSignal(nxt);
+                                    }    
+                                }
+                                else{
+                                    LOG.info(String.format("Canceled"));
+                                    SMTraffic nxt = tsk.goNext(tst.getFailed());
+                                    
+                                    if (nxt != null){
+                                        Controller.getInstance().processSignal(nxt);
+                                    } 
+                                }
+                            }
+                        });
+                    } 
+                }
+            });    
+            
+            
+            SMTraffic nxt = tsk.goNext(tst.getImediate());
+            if (nxt != null){
+                Controller.getInstance().processSignal(nxt);
+            }
+          
+           
+        }
+        else{
+           Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    SimpleStringProperty result = showInputDialog(payload.vstring, payload.getServicestatus());
+                    if (result != null){
+                        result.addListener(new ChangeListener<String>() {
+                            @Override
+                            public void changed(ObservableValue <? extends String> prop, String ov, String nv) {
+                                LOG.info(String.format("Valor : %s ", nv));
+                                hideInputDialog();
+                                if (nv != null && !nv.isEmpty() && !nv.equals("cancel")){
+                                    LOG.info(String.format("Validated."));
+
+                                }
+                            }
+                        });
+                    } 
+                }
+            });    
+        }
+   
+        return true;
+    }
+    
+    
+    public Parent currentdlgpane;
+    public AnchorPane getInputDialog() { return inputdialog;}
+    
+    
+    public void hideInputDialog(){    
+        inputdialog.getChildren().remove(currentdlgpane);
+        inputdialog.setVisible(false);
+    }
+    
+    public SimpleStringProperty showInputDialog(String header, String value){
+        
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXFInputDialog.fxml"));
+            currentdlgpane = fxmlLoader.load();
+            FXFInputDialogController dlgc = fxmlLoader.<FXFInputDialogController>getController();
+            
+            dlgc.setHeader(header);
+            dlgc.setDefvalue(value);
+            
+            inputdialog.getChildren().add(currentdlgpane);
+            //inputdialog.setMaxSize(200.0, 200.0);
+            inputdialog.setVisible(true);
+            return dlgc.result;
+      
+        } catch (IOException ex) {
+            LOG.severe("Severe !!!");
+            //Logger.getLogger(FXFWindowManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+ 
+        return null;
+    }
+    
+    
+    
     
     
     
@@ -330,7 +715,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                     + "-fx-effect :  dropshadow(three-pass-box, black, 8.0, 0, 1.0, 1.0);"
                     + "-fx-background-radius: 6;" 
                     + "-fx-border-radius: 6;"
-                    + "-fx-padding: 60 0 0 0"
+                    + "-fx-padding: 60 0 0 0;"
                     + "-fx-border-insets: 15 0 5 0;" 
                     + "-fx-background-insets: 15 0 5 0;");
             
@@ -373,7 +758,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                                 + "-fx-effect :  dropshadow(three-pass-box, black, 8.0, 0, 1.0, 1.0);"
                                 + "-fx-background-radius: 6;" 
                                 + "-fx-border-radius: 6;"
-                                + "-fx-padding: 60 0 0 0"
+                                + "-fx-padding: 60 0 0 0;"
                                 + "-fx-border-insets: 15 0 5 0;" 
                                 + "-fx-background-insets: 15 0 5 0;");
                         pane.setPinnedSide(null);
@@ -382,7 +767,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                                 + "-fx-effect :  dropshadow(three-pass-box, red, 8.0, 0, 1.0, 1.0);"
                                 + "-fx-background-radius: 6;" 
                                 + "-fx-border-radius: 6;"
-                                + "-fx-padding: 60 0 0 0"
+                                + "-fx-padding: 60 0 0 0;"
                                 + "-fx-border-insets: 15 0 5 0;" 
                                 + "-fx-background-insets: 15 0 5 0;");
                         pane.setPinnedSide(side);
@@ -393,33 +778,6 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         }
       
     }
-    
-    
-    class SideNode extends Label {
-
-        public SideNode(final String text, final Side side,final HiddenSidesPane pane) {
-
-            super(text + " (Click to pin / unpin)");
-
-            setAlignment(Pos.CENTER);
-            setPrefSize(50, 200);
-
-            setOnMouseClicked(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    if (pane.getPinnedSide() != null) {
-                        setText(text + " (unpinned)");
-                        pane.setPinnedSide(null);
-                    } else {
-                        setText(text + " (pinned)");
-                        pane.setPinnedSide(side);
-                    }
-                }
-            });
-        }
-    }
-
-    
     
     
     // =====================================================================================================================
@@ -440,16 +798,25 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
             case "FRESH_ANALISYS":
                 sidebar_btcycle.setDisable(false);
                 sidebar_btstore.setDisable(true);
-                sidebar_btreport.setDisable(true);
+                sidebar_btreport.setDisable(false);
                 sidebar_btbroadcast.setDisable(true);
                 sidebar_btloadfile.setDisable(false);
                 //blainedevice.enableRun(true);
                 break;
             
+                
+            case "ENABLEALL":
+                sidebar_btcycle.setDisable(false);
+                sidebar_btstore.setDisable(false);
+                sidebar_btreport.setDisable(false);
+                sidebar_btbroadcast.setDisable(false);
+                sidebar_btloadfile.setDisable(false);
+                break;    
+                
             default:
                 sidebar_btcycle.setDisable(false);
                 sidebar_btstore.setDisable(true);
-                sidebar_btreport.setDisable(true);
+                sidebar_btreport.setDisable(false);
                 sidebar_btbroadcast.setDisable(true);
                 sidebar_btloadfile.setDisable(false);
                 //blainedevice.enableRun(true);
@@ -459,25 +826,50 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     }
     
     
-    
     // ========================================= DISPATCH SECTION =======================================================
     
     @FXML
     void btcycle_action(MouseEvent event) {
-        showInfoPane("asvpdevice");
-        ctx.switchTask("checkp0task");
+
+        if (event.isControlDown()){
+            setUIState("ENABLEALL");
+        }
+        else if (event.isShiftDown()){
+            appctrl.processSignal(new SMTraffic(0l, 0l, 0, "EXIT", this.getClass(),
+                                   new VirnaPayload()));
+        }
+        else{
+            ctx.switchTask("roottask");
+        }
         
-        
+       
     }
 
     @FXML
     void btexport_action(MouseEvent event) {
+        
 //        MiddleStripB.mongolink.loadAsJson(UID);
 //        MiddleStripB.mongolink.loadAsBean(UID);
 //        appctrl.processSignal (new SMTraffic(0l, 0l, 0, "IMPORTISOTHERM", this.getClass(),
 //                        new VirnaPayload().setString("/Bascon/ASVP/Quantawin/sample_a (Isotherm).txt")));
 //        appctrl.processSignal (new SMTraffic(0l, 0l, 0, "UPDATEISOTHERMCHART", this.getClass(),
 //                        new VirnaPayload()));
+
+//        asvpdevice.connect();
+
+
+//        showSnack(null, "Teste de operação do Snack com texto relativamente curto"); 
+//        appctrl.processSignal(new SMTraffic(0l, 0l, 0, "SHOWSNACK", this.getClass(),
+//                                    new VirnaPayload()
+//                                        .setString("Teste de operação do Snack com texto relativamente curto")
+//                                        .setLong1(10000l)
+//                             ));
+
+        appctrl.processSignal(new SMTraffic(0l, 0l, 0, "SHOWINPUTDIALOG", this.getClass(),
+                                    new VirnaPayload()
+                                        .setString("Teste do Input Dialog")
+                                        .setAuxiliar("12345")
+                             ));
         
     }
 
@@ -491,14 +883,27 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     @FXML
     void btstore_action(MouseEvent event) {
 
-
-        appctrl.processSignal(new SMTraffic(0l, 0l, 0, "SETAUTO", this.getClass(),
+        if (event.isControlDown()){
+            appctrl.processSignal(new SMTraffic(0l, 0l, 0, "SETAUTO", this.getClass(),
+                                       new VirnaPayload()
+                                               .setString("SETVALVES=PUMP")
+                                               .setFlag1(Boolean.TRUE)));
+            
+            appctrl.processSignal(new SMTraffic(0l, 0l, 0, "SETAUTO", this.getClass(),
                                        new VirnaPayload()
                                                .setString("SETVALVES=BUILDP")
                                                .setFlag1(Boolean.TRUE)));
-
-
-        
+            
+        }
+        else{
+            for (int i = 0; i < 10; i++) {
+                appctrl.processSignal(new SMTraffic(0l, 0l, 0, "SETAUTO", this.getClass(),
+                                       new VirnaPayload()
+                                               .setString(String.format("SETVALVES=%d", i))
+                                               .setFlag1(Boolean.TRUE)));
+            }
+        }
+   
 //        if (event.isControlDown()){
 //            appctrl.processSignal(new SMTraffic(0l, 0l, 0, "AUXDOMESSAGES", this.getClass(),
 //                                       new VirnaPayload()
@@ -536,12 +941,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
 //        MiddleStripB.mongolink.savetoJsonFile();
 //        isothermchart.test1();
 
-                
-                
-        
     }
-
-
 
     
     @FXML
@@ -550,13 +950,8 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                                    new VirnaPayload().setCallerstate("ASKUSER")));
         
     }
-    
-    @FXML
-    void btrun_action(MouseEvent event) {
-        
-    }
-    
    
+    
     @Override
     public void clearCanvas(){ 
 //        pnl_user.setVisible(false);
@@ -575,8 +970,6 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
 
     }
   
-    
-    
     
     public Scene getScene() { return getScene();}
 
@@ -768,3 +1161,17 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
 
 
 //                LOG.info(String.format("Loaded = %d", mongolink.getLoaded_descriptors().size()));
+
+
+
+//try {
+//                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("JournalSideNode.fxml"));
+//                AnchorPane journalpane = fxmlLoader.load();
+////                FXFInputDialogController dlgc = fxmlLoader.<FXFInputDialogController>getController();
+//                logsidenode.getChildren().add(journalpane);
+//                
+//                journalpane("çkjklfdjglkfdjgfjdlgjfd \n fjdklfjlkdsjf \n erpoierf095843857");
+//
+//            } catch (IOException ex) {
+//                LOG.severe("Failed to load Journal fxml !!!");
+//            }

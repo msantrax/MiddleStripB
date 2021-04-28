@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Side;
+import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 
@@ -63,40 +64,41 @@ public class AuxChart implements SignalListener{
     public XYChartPane createCernChart(){
     
         xAxis = new NumericAxis(0.0, 50, 5);
-        xAxis.setAnimated(false);
-        xAxis.setLabel("Time");
+        getxAxis().setAnimated(false);
+        getxAxis().setLabel("Time");
+        getxAxis().setForceZeroInRange(false);
+//        xAxis.setAutoRanging(true);
         
         yAxis = new NumericAxis(0.0, 65, 5);
-        yAxis.setAnimated(false);
-        yAxis.setLabel("Pressure");
+        getyAxis().setAnimated(false);
+        getyAxis().setLabel("Pressure");
 
         
         companionXAxis = new NumericAxis(0.0, 50, 5);
-        companionXAxis.setAnimated(false);
-        companionXAxis.setLabel("Time");
+        getCompanionXAxis().setAnimated(false);
+        getCompanionXAxis().setLabel("Time");
         
-        companionYAxis = new NumericAxis(0.0, 0.5, 0.05);
-        companionYAxis.setAnimated(false);
-        companionYAxis.setLabel("Delta P");
-        companionYAxis.setSide(Side.RIGHT);
+        companionYAxis = new NumericAxis(0.0, 5, 0.5);
+        getCompanionYAxis().setAnimated(false);
+        getCompanionYAxis().setLabel("Delta P");
+        getCompanionYAxis().setSide(Side.RIGHT);
      
         
-        mainChart = new LineChart<>(xAxis, yAxis);
+        mainChart = new LineChart<>(getxAxis(), getyAxis());
         mainChart.setAnimated(false);
+        mainChart.setCreateSymbols(false);
     
-        suppChart = new LineChart<>(companionXAxis, companionYAxis);
+        suppChart = new LineChart<>(getCompanionXAxis(), getCompanionYAxis());
         suppChart.setAnimated(false);
+        suppChart.setCreateSymbols(false);
+        
         
         
         chartdata = mainChart.getData(); 
         
         chartPane = new XYChartPane<>(mainChart);
         chartPane.setLegendVisible(false);
-        
- 
-//        chartPane.getOverlayCharts().add(suppChart);
-       
-        
+
         clo = new AuxChartOverlay();
         clo.setMouseTransparent(true);
         
@@ -112,8 +114,6 @@ public class AuxChart implements SignalListener{
         return chartPane;
         
     }    
-    
-    
     
     
     public void refreshChart(String type){
@@ -132,31 +132,32 @@ public class AuxChart implements SignalListener{
                 return;
             }
            
-            xAxis.setLowerBound(cd.xmin);
-            xAxis.setUpperBound(cd.xmax);
-            if (cd.xtick != null) xAxis.setTickUnit(cd.xtick);
-            xAxis.setLabel(cd.xlabel);
+            getxAxis().setLowerBound(cd.xmin);
+            getxAxis().setUpperBound(cd.xmax);
+            if (cd.xtick != null) getxAxis().setTickUnit(cd.xtick);
+            getxAxis().setLabel(cd.xlabel);
             
-            yAxis.setLowerBound(cd.ymin);
-            yAxis.setUpperBound(cd.ymax);
-            if (cd.xtick != null) xAxis.setTickUnit(cd.xtick);
-            yAxis.setLabel(cd.ylabel);
+//            xAxis.setAutoRanging(true);
+            
+            getyAxis().setLowerBound(cd.ymin);
+            getyAxis().setUpperBound(cd.ymax);
+            if (cd.xtick != null) getxAxis().setTickUnit(cd.xtick);
+            getyAxis().setLabel(cd.ylabel);
     
-            
             
             for (String skey : cd.series.keySet()){
                 if (skey.contains("main")){
                     ObservableList<XYChart.Data<Number, Number>> serie = cd.series.get(skey);
                     main_series = new XYChart.Series<>(skey, serie);
                     ctx.auxmain_series = main_series.getData();
+                    mainChart.getData().clear();
                     mainChart.getData().add((javafx.scene.chart.XYChart.Series<Number, Number>)main_series);
                 }
             }
          
             
-            
-            
             chartPane.getPlugins().clear();
+            cd.overlay.clearMessages();
             chartPane.getPlugins().addAll(zoomer, panner, dptt,
                                 new ChartOverlay<>(OverlayArea.PLOT_AREA, cd.overlay ));
    
@@ -178,16 +179,18 @@ public class AuxChart implements SignalListener{
                 chartPane.getPlugins().add(ind);
             }
             
+            
             chartPane.getOverlayCharts().clear();
             if (!cd.auxlabel.equals("")){
-                companionYAxis.setLabel(cd.auxlabel);
-                if (cd.auxmin != 0.0) companionYAxis.setLowerBound(cd.auxmin);
-                if (cd.auxmax != 0.0) companionYAxis.setUpperBound(cd.auxmax);
+                getCompanionYAxis().setLabel(cd.auxlabel);
+                if (cd.auxmin != 0.0) getCompanionYAxis().setLowerBound(cd.auxmin);
+                if (cd.auxmax != 0.0) getCompanionYAxis().setUpperBound(cd.auxmax);
                 for (String skey : cd.series.keySet()){
                     if (skey.contains("companion")){
                         ObservableList<XYChart.Data<Number, Number>> serie = cd.series.get(skey);
                         companion_series = new XYChart.Series<>(skey, serie);
                         ctx.auxcompanion_series = companion_series.getData();
+                        suppChart.getData().clear();
                         suppChart.getData().add((javafx.scene.chart.XYChart.Series<Number, Number>)companion_series);
                     }
                 }
@@ -195,7 +198,8 @@ public class AuxChart implements SignalListener{
                 chartPane.getOverlayCharts().add(suppChart);
             }
             
-            
+            Node line = companion_series.getNode().lookup(".chart-series-line");
+            line.setStyle("-fx-stroke: red;");
             chartdata = mainChart.getData(); 
             
         });
@@ -214,6 +218,7 @@ public class AuxChart implements SignalListener{
         
         Context ctx = Context.getInstance();
         AuxChartDescriptor cd = ctx.auxcharts.get(payload.vstring);
+        
         
         Platform.runLater(() -> {
             
@@ -345,6 +350,22 @@ public class AuxChart implements SignalListener{
 ////            selectPoint(null); 
 //        }
                 
+    }
+
+    public NumericAxis getxAxis() {
+        return xAxis;
+    }
+
+    public NumericAxis getyAxis() {
+        return yAxis;
+    }
+
+    public NumericAxis getCompanionXAxis() {
+        return companionXAxis;
+    }
+
+    public NumericAxis getCompanionYAxis() {
+        return companionYAxis;
     }
     
     

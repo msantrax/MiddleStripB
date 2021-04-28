@@ -15,7 +15,7 @@ public class ASVPDEVBargraphDescriptor {
     public String main_label = "Pressure mmHg";
     public String main_rangeformat = "%6.2f";
     public Double main_low = 0.0;
-    public Double main_high = 800.0;
+    public Double main_high = 1000.0;
     public Double main_threshold = 80.0;
     public Boolean main_inverted = true;
     
@@ -29,8 +29,8 @@ public class ASVPDEVBargraphDescriptor {
     
     public String sigma_label = "ϭ ² (Variance)";
     public String sigma_rangeformat = "%5.3f";
-    public Double sigma_range = 100.0;
-    public Double sigma_threshold = 50.0;
+    public Double sigma_range = 10.0;
+    public Double sigma_threshold = 10.0;
     public Boolean sigma_inverted = false;
 
     
