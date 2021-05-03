@@ -9,6 +9,7 @@ import Entities.CalcP0;
 import Entities.CalcP0_pf;
 import com.google.gson.reflect.TypeToken;
 import com.opus.syssupport.PicnoUtils;
+import com.opus.syssupport.SMEvent;
 import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.VirnaPayload;
 import java.io.IOException;
@@ -101,18 +102,20 @@ public class CheckP0AnaTask extends BaseAnaTask {
                 FX1Controller fx1 = FX1Controller.getInstance();
                 auxchart = fx1.getAuxchart(); 
                 auxchart.refreshChart("checkp0");
-                
-//                chdesc.addYRange("dvthrs", String.format("%s Threshold", prof.getChrt_Ycomplabel()), 
-//                        0.0, 200.0, null, null, null);
-                
-//                chdesc.addYRange("dvthrs", String.format("%s Threshold", prof.getChrt_Ycomplabel()), 
-//                        0.0, prof.getBprs_Thrs(), auxchart.getCompanionYAxis(), null, null);
-//                accept = true;
-                
+
             });    
         }
         
         this.initStates();
+
+        Controller ctrl = Controller.getInstance();
+        
+        SMEvent smevt = new SMEvent()
+        .setTask(this)
+        .setTaskstate(getTaskstates().get("START_ACTION"));  
+        ctrl.addSMEventListener("START_ACTION", smevt );
+
+        
         
         SMTraffic nxt = goNext("TASKINIT");
         if (nxt != null){
@@ -131,6 +134,8 @@ public class CheckP0AnaTask extends BaseAnaTask {
     public void setDataframe(Object dataframe) {
         this.dataframe = (CalcP0)dataframe;
     }
+    
+    
     
     
    
@@ -184,7 +189,7 @@ public class CheckP0AnaTask extends BaseAnaTask {
     @Override
     public SMTraffic goNext(String nextstate){   
        
-        //LOG.info(String.format("CheckP0 going next state : %s", nextstate));
+        LOG.info(String.format("CheckP0 going next state : %s", nextstate));
         
         String state = nextstate;
         

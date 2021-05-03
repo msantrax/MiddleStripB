@@ -2,7 +2,7 @@
   "TASKINIT": {
     "callstate": "TASKIDLE",
     "statecmd": "",
-    "notifymessage": "",
+    "notifymessage": "Taskinit  @ checkP0 task is on !!!",
     "logmessage": "",
     "imediate": "SETAUTO_RESET",
     "failed": "",
@@ -27,6 +27,7 @@
       }
     ]
   },
+  
   "SETAUTO_RESET": {
     "callstate": "SETAUTO",
     "statecmd": "RESTARTINSTRU",
@@ -46,4 +47,29 @@
     "param2": 0.0,
     "param3": 0.0
   }
+  
+  
+  ,
+  "START_ACTION": {
+    "callstate": "NOTIFYAUX",
+    "statecmd": "",
+    "notifymessage": "Start event received",
+    "logmessage": "Start event was received",
+    "imediate": "TASKIDLE",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "sparam1": "",
+    "sparam2": "",
+    "param1": 0.0,
+    "param2": 0.0,
+    "param3": 0.0
+  }
+  
+  
+  
 }

@@ -939,67 +939,9 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
         return true;
     }
     
+   
     
     
-    
-    
-    // ======================================== SERVICE & TEST STATES ========================================================
-    
-    @smstate (state = "TASKIDLE")
-    public boolean st_taskIdle(SMTraffic smm){
-        
-        VirnaPayload payload = smm.getPayload();
-        
-        log.info(String.format("Task Idle"));
-        
-        return true;
-    }
-    
-    
-    @smstate (state = "RESETMEAS")
-    public boolean st_resetMeas(SMTraffic smm){
-        
-        VirnaPayload payload = smm.getPayload();
-        
-        ctx.current_anatask.resetMeasurements();
-        
-        log.info(String.format("Reseting measurements"));
-        
-        return true;
-    }
-    
-    @smstate (state = "ENDMEAS")
-    public boolean st_endMeas(SMTraffic smm){
-        
-        VirnaPayload payload = smm.getPayload();
-        
-        log.info(String.format("Ending  Measurements"));
-        
-        return true;
-    }
-    
-    
-    @smstate (state = "MONITOR")
-    public boolean st_doMonitor(SMTraffic smm){
-        
-        VirnaPayload payload = smm.getPayload();
-        
-        log.info(String.format("Monitoring"));
-        
-        ctrl.processSignal(new SMTraffic(0l, 0l, 0, "SETAUTO", this.getClass(),
-                                       new VirnaPayload()
-                                        ));
-        
-        ctrl.processSignal(new SMTraffic(0l, 0l, 0, "NOTIFYAUX", this.getClass(),
-                                       new VirnaPayload()
-                                        ));
-        
-        ctrl.processSignal(new SMTraffic(0l, 0l, 0, "ENDMEAS", this.getClass(),
-                                       new VirnaPayload()
-                                        ));
-        
-        return true;
-    }
     
     
     
@@ -1159,3 +1101,53 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
 //            System.out.println("start(1): " + mr.start(1));
 //            // print 1st captured group's end position
 //            System.out.println("end(1): " + mr.end(1));
+
+
+
+
+// 
+//    @smstate (state = "RESETMEAS")
+//    public boolean st_resetMeas(SMTraffic smm){
+//        
+//        VirnaPayload payload = smm.getPayload();
+//        
+//        ctx.current_anatask.resetMeasurements();
+//        
+//        log.info(String.format("Reseting measurements"));
+//        
+//        return true;
+//    }
+//    
+//    @smstate (state = "ENDMEAS")
+//    public boolean st_endMeas(SMTraffic smm){
+//        
+//        VirnaPayload payload = smm.getPayload();
+//        
+//        log.info(String.format("Ending  Measurements"));
+//        
+//        return true;
+//    }
+//    
+//    
+//    @smstate (state = "MONITOR")
+//    public boolean st_doMonitor(SMTraffic smm){
+//        
+//        VirnaPayload payload = smm.getPayload();
+//        
+//        log.info(String.format("Monitoring"));
+//        
+//        ctrl.processSignal(new SMTraffic(0l, 0l, 0, "SETAUTO", this.getClass(),
+//                                       new VirnaPayload()
+//                                        ));
+//        
+//        ctrl.processSignal(new SMTraffic(0l, 0l, 0, "NOTIFYAUX", this.getClass(),
+//                                       new VirnaPayload()
+//                                        ));
+//        
+//        ctrl.processSignal(new SMTraffic(0l, 0l, 0, "ENDMEAS", this.getClass(),
+//                                       new VirnaPayload()
+//                                        ));
+//        
+//        return true;
+//    }
+//    
