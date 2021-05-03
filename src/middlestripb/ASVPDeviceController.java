@@ -10,6 +10,7 @@ import com.opus.fxsupport.FXFCenterBargraph;
 import com.opus.fxsupport.FXFCountdownTimer;
 import com.opus.glyphs.FontAwesomeIcon;
 import com.opus.glyphs.GlyphsBuilder;
+import com.opus.syssupport.SMEvent;
 import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.VirnaPayload;
 import java.io.IOException;
@@ -81,55 +82,26 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
     
     @FXML
     void pause_action(MouseEvent event) {
-       
-        if (event.isControlDown()){
-            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
-                                             .setString("SETINSTRU=DOWN")
-                                         ));
-        }   
-        else{
-            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
-                                             .setString("SETINSTRU=UP")
-                                         ));
-        }
+       setStatus (Status.PAUSED);
+    
     }
 
     @FXML
     void start_action(MouseEvent event) {
-    
-        asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
-                                             .setString("SETSETRADUMP=0.56")
-                                         ));
- 
+        setStatus (Status.RUNNING);
+        ctrl.publishSMEvent(new SMEvent().setId("START_ACTION"));
     }
-
+    
     @FXML
     void stop_action(MouseEvent event) {
-        
-        if (event.isControlDown()){
-            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
-                                             .setString("BEACONLOCK=OFF")
-                                         ));
-        }   
-        else if (event.isAltDown()){
-            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
-                                             .setString("RESTARTINSTRU")
-                                         ));
-        }
-        else{
-            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
-                                             .setString("BEACONLOCK=ON")
-                                         ));
-        }
-        
-
+        setStatus (Status.STOPPED);
     }
+        
+   
     
     
     
-    
-    
-    public enum Status { STOPPED, RUNNING, PAUSED, TEST };
+    public enum Status { STOPPED, RUNNING, PAUSED, TEST, CLEAR };
     
     private FX1Controller anct;
     private Controller ctrl;
@@ -156,6 +128,10 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+        
+        
+        
+        
   
     }
 
@@ -184,7 +160,12 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
                 startbt.setDisable(false);
                 stopbt.setDisable(false);
                 pausebt.setDisable(false);
-                break;    
+                break;
+            case CLEAR:
+                startbt.setDisable(true);
+                stopbt.setDisable(true);
+                pausebt.setDisable(true);
+                break;     
         }
         
     }
@@ -372,3 +353,55 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
 //
 //        
 //        timer.schedule(task, 0l , 50l);
+
+
+
+
+// @FXML
+//    void pause_action(MouseEvent event) {
+//       
+//        
+//        
+//        
+//        if (event.isControlDown()){
+//            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
+//                                             .setString("SETINSTRU=DOWN")
+//                                         ));
+//        }   
+//        else{
+//            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
+//                                             .setString("SETINSTRU=UP")
+//                                         ));
+//        }
+//    }
+//
+//    @FXML
+//    void start_action(MouseEvent event) {
+//    
+//        asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
+//                                             .setString("SETSETRADUMP=0.56")
+//                                         ));
+// 
+//    }
+//
+//    @FXML
+//    void stop_action(MouseEvent event) {
+//        
+//        if (event.isControlDown()){
+//            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
+//                                             .setString("BEACONLOCK=OFF")
+//                                         ));
+//        }   
+//        else if (event.isAltDown()){
+//            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
+//                                             .setString("RESTARTINSTRU")
+//                                         ));
+//        }
+//        else{
+//            asvpdev.st_setAutomation(new SMTraffic(0l, 0l, 0, "", this.getClass(),new VirnaPayload()
+//                                             .setString("BEACONLOCK=ON")
+//                                         ));
+//        }
+//        
+//
+//    }

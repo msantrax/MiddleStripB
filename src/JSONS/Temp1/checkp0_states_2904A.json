@@ -41,6 +41,8 @@
     "value2": 0.0
   },
   
+  
+  
   "SCALETOORIGINAL": {
     "callstate": "SCALEMAINAXIS",
     "statecmd": "",
@@ -106,6 +108,8 @@
     "value1": 0.0,
     "value2": 0.0
   },
+  
+ 
   "DELAYSTART": {
     "callstate": "DELAYTASK",
     "statecmd": "",

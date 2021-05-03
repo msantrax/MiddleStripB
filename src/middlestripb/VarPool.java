@@ -39,7 +39,7 @@ public class VarPool {
     }
     
     
-    public <T> T Pop(String key){
+    public <T> T Pop(String key, Class<T> clazz){
         
         if (getVars().containsKey(key)){
             Object obj = getVars().get(key).payld;

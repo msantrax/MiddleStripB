@@ -12,6 +12,22 @@ import java.util.ArrayList;
  * @author opus
  */
 public class TaskState {
+
+    public String getSparam1() {
+        return sparam1;
+    }
+
+    public void setSparam1(String sparam1) {
+        this.sparam1 = sparam1;
+    }
+
+    public String getSparam2() {
+        return sparam2;
+    }
+
+    public void setSparam2(String sparam2) {
+        this.sparam2 = sparam2;
+    }
     
     private String callstate = "TASKSTATEERROR";
     private String statecmd = "";
@@ -32,11 +48,13 @@ public class TaskState {
     
     private Boolean flag = false;
     
-    private Double value1 = 0.0;
-    private Double value2 = 0.0;
-   
     
+    private String sparam1 = "";
+    private String sparam2 = "";
     
+    private Double param1 = 0.0;
+    private Double param2 = 0.0;
+    private Double param3 = 0.0;
     
     
     private ArrayList<TaskStateChronoSegment> chronosegs;
@@ -153,20 +171,20 @@ public class TaskState {
         this.flag = flag;
     }
 
-    public Double getValue1() {
-        return value1;
+    public Double getParam1() {
+        return param1;
     }
 
-    public void setValue1(Double value1) {
-        this.value1 = value1;
+    public void setParam1(Double param1) {
+        this.param1 = param1;
     }
 
-    public Double getValue2() {
-        return value2;
+    public Double getParam2() {
+        return param2;
     }
 
-    public void setValue2(Double value2) {
-        this.value2 = value2;
+    public void setParam2(Double param2) {
+        this.param2 = param2;
     }
 
     public ArrayList<TaskStateChronoSegment> getChronosegs() {
@@ -191,6 +209,14 @@ public class TaskState {
 
     public void setLogmessage(String logmessage) {
         this.logmessage = logmessage;
+    }
+
+    public Double getParam3() {
+        return param3;
+    }
+
+    public void setParam3(Double param3) {
+        this.param3 = param3;
     }
     
     

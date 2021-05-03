@@ -375,23 +375,22 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     }
     
     
-    
-    
-    
     public void loadMainCharts(){
         
         isothermchart = new IsothermChart(this);
         chartpane = isothermchart.createCernChart();
         chartpane.getStylesheets().add(getClass().getClassLoader().getResource("middlestripb/isochart.css").toExternalForm());
         
+        
         setAuxchart(new AuxChart());
         auxchartpane = getAuxchart().createCernChart();
         auxchartpane.getStylesheets().add(getClass().getClassLoader().getResource("middlestripb/auxchart.css").toExternalForm());
         
+               
         ctx.switchTask ("roottask");
-        JournalSideNode logsidenode = new JournalSideNode(Side.TOP, auxpane);
-        ctx.journals.put(ctx.current_anatask, new JournalSideNode(Side.TOP, auxpane));
-        
+//        ctx.journals.put(ctx.current_anatask, new JournalSideNode(Side.TOP, getAuxpane()));
+
+
         ctx.setFXController(this);
         
         Platform.runLater(() -> {
@@ -407,19 +406,19 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
             mainchartpane.setLeft(chtb);
                       
             
-            auxchartpane.setMinWidth(auxpane.getWidth());
-            auxchartpane.setMinHeight(auxpane.getHeight());
-            auxpane.setContent(auxchartpane);
-            auxpane.setTop(logsidenode);
+            auxchartpane.setMinWidth(getAuxpane().getWidth());
+            auxchartpane.setMinHeight(getAuxpane().getHeight());
+            getAuxpane().setContent(auxchartpane);
+//            getAuxpane().setTop(ctx.journals.get(ctx.current_anatask));
             
             
 //            prepctrl.loadCharts(bpn_main, bpn_naveg) ;
 
                        
-            String mes2 = "Virna7 Initial Config - Currente available tasks are :|CheckP01|BaseTask1|\tTask nr 3";
-            String mes3 = "Connection with Antares Controller is";
-            logsidenode.addEntry(mes2);
-            logsidenode.addEntry(mes3);
+//            String mes2 = "Virna7 Initial Config - Currente available tasks are :|CheckP01|BaseTask1|\tTask nr 3";
+//            String mes3 = "Connection with Antares Controller is";
+//            logsidenode.addEntry(mes2);
+//            logsidenode.addEntry(mes3);
   
    
             // Scan Controllers for machine states
@@ -839,7 +838,10 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                                    new VirnaPayload()));
         }
         else{
-            ctx.switchTask("roottask");
+//            ctx.switchTask("roottask");
+            
+            showInfoPane("asvpdevice");
+            ctx.switchTask("checkp0task");
         }
         
        
@@ -984,6 +986,10 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
 
     public void setAuxchart(AuxChart auxchart) {
         this.auxchart = auxchart;
+    }
+
+    public HiddenSidesPane getAuxpane() {
+        return auxpane;
     }
 
     

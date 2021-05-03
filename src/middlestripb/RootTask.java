@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
@@ -41,7 +42,12 @@ public class RootTask extends BaseAnaTask {
     public Parent controlpane;
     public RootTaskController rtctrl;
     
+    
+    private JournalSideNode journal;
    
+    
+    
+    
     public RootTask(ASVPDevice asvpdev, Context ctx) {
         
         super(asvpdev, ctx);
@@ -52,6 +58,8 @@ public class RootTask extends BaseAnaTask {
         chartbanner.setFill(new ImagePattern(chbanner, 0, 0, 1, 1, true));
 
         
+        
+        
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("RootTaskPanel.fxml"));
             controlpane = fxmlLoader.load();
@@ -59,6 +67,10 @@ public class RootTask extends BaseAnaTask {
         } catch (IOException ex) { 
             Logger.getLogger(RootTask.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+         
+        
+        
         
     }
 
@@ -87,6 +99,18 @@ public class RootTask extends BaseAnaTask {
         FX1Controller anct = ctx.getFXController();
         anct.showInfoPane("asvpdevice");
         anct.showMainChart(controlpane);
+        
+        // Setup the journal
+        if (journal == null){
+            journal = new JournalSideNode(Side.TOP, anct.getAuxpane());
+            ctx.journals.put(this, journal);   
+            journal.addEntry("Root Task is initializing...");
+        }
+        ctx.current_journal = journal;
+        ctx.getFXController().getAuxpane().setTop(journal);
+        
+        
+        Go();
       
     }
     

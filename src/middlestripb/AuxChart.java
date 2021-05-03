@@ -97,7 +97,7 @@ public class AuxChart implements SignalListener{
         chartdata = mainChart.getData(); 
         
         chartPane = new XYChartPane<>(mainChart);
-        chartPane.setLegendVisible(false);
+        getChartPane().setLegendVisible(false);
 
         clo = new AuxChartOverlay();
         clo.setMouseTransparent(true);
@@ -108,10 +108,10 @@ public class AuxChart implements SignalListener{
         dptt.addSignalListener(this);
         
 
-        chartPane.getPlugins().addAll(zoomer, panner, dptt,
+        getChartPane().getPlugins().addAll(zoomer, panner, dptt,
                                 new ChartOverlay<>(OverlayArea.PLOT_AREA, clo ));
         
-        return chartPane;
+        return getChartPane();
         
     }    
     
@@ -156,31 +156,31 @@ public class AuxChart implements SignalListener{
             }
          
             
-            chartPane.getPlugins().clear();
+            getChartPane().getPlugins().clear();
             cd.overlay.clearMessages();
-            chartPane.getPlugins().addAll(zoomer, panner, dptt,
+            getChartPane().getPlugins().addAll(zoomer, panner, dptt,
                                 new ChartOverlay<>(OverlayArea.PLOT_AREA, cd.overlay ));
    
             
             for (YValueIndicator<Number> ind : cd.yvalindicators.values()){
-                chartPane.getPlugins().add(ind);
+                getChartPane().getPlugins().add(ind);
             }
             
             for (XValueIndicator<Number> ind : cd.xvalindicators.values()){
-                chartPane.getPlugins().add(ind);
+                getChartPane().getPlugins().add(ind);
             }
             
             for (XRangeIndicator<Number> ind : cd.xrangeindicators.values()){
-                chartPane.getPlugins().add(ind);
+                getChartPane().getPlugins().add(ind);
             }
             
             
             for (YRangeIndicator<Number> ind : cd.yrangeindicators.values()){
-                chartPane.getPlugins().add(ind);
+                getChartPane().getPlugins().add(ind);
             }
             
             
-            chartPane.getOverlayCharts().clear();
+            getChartPane().getOverlayCharts().clear();
             if (!cd.auxlabel.equals("")){
                 getCompanionYAxis().setLabel(cd.auxlabel);
                 if (cd.auxmin != 0.0) getCompanionYAxis().setLowerBound(cd.auxmin);
@@ -195,7 +195,7 @@ public class AuxChart implements SignalListener{
                     }
                 }
          
-                chartPane.getOverlayCharts().add(suppChart);
+                getChartPane().getOverlayCharts().add(suppChart);
             }
             
             Node line = companion_series.getNode().lookup(".chart-series-line");
@@ -228,7 +228,7 @@ public class AuxChart implements SignalListener{
                 XValueIndicator<Number> ind = (XValueIndicator<Number>)payload.vobject;
                 if (!cd.xvalindicators.containsKey(payload.getServicestatus())){
                     cd.xvalindicators.put(payload.getServicestatus(), ind);
-                    chartPane.getPlugins().add(ind);
+                    getChartPane().getPlugins().add(ind);
                     artifactset = true;
                 }
             }
@@ -236,7 +236,7 @@ public class AuxChart implements SignalListener{
                 YValueIndicator<Number> ind = (YValueIndicator<Number>)payload.vobject;
                 if (!cd.yvalindicators.containsKey(payload.getServicestatus())){
                     cd.yvalindicators.put(payload.getServicestatus(), ind);
-                    chartPane.getPlugins().add(ind);
+                    getChartPane().getPlugins().add(ind);
                     artifactset = true;
                 }
             }
@@ -276,7 +276,7 @@ public class AuxChart implements SignalListener{
                 if (cd.xvalindicators.containsKey(payload.getServicestatus())){
                     XValueIndicator<Number> ind = cd.xvalindicators.get(payload.getServicestatus());
                     cd.xvalindicators.remove(payload.getServicestatus());
-                    chartPane.getPlugins().remove(ind);
+                    getChartPane().getPlugins().remove(ind);
                     hasartifact = true;
                 }
             }
@@ -284,7 +284,7 @@ public class AuxChart implements SignalListener{
                 YValueIndicator<Number> ind = (YValueIndicator<Number>)payload.vobject;
                 if (!cd.yvalindicators.containsKey(payload.getServicestatus())){
                     cd.yvalindicators.put(payload.getServicestatus(), ind);
-                    chartPane.getPlugins().add(ind);
+                    getChartPane().getPlugins().add(ind);
                     hasartifact = true;
                 }
             }
@@ -366,6 +366,10 @@ public class AuxChart implements SignalListener{
 
     public NumericAxis getCompanionYAxis() {
         return companionYAxis;
+    }
+
+    public XYChartPane<Number, Number> getChartPane() {
+        return chartPane;
     }
     
     

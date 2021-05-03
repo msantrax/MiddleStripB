@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.geometry.Side;
 import javafx.scene.chart.XYChart;
 import middlestripb.VarPool.VarInfo;
 
@@ -39,6 +40,10 @@ public class CheckP0AnaTask extends BaseAnaTask {
     private CalcP0_pf prof ; // = (CalcP0_pf)dtfr.calcp0_pf;
     
    
+    private JournalSideNode journal; 
+    
+    
+    
     
     public CheckP0AnaTask(ASVPDevice asvpdev, Context ctx) {
         
@@ -56,6 +61,15 @@ public class CheckP0AnaTask extends BaseAnaTask {
         
         super.Go();
         
+        // Setup the journal
+        if (journal == null){
+            journal = new JournalSideNode(Side.TOP, ctx.getFXController().getAuxpane());
+            ctx.journals.put(this, journal);   
+            journal.addEntry("CheckP0 Task (Determine Zero&ATM pressures) is initializing...");
+        }
+        ctx.current_journal = journal;
+        ctx.getFXController().getAuxpane().setTop(journal);
+        
         if (dataframe == null){
             asvpdev.loadTaskConfig(CalcP0.class, "checkp0task", 1617981872798l);
         }
@@ -70,6 +84,9 @@ public class CheckP0AnaTask extends BaseAnaTask {
         super.Go();
         ctx.auxcharts.remove("checkp0");
         asvpdev.loadTaskConfig(CalcP0.class, "checkp0task", 1617981872798l);
+        
+        
+        
     }
     
     
@@ -88,8 +105,8 @@ public class CheckP0AnaTask extends BaseAnaTask {
 //                chdesc.addYRange("dvthrs", String.format("%s Threshold", prof.getChrt_Ycomplabel()), 
 //                        0.0, 200.0, null, null, null);
                 
-                chdesc.addYRange("dvthrs", String.format("%s Threshold", prof.getChrt_Ycomplabel()), 
-                        0.0, prof.getBprs_Thrs(), auxchart.getCompanionYAxis(), null, null);
+//                chdesc.addYRange("dvthrs", String.format("%s Threshold", prof.getChrt_Ycomplabel()), 
+//                        0.0, prof.getBprs_Thrs(), auxchart.getCompanionYAxis(), null, null);
 //                accept = true;
                 
             });    
@@ -97,7 +114,7 @@ public class CheckP0AnaTask extends BaseAnaTask {
         
         this.initStates();
         
-        SMTraffic nxt = goNext("SETAUTO_RESET");
+        SMTraffic nxt = goNext("TASKINIT");
         if (nxt != null){
             Controller.getInstance().processSignal(nxt);
         }
@@ -130,17 +147,18 @@ public class CheckP0AnaTask extends BaseAnaTask {
             Logger.getLogger(CheckP0AnaTask.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        
         varpool.Push("MESSAGE1", varpool.new VarInfo("VarPool Message 1", "String"));
         varpool.Push("MESSAGE2", "VarPool message 2");
         varpool.Push("VPDOUBLE1", varpool.new VarInfo(37.2, "DoubleNF"));
         varpool.Push("TSTAMP", System.currentTimeMillis());
         
+        
+        
 //        String tst = "Teste da &MESSAGE1 que aponta para a &VPDOUBLE1";
 //        String sout = asvpdev.formatMessage(tst, this);
         
-        
         setCurrent_taskstate(getTaskstates().get("TASKINIT"));
+        
 //        ArrayList<String> ltst = new ArrayList<>();
 //        ltst.add("teste1");
 //        ltst.add("teste2");
@@ -153,7 +171,7 @@ public class CheckP0AnaTask extends BaseAnaTask {
         
         
 //        try {
-//            PicnoUtils.saveJson(ASVPDevice.JSONS + "checkp0_states_temp3.json", taskstates, true);
+//            PicnoUtils.saveJson(ASVPDevice.JSONS + "checkp0_states_temp4.json", taskstates, true);
 //        } catch (IOException ex) {
 //            Logger.getLogger(CheckP0AnaTask.class.getName()).log(Level.SEVERE, null, ex);
 //        }
@@ -167,7 +185,18 @@ public class CheckP0AnaTask extends BaseAnaTask {
     public SMTraffic goNext(String nextstate){   
        
         //LOG.info(String.format("CheckP0 going next state : %s", nextstate));
-        setCurrent_taskstate(getTaskstates().get(nextstate));
+        
+        String state = nextstate;
+        
+        if (lockedstate.contains("LOCK")){
+            lockedstate = nextstate;
+            return null;
+        }
+        else if (!lockedstate.isEmpty()){
+            state = lockedstate;
+        }
+        
+        setCurrent_taskstate(getTaskstates().get(state));
         if (getCurrent_taskstate() != null){
             return new SMTraffic(0l, 0l, 0, getCurrent_taskstate().getCallstate(), this.getClass(),
                                     new VirnaPayload()
@@ -176,6 +205,7 @@ public class CheckP0AnaTask extends BaseAnaTask {
                                 );
         }
         return null;
+        
     }
     
     @Override

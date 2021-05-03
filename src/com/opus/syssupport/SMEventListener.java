@@ -9,14 +9,9 @@ package com.opus.syssupport;
  *
  * @author opus
  */
-public interface SignalListener {
+public interface SMEventListener {
     
-    Long getContext();
+    void processEvent (SMEvent event);
     
-    Long getUID();
-    
-    void processSignal (SMTraffic signal);
-    
-    
-    
+   
 }

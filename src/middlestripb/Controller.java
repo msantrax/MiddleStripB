@@ -9,6 +9,8 @@ package middlestripb;
 import Entities.Entity;
 import Entities.Isotherm;
 import com.mongodb.client.model.Filters;
+import com.opus.syssupport.SMEvent;
+import com.opus.syssupport.SMEventListener;
 import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.SignalListener;
 import com.opus.syssupport.StateDescriptor;
@@ -231,6 +233,35 @@ public class Controller implements SignalListener, TickListener, VirnaServicePro
             }
         }
     }
+    
+    
+    // =========================================== EVENT SIGNAL HANDLING (VIA LISTENERS) =======================================
+    private transient ArrayList<SMEventListener> smeventlisteners = new ArrayList<>();
+    
+    
+    
+    public void addSMEventListener (SMEventListener l){
+        smeventlisteners.add(l);
+    }
+
+    /** Método de remoção do registro do listener do dispositivo  */
+    public void removeSMEventListener ( SMEventListener l){
+        smeventlisteners.remove(l);
+    }
+
+    
+    public void publishSMEvent(SMEvent event) {
+
+        log.info(String.format("Request to publish event %s was sent", event.getId()));
+        
+        if (!smeventlisteners.isEmpty()){      
+            //log.fine("Notifying "+ uid_addr);
+            for (SMEventListener sl : smeventlisteners){
+                sl.processEvent(event);
+            }
+        }
+    }
+    
     
     
     

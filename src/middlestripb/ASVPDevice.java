@@ -6,7 +6,11 @@
 package middlestripb;
 
 import Entities.Entity;
+import cern.extjfx.chart.NumericAxis;
+import cern.extjfx.chart.plugins.XRangeIndicator;
 import cern.extjfx.chart.plugins.XValueIndicator;
+import cern.extjfx.chart.plugins.YRangeIndicator;
+import cern.extjfx.chart.plugins.YValueIndicator;
 import com.fazecast.jSerialComm.SerialPort;
 import com.mongodb.client.model.Filters;
 import com.opus.fxsupport.FXFCountdownTimer;
@@ -290,12 +294,12 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
             Platform.runLater(() -> {
                 
                 Double measure;
-                if (Double.compare(tst.getValue1(), 0.0) == 0){
-                    measure=tst.getValue2();
+                if (Double.compare(tst.getParam1(), 0.0) == 0){
+                    measure=tst.getParam2();
                     tsk.diffvalue = true;
                 }
                 else{
-                    measure=tst.getValue1();
+                    measure=tst.getParam1();
                     tsk.diffvalue = false;
                 }
                 
@@ -338,6 +342,331 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
     
     
     
+    @smstate (state = "SETCHARTEVENT")
+    public boolean st_setChartEvent(SMTraffic smm){
+        
+        VirnaPayload pld = smm.getPayload();
+        
+        if (pld.vobject instanceof BaseAnaTask){
+            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
+            TaskState tst = tsk.getCurrent_taskstate();
+            String cmd = tst.getStatecmd().toUpperCase().trim();
+            
+            AuxChart chart = tsk.auxchart;
+            AuxChartDescriptor acd = tsk.ctx.auxcharts.get(tsk.taskid);
+        
+            VarPool vp = tsk.getVarPool();
+            
+            
+            Platform.runLater(() -> {
+                
+                YValueIndicator<Number>  yvi = acd.yvalindicators.get(tst.getSparam1()) ;
+                XValueIndicator<Number>  xvi = acd.xvalindicators.get(tst.getSparam1()) ;
+                Long timeout;
+                
+                switch (cmd){
+                    
+                    case "SETX":
+                        if (xvi != null){
+                            chart.getChartPane().getPlugins().remove(xvi);
+                            acd.xvalindicators.remove(tst.getSparam1());
+                        }
+                        xvi = AuxChartDescriptor.XValIndicatorFactory(tst.getSparam1(), tst.getSparam2(), 
+                                tst.getParam1(), tst.getParam2());
+                        acd.xvalindicators.put(tst.getSparam1(), xvi);
+                        chart.getChartPane().getPlugins().add(xvi);
+                        
+                        timeout = tst.getTimeout();
+                        if ( timeout != null && timeout != 0L){
+                            SMTraffic alarm_config = new SMTraffic(0l, 1l, 0, "REMOVECHARTEVENT", this.getClass(),
+                                    new VirnaPayload().setObjectType("XValue")
+                                            .setString(tst.getSparam1())
+                                            .setObject(tsk)
+                            );
+                            ctrl.setAlarm (-1l, -4, alarm_config, timeout, 0);
+                        }
+                        break;
+                        
+                    case "CLEARX":
+                        if (xvi != null){
+                            chart.getChartPane().getPlugins().remove(xvi);
+                            acd.xvalindicators.remove(tst.getSparam1());
+                        }
+                        break;
+                        
+                    case "LOADX":
+                        if (xvi != null){
+                            chart.getChartPane().getPlugins().remove(xvi);
+                            acd.xvalindicators.remove(tst.getSparam1());
+                        }
+                        xvi = AuxChartDescriptor.XValIndicatorFactory(vp.Pop("CHARTEVENTID", String.class), 
+                                vp.Pop("CHARTEVENTLABEL", String.class), 
+                                vp.Pop("CHARTEVENTVALUE", Double.class), vp.Pop("CHARTEVENTPOS", Double.class));
+                        acd.xvalindicators.put(tst.getSparam1(), xvi);
+                        chart.getChartPane().getPlugins().add(xvi);
+                        
+                        timeout = tst.getTimeout();
+                        if ( timeout != null && timeout != 0L){
+                            SMTraffic alarm_config = new SMTraffic(0l, 1l, 0, "REMOVECHARTEVENT", this.getClass(),
+                                    new VirnaPayload().setObjectType("XValue")
+                                            .setString(vp.Pop("CHARTEVENTID", String.class))
+                                            .setObject(tsk)
+                            );
+                            ctrl.setAlarm (-1l, -4, alarm_config, timeout, 0);
+                        }
+                        break;
+                    
+                        
+                    default:
+                        break;
+                        
+                }
+
+                SMTraffic nxt = tsk.goNext(tst.getImediate());
+                if (nxt != null){
+                    Controller.getInstance().processSignal(nxt);
+                }
+            });
+        }
+        else{
+            log.info(String.format("Set range band requested"));
+        }
+       
+        return true;
+    }
+    
+    
+    @smstate (state = "REMOVECHARTEVENT")
+    public boolean st_removeChartEvent(SMTraffic smm){
+        
+        VirnaPayload pld = smm.getPayload();
+        
+        BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
+        String type = pld.objecttype;
+        String eventid = pld.vstring;
+         
+        AuxChart chart = tsk.auxchart;
+        AuxChartDescriptor acd = tsk.ctx.auxcharts.get(tsk.taskid);
+        
+        Platform.runLater(() -> {
+             
+            boolean hasartifact = false;
+            
+            if (type.equals("XValue")){
+                if (acd.xvalindicators.containsKey(eventid)){
+                    XValueIndicator<Number> ind = acd.xvalindicators.get(eventid);
+                    acd.xvalindicators.remove(eventid);
+                    chart.getChartPane().getPlugins().remove(ind);
+                    hasartifact = true;
+                }
+            }
+            if (type.equals("YValue")){
+                if (!acd.yvalindicators.containsKey(eventid)){
+                    YValueIndicator<Number> ind = acd.yvalindicators.get(eventid);
+                    acd.yvalindicators.put(eventid, ind);
+                    chart.getChartPane().getPlugins().remove(ind);
+                    hasartifact = true;
+                }
+            }
+          
+            if (!hasartifact) log.info(String.format("Aux chart has no indicator %s", eventid ));
+               
+         });
+             
+        return true;
+    }   
+    
+    
+    
+    @smstate (state = "SETRANGEBAND")
+    public boolean st_setRangeband(SMTraffic smm){
+        
+        VirnaPayload pld = smm.getPayload();
+        
+        if (pld.vobject instanceof BaseAnaTask){
+            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
+            TaskState tst = tsk.getCurrent_taskstate();
+            String cmd = tst.getStatecmd().toUpperCase().trim();
+            
+            AuxChart chart = tsk.auxchart;
+            AuxChartDescriptor acd = tsk.ctx.auxcharts.get(tsk.taskid);
+        
+            VarPool vp = tsk.getVarPool();
+            
+            
+            Platform.runLater(() -> {
+                
+                YRangeIndicator<Number>  yri;
+                XRangeIndicator<Number>  xri;
+                
+                switch (cmd){
+                    
+                    case "SETX":
+                        xri = AuxChartDescriptor.XRangeIndicatorFactory(tst.getSparam1(), tst.getSparam2(), 
+                                tst.getParam1(), tst.getParam2(), 0.0, 0.0);
+                        acd.xrangeindicators.put(tst.getSparam1(), xri);
+                        chart.getChartPane().getPlugins().add(xri);
+                        break;
+                    case "CLEARX":
+                        xri = acd.xrangeindicators.get(tst.getSparam1());
+                        if (xri != null){
+                            chart.getChartPane().getPlugins().remove(xri);
+                            acd.xrangeindicators.remove(tst.getSparam1());
+                        }
+                        break;
+                    case "LOADX":
+                        xri = AuxChartDescriptor.XRangeIndicatorFactory(vp.Pop("RANGEID", String.class), 
+                                vp.Pop("RANGELABEL", String.class), 
+                                vp.Pop("RANGEMIN", Double.class), vp.Pop("RANGEMAX", Double.class), 0.0, 0.0);
+                        acd.xrangeindicators.put(tst.getSparam1(), xri);
+                        chart.getChartPane().getPlugins().add(xri);
+                        break;
+                    
+                        
+                    case "SETY":
+                        yri = AuxChartDescriptor.YRangeIndicatorFactory(tst.getSparam1(), tst.getSparam2(), 
+                                tst.getParam1(), tst.getParam2(), null, 0.0, 0.0);
+                        acd.yrangeindicators.put(tst.getSparam1(), yri);
+                        chart.getChartPane().getPlugins().add(yri);
+                        break;
+                    case "CLEARY":
+                        yri = acd.yrangeindicators.get(tst.getSparam1());
+                        if (yri != null){
+                            chart.getChartPane().getPlugins().remove(yri);
+                            acd.yrangeindicators.remove(tst.getSparam1());
+                        }
+                        break;
+                    case "LOADY":
+                        yri = AuxChartDescriptor.YRangeIndicatorFactory(vp.Pop("RANGEID", String.class), 
+                                vp.Pop("RANGELABEL", String.class), 
+                                vp.Pop("RANGEMIN", Double.class), vp.Pop("RANGEMAX", Double.class), null, 0.0, 0.0);
+                        acd.yrangeindicators.put(tst.getSparam1(), yri);
+                        chart.getChartPane().getPlugins().add(yri);
+                        break;
+                      
+                        
+                    default:
+                        break;
+                        
+                }
+
+                SMTraffic nxt = tsk.goNext(tst.getImediate());
+                if (nxt != null){
+                    Controller.getInstance().processSignal(nxt);
+                }
+            });
+        }
+        else{
+            log.info(String.format("Set range band requested"));
+        }
+       
+        return true;
+    }
+    
+    
+    
+    private void configAxis (NumericAxis axis, Double min, Double max, Double tick, String label){
+        
+        if (min != null) axis.setLowerBound(min);
+        if (max != null) axis.setUpperBound(max);
+        if (tick != null && Double.compare(tick, 0.0) != 0) axis.setTickUnit(tick);
+        if (label!= null && !label.isBlank()) axis.setLabel(label);
+        
+    }
+    
+    @smstate (state = "CONFIGAXIS")
+    public boolean st_configAxis(SMTraffic smm){
+        
+        VirnaPayload pld = smm.getPayload();
+        
+        if (pld.vobject instanceof BaseAnaTask){
+            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
+            TaskState tst = tsk.getCurrent_taskstate();
+            String cmd = tst.getStatecmd().toUpperCase().trim();
+            
+            AuxChart chart = tsk.auxchart;
+            AuxChartDescriptor acd = tsk.ctx.auxcharts.get(tsk.taskid);
+        
+            VarPool vp = tsk.getVarPool();
+            
+            Platform.runLater(() -> {
+                
+                switch (cmd){
+                    
+                    case "SETX":
+                        configAxis (chart.getxAxis(), tst.getParam1(), tst.getParam2(), tst.getParam3(), tst.getSparam1());
+                        break;
+                    case "CLEARX":
+                        configAxis (chart.getxAxis(), acd.xmin, acd.xmax, acd.xtick, acd.xlabel);
+                        break;
+                    case "UPDATEX":
+                        configAxis (chart.getxAxis(), tst.getParam1(), tst.getParam2(), tst.getParam3(), tst.getSparam1());
+                        acd.xmin = tst.getParam1();
+                        acd.xmax = tst.getParam2();
+                        acd.xtick = tst.getParam3();
+                        acd.xlabel = tst.getSparam1();
+                        break;
+                    case "LOADX":
+                        configAxis (chart.getxAxis(), vp.Pop("AXISMIN", Double.class), vp.Pop("AXISMAX", Double.class), 
+                                vp.Pop("AXISTICK", Double.class), vp.Pop("AXISLABEL", String.class));
+                        break;
+                        
+                        
+                    case "SETY":
+                        configAxis (chart.getyAxis(), tst.getParam1(), tst.getParam2(), tst.getParam3(), tst.getSparam1());
+                        break;
+                    case "CLEARY":
+                        configAxis (chart.getyAxis(), acd.ymin, acd.ymax, acd.ytick, acd.ylabel);
+                        break;
+                    case "UPDATEY":
+                        configAxis (chart.getyAxis(), tst.getParam1(), tst.getParam2(), tst.getParam3(), tst.getSparam1());
+                        acd.ymin = tst.getParam1();
+                        acd.ymax = tst.getParam2();
+                        acd.ytick = tst.getParam3();
+                        acd.ylabel = tst.getSparam1();
+                        break;
+                    case "LOADY":
+                        configAxis (chart.getyAxis(), vp.Pop("AXISMIN", Double.class), vp.Pop("AXISMAX", Double.class), 
+                                vp.Pop("AXISTICK", Double.class), vp.Pop("AXISLABEL", String.class));
+                        break;    
+                    
+                    case "SETCOMPANION":
+                        configAxis (chart.getCompanionYAxis(), tst.getParam1(), tst.getParam2(), tst.getParam3(), tst.getSparam1());
+                        break;
+                    case "CLEARCOMPANION":
+                        configAxis (chart.getCompanionYAxis(), acd.auxmin, acd.auxmax, acd.auxtick, acd.auxlabel);
+                        break;
+                    case "UPDATECOMPANION":
+                        configAxis (chart.getCompanionYAxis(), tst.getParam1(), tst.getParam2(), tst.getParam3(), tst.getSparam1());
+                        acd.auxmin = tst.getParam1();
+                        acd.auxmax = tst.getParam2();
+                        acd.auxtick = tst.getParam3();
+                        acd.auxlabel = tst.getSparam1();
+                        break;
+                    case "LOADCOMPANION":
+                        configAxis (chart.getCompanionYAxis(), vp.Pop("AXISMIN", Double.class), vp.Pop("AXISMAX", Double.class), 
+                                vp.Pop("AXISTICK", Double.class), vp.Pop("AXISLABEL", String.class));
+                        break;
+                    
+                    default:
+                        break;
+                        
+                }
+
+                SMTraffic nxt = tsk.goNext(tst.getImediate());
+                if (nxt != null){
+                    Controller.getInstance().processSignal(nxt);
+                }
+            });
+        }
+        else{
+            log.info(String.format("Set confi axis requested"));
+        }
+       
+        return true;
+    }
+    
+    
     @smstate (state = "SCALEMAINAXIS")
     public boolean st_scaleMainAxis(SMTraffic smm){
         
@@ -351,18 +680,19 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
             AuxChartDescriptor acd = tsk.ctx.auxcharts.get(tsk.taskid);
             
             Platform.runLater(() -> {
-                if ( Double.compare(tst.getValue2(), tst.getValue1()) == 0){
+                
+                if ( Double.compare(tst.getParam2(), tst.getParam1()) == 0){
                     chart.getyAxis().setLowerBound(acd.ymin);
                     chart.getyAxis().setUpperBound(acd.ymax);
                 }
                 else{
                     if (tst.getFlag()){
-                        chart.getCompanionYAxis().setLowerBound(tst.getValue2());
-                        chart.getCompanionYAxis().setUpperBound(tst.getValue1()); 
+                        chart.getCompanionYAxis().setLowerBound(tst.getParam2());
+                        chart.getCompanionYAxis().setUpperBound(tst.getParam1()); 
                     }
                     else{
-                        chart.getyAxis().setLowerBound(tst.getValue2());
-                        chart.getyAxis().setUpperBound(tst.getValue1());
+                        chart.getyAxis().setLowerBound(tst.getParam2());
+                        chart.getyAxis().setUpperBound(tst.getParam1());
                     }
                 }
 
@@ -454,6 +784,8 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
         }
         return true;
     }
+    
+    
     
     
     public String formatMessage (String tpl, BaseAnaTask tsk){

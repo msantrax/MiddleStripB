@@ -52,6 +52,7 @@ public class BaseAnaTask {
     public Boolean accept = false;
     
     
+    public String lockedstate = "";
     
     
     public BaseAnaTask(ASVPDevice asvpdev, Context ctx) {
