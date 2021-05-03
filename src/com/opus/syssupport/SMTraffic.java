@@ -40,7 +40,7 @@ public class SMTraffic {
      public SMTraffic( Long addr, Long handle, int code, String state, Class caller, VirnaPayload payload) {
         
         this.addr = addr;
-        this.command = "TASKIDLE"; //VirnaServices.CMDS.LOADSTATE;
+        this.command = "LOADSTATE"; //VirnaServices.CMDS.LOADSTATE;
         this.code = code;
         this.handle = handle;
         this.caller = caller;
