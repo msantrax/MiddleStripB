@@ -301,16 +301,20 @@ public class Controller implements SignalListener, TickListener, VirnaServicePro
                                         .setObjectType(eventkey)
                                         .setObject(smevt.getTask())
                                         .setString(taskstate.getStatecmd())
+                                        .setCaller(taskstate)
                                 );
                 
                 log.info(String.format("Activating event %s on %s",
                 eventkey, smevt.getTask().toString()));
-                Controller.getInstance().processSignal(nxt);
-               
+                Controller.getInstance().processSignal(nxt);             
             }
         }
-        log.info(String.format("Event Route: can't send event ! - There is no key to %s on event routes",
+        else{
+            log.info(String.format("Event Route: can't send event ! - There is no key to %s on event routes",
                     eventkey));
+        }
+        
+        
     }
     
     

@@ -91,6 +91,19 @@ public class CheckP0AnaTask extends BaseAnaTask {
     }
     
     
+    
+    private void addSMEvent (String eventkey) {
+        
+        Controller ctrl = Controller.getInstance();
+        
+        SMEvent smevt = new SMEvent()
+        .setTask(this)
+        .setTaskstate(getTaskstates().get(eventkey));  
+        ctrl.addSMEventListener(eventkey, smevt );
+    
+    }
+    
+    
     @Override
     public void Go(){
         
@@ -108,13 +121,9 @@ public class CheckP0AnaTask extends BaseAnaTask {
         
         this.initStates();
 
-        Controller ctrl = Controller.getInstance();
-        
-        SMEvent smevt = new SMEvent()
-        .setTask(this)
-        .setTaskstate(getTaskstates().get("START_ACTION"));  
-        ctrl.addSMEventListener("START_ACTION", smevt );
-
+        addSMEvent("START_ACTION");
+        addSMEvent("STOP_ACTION");
+        addSMEvent("PAUSE_ACTION");
         
         
         SMTraffic nxt = goNext("TASKINIT");

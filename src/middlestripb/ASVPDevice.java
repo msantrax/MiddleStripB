@@ -884,18 +884,28 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
         VirnaPayload pld = smm.getPayload();
         
         if (pld.vobject instanceof BaseAnaTask){
-            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
-            TaskState tst = tsk.getCurrent_taskstate();
-            AuxChartDescriptor cd = ctx.auxcharts.get(tsk.taskid);
+            
             Platform.runLater(() -> {
-                cd.overlay.addMessage(pld.vstring);
+                BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
+                AuxChartDescriptor cd = ctx.auxcharts.get(tsk.taskid);
+                
+                TaskState tst = tsk.getCurrent_taskstate();
+                // Correct if we're comming from event dispatch
+                if (pld.getCaller() != null){
+                    tst = (TaskState)pld.getCaller();
+                }
+                String message = "?";
+                message = tst.getNotifymessage();
+                cd.overlay.addMessage(message);
+                
+                SMTraffic nxt = tsk.goNext(tst.getImediate());
+                if (nxt != null){
+                    Controller.getInstance().processSignal(nxt);
+                }
+                
             });
             //log.info(String.format("Notifying aux with : %s", tst.getStatecmd()));
             
-            SMTraffic nxt = tsk.goNext(tst.getImediate());
-            if (nxt != null){
-                Controller.getInstance().processSignal(nxt);
-            }
         }
         else{
             log.info(String.format("Notify Aux"));
