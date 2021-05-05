@@ -1,0 +1,108 @@
+{
+
+    "BOOTSTRAP": {
+    "callstate": "NOTIFYAUX",
+    "statecmd": "",
+    "notifymessage": "Bootstrapping Check P0",
+    "logmessage": "[CLEAR] Hello ! This is task CheckP0 bootstrapping",
+    "imediate": "RESETXAXIS",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "sparam1": "",
+    "sparam2": "",
+    "param1": 0.0,
+    "param2": 0.0,
+    "param3": 0.0
+  },
+  
+  "RESETXAXIS": {
+    "callstate": "CONFIGAXIS",
+    "statecmd": "UPDATEX",
+    "notifymessage": "",
+    "logmessage": "",
+    "imediate": "RESETYAXIS",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "sparam1": "Time (sec)",
+    "sparam2": "",
+    "param1": 0.0,
+    "param2": 30.0,
+    "param3": 0.0
+  },
+  
+  "RESETYAXIS": {
+    "callstate": "CONFIGAXIS",
+    "statecmd": "UPDATEY",
+    "notifymessage": "",
+    "logmessage": "",
+    "imediate": "",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "sparam1": "Pressure (mmHg)",
+    "sparam2": "",
+    "param1": 0.0,
+    "param2": 1000.0,
+    "param3": 0.0
+  },
+  
+  
+  "RESETCOMPANIONAXIS": {
+    "callstate": "CONFIGAXIS",
+    "statecmd": "UPDATECOMPANION",
+    "notifymessage": "",
+    "logmessage": "",
+    "imediate": "",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "sparam1": "",
+    "sparam2": "",
+    "param1": 0.0,
+    "param2": 0.5,
+    "param3": 0.0
+  },
+  
+  
+  "SETDPRANGEBAND": {
+    "callstate": "SETRANGEBAND",
+    "statecmd": "SETY",
+    "notifymessage": "",
+    "logmessage": "",
+    "imediate": "",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "sparam1": "",
+    "sparam2": "",
+    "param1": 0.0,
+    "param2": 120.0,
+    "param3": 0.0
+  }
+  
+  
+  
+  
+}

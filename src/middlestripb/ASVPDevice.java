@@ -667,47 +667,47 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
     }
     
     
-    @smstate (state = "SCALEMAINAXIS")
-    public boolean st_scaleMainAxis(SMTraffic smm){
-        
-        VirnaPayload pld = smm.getPayload();
-        
-        if (pld.vobject instanceof BaseAnaTask){
-            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
-            TaskState tst = tsk.getCurrent_taskstate();
-            //tsk.auxchart.getxAxis()
-            AuxChart chart = tsk.auxchart;
-            AuxChartDescriptor acd = tsk.ctx.auxcharts.get(tsk.taskid);
-            
-            Platform.runLater(() -> {
-                
-                if ( Double.compare(tst.getParam2(), tst.getParam1()) == 0){
-                    chart.getyAxis().setLowerBound(acd.ymin);
-                    chart.getyAxis().setUpperBound(acd.ymax);
-                }
-                else{
-                    if (tst.getFlag()){
-                        chart.getCompanionYAxis().setLowerBound(tst.getParam2());
-                        chart.getCompanionYAxis().setUpperBound(tst.getParam1()); 
-                    }
-                    else{
-                        chart.getyAxis().setLowerBound(tst.getParam2());
-                        chart.getyAxis().setUpperBound(tst.getParam1());
-                    }
-                }
-
-                SMTraffic nxt = tsk.goNext(tst.getImediate());
-                if (nxt != null){
-                    Controller.getInstance().processSignal(nxt);
-                }
-            });
-        }
-        else{
-            log.info(String.format("Notify Aux"));
-        }
-       
-        return true;
-    }
+//    @smstate (state = "SCALEMAINAXIS")
+//    public boolean st_scaleMainAxis(SMTraffic smm){
+//        
+//        VirnaPayload pld = smm.getPayload();
+//        
+//        if (pld.vobject instanceof BaseAnaTask){
+//            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
+//            TaskState tst = tsk.getCurrent_taskstate();
+//            //tsk.auxchart.getxAxis()
+//            AuxChart chart = tsk.auxchart;
+//            AuxChartDescriptor acd = tsk.ctx.auxcharts.get(tsk.taskid);
+//            
+//            Platform.runLater(() -> {
+//                
+//                if ( Double.compare(tst.getParam2(), tst.getParam1()) == 0){
+//                    chart.getyAxis().setLowerBound(acd.ymin);
+//                    chart.getyAxis().setUpperBound(acd.ymax);
+//                }
+//                else{
+//                    if (tst.getFlag()){
+//                        chart.getCompanionYAxis().setLowerBound(tst.getParam2());
+//                        chart.getCompanionYAxis().setUpperBound(tst.getParam1()); 
+//                    }
+//                    else{
+//                        chart.getyAxis().setLowerBound(tst.getParam2());
+//                        chart.getyAxis().setUpperBound(tst.getParam1());
+//                    }
+//                }
+//
+//                SMTraffic nxt = tsk.goNext(tst.getImediate());
+//                if (nxt != null){
+//                    Controller.getInstance().processSignal(nxt);
+//                }
+//            });
+//        }
+//        else{
+//            log.info(String.format("Notify Aux"));
+//        }
+//       
+//        return true;
+//    }
     
     
     @smstate (state = "DELAYTASK")

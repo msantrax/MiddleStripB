@@ -14,6 +14,10 @@ import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.VirnaPayload;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import java.util.LinkedHashMap;
 import java.util.logging.Level;
@@ -152,14 +156,37 @@ public class CheckP0AnaTask extends BaseAnaTask {
     public void initStates(){
         
         taskstates = new LinkedHashMap<>();
+        
         initVarPool();
         
-        try {
+        
+        Path path = Paths.get(ASVPDevice.JSONS + "checkp0/");
+
+        try (DirectoryStream<Path> ds = Files.newDirectoryStream(path)) {
             Type stMapType = new TypeToken<LinkedHashMap<String, TaskState>>() {}.getType();
-            taskstates = PicnoUtils.loadJsonTT(ASVPDevice.JSONS + "checkp0_states.json", stMapType);
-        } catch (IOException ex) {
-            Logger.getLogger(CheckP0AnaTask.class.getName()).log(Level.SEVERE, null, ex);
+            LinkedHashMap tempstates = new LinkedHashMap<>();
+            for (Path file : ds) {
+                LOG.info(String.format("Loading file : %s" ,file.toString()));
+                tempstates = PicnoUtils.loadJsonTT(file.toString(), stMapType);
+                taskstates.putAll(tempstates);
+                
+            }
+        }catch(IOException e) {
+            LOG.info(String.format("Exception when loading states is : %s" , e.getCause().getMessage()));
         }
+
+        
+        
+        
+//        try {
+//            Type stMapType = new TypeToken<LinkedHashMap<String, TaskState>>() {}.getType();
+//            taskstates = PicnoUtils.loadJsonTT(ASVPDevice.JSONS + "checkp0_states.json", stMapType);
+//        } catch (IOException ex) {
+//            Logger.getLogger(CheckP0AnaTask.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+        
+        
+        
         
         varpool.Push("MESSAGE1", varpool.new VarInfo("VarPool Message 1", "String"));
         varpool.Push("MESSAGE2", "VarPool message 2");
@@ -172,17 +199,7 @@ public class CheckP0AnaTask extends BaseAnaTask {
 //        String sout = asvpdev.formatMessage(tst, this);
         
         setCurrent_taskstate(getTaskstates().get("TASKINIT"));
-        
-//        ArrayList<String> ltst = new ArrayList<>();
-//        ltst.add("teste1");
-//        ltst.add("teste2");
-//        current_taskstate.setLoad(ltst);
-        
-//        ArrayList<TaskStateChronoSegment> ltst = new ArrayList<>();
-//        TaskStateChronoSegment tscs1 = new TaskStateChronoSegment();
-//        ltst.add(tscs1);
-//        current_taskstate.setChronosegs(ltst);
-        
+
         
 //        try {
 //            PicnoUtils.saveJson(ASVPDevice.JSONS + "checkp0_states_temp4.json", taskstates, true);
