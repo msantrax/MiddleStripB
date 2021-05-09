@@ -2,7 +2,7 @@
   "TASKINIT": {
     "callstate": "TASKIDLE",
     "statecmd": "",
-    "realm": "checkp0",
+    "realm": "",
     "statetype": "CMD",
     "notifymessage": "Taskinit  @ checkP0 task is on !!!",
     "logmessage": "",
@@ -32,7 +32,7 @@
   "SETAUTO_RESET": {
     "callstate": "SETAUTO",
     "statecmd": "RESTARTINSTRU",
-    "realm": "checkp0",
+    "realm": "",
     "statetype": "CMD",
     "notifymessage": "Set auto to: \u0026VPDOUBLE1",
     "logmessage": "",

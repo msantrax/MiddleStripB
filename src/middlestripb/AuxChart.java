@@ -141,7 +141,7 @@ public class AuxChart implements SignalListener{
             
             getyAxis().setLowerBound(cd.ymin);
             getyAxis().setUpperBound(cd.ymax);
-            if (cd.xtick != null) getxAxis().setTickUnit(cd.xtick);
+            if (cd.ytick != null) getyAxis().setTickUnit(cd.ytick);
             getyAxis().setLabel(cd.ylabel);
     
             
@@ -198,8 +198,11 @@ public class AuxChart implements SignalListener{
                 getChartPane().getOverlayCharts().add(suppChart);
             }
             
-            Node line = companion_series.getNode().lookup(".chart-series-line");
-            line.setStyle("-fx-stroke: red;");
+            if (companion_series != null){
+                Node line = companion_series.getNode().lookup(".chart-series-line");
+                line.setStyle("-fx-stroke: red;");
+            }
+            
             chartdata = mainChart.getData(); 
             
         });

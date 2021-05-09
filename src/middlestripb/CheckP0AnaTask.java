@@ -54,6 +54,8 @@ public class CheckP0AnaTask extends BaseAnaTask {
         
         super(asvpdev, ctx);
         taskid = "checkp0";
+        
+        this.initStates();
  
 //        dtfr = CalcP0.getInstance(1L);
 //        dtfr.setDesc("Iniciado via codigo java");
@@ -89,23 +91,9 @@ public class CheckP0AnaTask extends BaseAnaTask {
         super.Go();
         ctx.auxcharts.remove("checkp0");
         asvpdev.loadTaskConfig(CalcP0.class, "checkp0task", 1617981872798l);
-        
-        
-        
-    }
-    
-    
-    
-    private void addSMEvent (String eventkey) {
-        
-        Controller ctrl = Controller.getInstance();
-        
-        SMEvent smevt = new SMEvent()
-        .setTask(this)
-        .setTaskstate(getTaskstates().get(eventkey));  
-        ctrl.addSMEventListener(eventkey, smevt );
     
     }
+    
     
     
     @Override
@@ -119,17 +107,11 @@ public class CheckP0AnaTask extends BaseAnaTask {
                 FX1Controller fx1 = FX1Controller.getInstance();
                 auxchart = fx1.getAuxchart(); 
                 auxchart.refreshChart("checkp0");
-
             });    
         }
         
-        this.initStates();
+//        this.initStates();
 
-        addSMEvent("START_ACTION");
-        addSMEvent("STOP_ACTION");
-        addSMEvent("PAUSE_ACTION");
-        
-        
         SMTraffic nxt = goNext("TASKINIT");
         if (nxt != null){
             Controller.getInstance().processSignal(nxt);
@@ -148,66 +130,21 @@ public class CheckP0AnaTask extends BaseAnaTask {
         this.dataframe = (CalcP0)dataframe;
     }
     
-    
-    
-    
    
     @Override
     public void initStates(){
         
-        taskstates = new LinkedHashMap<>();
-        
-        initVarPool();
+        super.initStates();
         
         
-        Path path = Paths.get(ASVPDevice.JSONS + "checkp0/");
-
-        try (DirectoryStream<Path> ds = Files.newDirectoryStream(path)) {
-            Type stMapType = new TypeToken<LinkedHashMap<String, TaskState>>() {}.getType();
-            LinkedHashMap tempstates = new LinkedHashMap<>();
-            for (Path file : ds) {
-                LOG.info(String.format("Loading file : %s" ,file.toString()));
-                tempstates = PicnoUtils.loadJsonTT(file.toString(), stMapType);
-                taskstates.putAll(tempstates);
-                
-            }
-        }catch(IOException e) {
-            LOG.info(String.format("Exception when loading states is : %s" , e.getCause().getMessage()));
-        }
-
-        
-        
-        
-//        try {
-//            Type stMapType = new TypeToken<LinkedHashMap<String, TaskState>>() {}.getType();
-//            taskstates = PicnoUtils.loadJsonTT(ASVPDevice.JSONS + "checkp0_states.json", stMapType);
-//        } catch (IOException ex) {
-//            Logger.getLogger(CheckP0AnaTask.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        
-        
-        
-        
-        varpool.Push("MESSAGE1", varpool.new VarInfo("VarPool Message 1", "String"));
-        varpool.Push("MESSAGE2", "VarPool message 2");
-        varpool.Push("VPDOUBLE1", varpool.new VarInfo(37.2, "DoubleNF"));
-        varpool.Push("TSTAMP", System.currentTimeMillis());
-        
-        
-        
+//        varpool.Push("MESSAGE1", varpool.new VarInfo("VarPool Message 1", "String"));
+//        varpool.Push("MESSAGE2", "VarPool message 2");
+//        varpool.Push("VPDOUBLE1", varpool.new VarInfo(37.2, "DoubleNF"));
+//        varpool.Push("TSTAMP", System.currentTimeMillis());
 //        String tst = "Teste da &MESSAGE1 que aponta para a &VPDOUBLE1";
 //        String sout = asvpdev.formatMessage(tst, this);
         
         setCurrent_taskstate(getTaskstates().get("TASKINIT"));
-
-        
-//        try {
-//            PicnoUtils.saveJson(ASVPDevice.JSONS + "checkp0_states_temp4.json", taskstates, true);
-//        } catch (IOException ex) {
-//            Logger.getLogger(CheckP0AnaTask.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        
-        
         LOG.info(String.format("CheckP0 task stats init"));
     }
     
@@ -356,13 +293,15 @@ public class CheckP0AnaTask extends BaseAnaTask {
         }
         
         
-        chdesc.xlabel = prof.getChrt_Xlabel();
-        chdesc.ylabel = prof.getChrt_Ymainlabel();
+        // Hard coded =====================================================================================
+        chdesc.xlabel = "Time - Sec";
+        chdesc.ylabel = "Pressure (mmHg)";
 
-        chdesc.xmin = prof.getChrt_Xmainmin();
-        chdesc.xmax = prof.getChrt_Xmainmax();
-        chdesc.ymin = prof.getChrt_Ymainmin();
-        chdesc.ymax = prof.getChrt_Ymainmax();
+        chdesc.xmin = 0.0;
+        chdesc.xmax = 30.0;
+        chdesc.ymin = 0.0;
+        chdesc.ymax = 900.0;
+        chdesc.ytick = 100.0;
         
         Double dws = (chdesc.xmax - chdesc.xmin) * 4 ;
         windowsize =  dws.intValue();
@@ -370,15 +309,42 @@ public class CheckP0AnaTask extends BaseAnaTask {
 
         chdesc.series.put("main_data", FXCollections.observableArrayList());
         
-        chdesc.overlay.addMessage(String.format("Loaded :"+ prof.getDesc()));
+//        chdesc.overlay.addMessage(String.format("Loaded : Hard coded"));
 
-        
-        chdesc.addYVal ("buildtgt", String.format("Build Target: %6.2f mmHg", prof.getBprs()), 
-                prof.getBprs(), null, 0.2);
+//        chdesc.addYVal ("buildtgt", String.format("Build Target: %6.2f mmHg", prof.getBprs()), prof.getBprs(), null, 0.2);
 //        chdesc.addYRange("dvthrs", "\u0394P̣ Threshold", 0.0, 1.0, auxchart.getCompanionYAxis(), null, null);
         
-        chdesc.auxlabel = prof.getChrt_Ycomplabel();
+        chdesc.auxlabel = "Delta P";
         chdesc.series.put("companion_data", FXCollections.observableArrayList());
+        
+        
+        
+        
+        
+        
+        
+        // Using Prof   ===========================================================
+//        chdesc.xlabel = prof.getChrt_Xlabel();
+//        chdesc.ylabel = prof.getChrt_Ymainlabel();
+//
+//        chdesc.xmin = prof.getChrt_Xmainmin();
+//        chdesc.xmax = prof.getChrt_Xmainmax();
+//        chdesc.ymin = prof.getChrt_Ymainmin();
+//        chdesc.ymax = prof.getChrt_Ymainmax();
+//        
+//        Double dws = (chdesc.xmax - chdesc.xmin) * 4 ;
+//        windowsize =  dws.intValue();
+//        chdesc.windowsize = this.windowsize;
+//
+//        chdesc.series.put("main_data", FXCollections.observableArrayList());
+//        
+//        chdesc.overlay.addMessage(String.format("Loaded :"+ prof.getDesc()));
+//
+//        chdesc.addYVal ("buildtgt", String.format("Build Target: %6.2f mmHg", prof.getBprs()), prof.getBprs(), null, 0.2);
+////        chdesc.addYRange("dvthrs", "\u0394P̣ Threshold", 0.0, 1.0, auxchart.getCompanionYAxis(), null, null);
+//        
+//        chdesc.auxlabel = prof.getChrt_Ycomplabel();
+//        chdesc.series.put("companion_data", FXCollections.observableArrayList());
         
         
         chdesc.dirty = false;

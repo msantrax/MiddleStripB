@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Side;
 import javafx.scene.Node;
@@ -57,9 +58,6 @@ public class RootTask extends BaseAnaTask {
         chartbanner = new Rectangle(660, 500);
         chartbanner.setFill(new ImagePattern(chbanner, 0, 0, 1, 1, true));
 
-        
-        
-        
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("RootTaskPanel.fxml"));
             controlpane = fxmlLoader.load();
@@ -67,10 +65,8 @@ public class RootTask extends BaseAnaTask {
         } catch (IOException ex) { 
             Logger.getLogger(RootTask.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-         
-        
-        
+   
+        this.initStates();
         
     }
 
@@ -88,17 +84,19 @@ public class RootTask extends BaseAnaTask {
     
     
     @Override
-    public void prepareGo(){       
+    public void prepareGo(){ 
+        
         super.Go();
-
     }
     
     @Override
     public void Restart(){
         super.Go();
         FX1Controller anct = ctx.getFXController();
-        anct.showInfoPane("asvpdevice");
-        anct.showMainChart(controlpane);
+//        anct.showInfoPane("asvpdevice");
+//        anct.showMainChart(controlpane);
+        auxchart = anct.getAuxchart(); 
+        auxchart.refreshChart(taskid);
         
         // Setup the journal
         if (journal == null){
@@ -108,6 +106,7 @@ public class RootTask extends BaseAnaTask {
         }
         ctx.current_journal = journal;
         ctx.getFXController().getAuxpane().setTop(journal);
+        AuxChartDescriptor cd = ctx.auxcharts.get(taskid);               
         
         
         Go();
@@ -125,7 +124,7 @@ public class RootTask extends BaseAnaTask {
             });    
         }
         
-        this.initStates();
+        
         
         SMTraffic nxt = goNext("SETAUTO_RESET");
         if (nxt != null){
@@ -138,17 +137,7 @@ public class RootTask extends BaseAnaTask {
     @Override
     public void initStates(){
         
-        taskstates = new LinkedHashMap<>();
-        initVarPool();
-        
-        try {
-            Type stMapType = new TypeToken<LinkedHashMap<String, TaskState>>() {}.getType();
-            taskstates = PicnoUtils.loadJsonTT(ASVPDevice.JSONS + "checkp0_states.json", stMapType);
-        } catch (IOException ex) {
-            Logger.getLogger(RootTask.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-
+        super.initStates();
         
         setCurrent_taskstate(getTaskstates().get("TASKINIT"));
 
@@ -186,7 +175,55 @@ public class RootTask extends BaseAnaTask {
         return null;
     }
     
+    
+    
+    @Override
+    public boolean createGraph(Boolean clear) {
+      
+        
+        chdesc = ctx.auxcharts.get(taskid);
+        
+        if (chdesc == null){
+            chdesc = new AuxChartDescriptor();
+            chdesc.overlay.label.setText("Time Domain Chart");
+            chdesc.overlay.clearMessages();
+        }
+        else if (!chdesc.dirty){
+            return true;
+        }
+        
+        
+        // Hard coded =====================================================================================
+        chdesc.xlabel = "Time - Sec";
+        chdesc.ylabel = "Pressure (mmHg)";
+
+        chdesc.xmin = 0.0;
+        chdesc.xmax = 30.0;
+        chdesc.xtick = 2.0;
+        
+        chdesc.ymin = 0.0;
+        chdesc.ymax = 100.0;
+        chdesc.ytick = 10.0;
+        
+        
+        chdesc.series.put("main_data", FXCollections.observableArrayList());
+        
+        chdesc.overlay.addMessage(String.format("Loaded : Hard coded"));
+
+//        chdesc.addYVal ("buildtgt", String.format("Build Target: %6.2f mmHg", prof.getBprs()), prof.getBprs(), null, 0.2);
+//        chdesc.addYRange("dvthrs", "\u0394P̣ Threshold", 0.0, 1.0, auxchart.getCompanionYAxis(), null, null);
+        
+//        chdesc.auxlabel = "Delta P";
+//        chdesc.series.put("companion_data", FXCollections.observableArrayList());
+        
    
+        chdesc.dirty = false;
+        ctx.auxcharts.put(this.taskid, chdesc);
+        return true;
+               
+    }
+    
+    
   
 }
 

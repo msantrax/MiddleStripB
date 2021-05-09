@@ -32,6 +32,10 @@ public class TaskState {
     private String callstate = "TASKSTATEERROR";
     private String statecmd = "";
     
+    private String realm = ""; 
+    private String statetype = "CMD"; // It may be : CMD, SIGNAL, DEBUG, CALLER, CALLERRETURN, LOOP, LOOPRETURN 
+    
+    
     protected String notifymessage = "";
     protected String logmessage = "";
     
@@ -217,6 +221,14 @@ public class TaskState {
 
     public void setParam3(Double param3) {
         this.param3 = param3;
+    }
+
+    public String getRealm() {
+        return realm;
+    }
+
+    public String getStatetype() {
+        return statetype;
     }
     
     

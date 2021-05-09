@@ -5,7 +5,16 @@
  */
 package middlestripb;
 
+import com.google.gson.reflect.TypeToken;
+import com.opus.syssupport.PicnoUtils;
+import com.opus.syssupport.SMEvent;
 import com.opus.syssupport.SMTraffic;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -61,8 +70,7 @@ public class BaseAnaTask {
         
         events = new LinkedHashMap<>();
         samplering = new SampleRing(5);
-        
-        initStates();
+
        
     }
     
@@ -78,10 +86,44 @@ public class BaseAnaTask {
         resetMeasurements();
     }
     
+    
     public void initStates(){
         
         taskstates = new LinkedHashMap<>();
-        getTaskstates().put("BaseIdle", new TaskState ("TASKIDLE", "NONE"));
+        initVarPool();
+        
+        Path path = Paths.get(ASVPDevice.JSONS + taskid + "/");
+        String pathbup = ASVPDevice.JSONS + taskid + "bup/";
+        
+        try (DirectoryStream<Path> ds = Files.newDirectoryStream(path)) {
+            Type stMapType = new TypeToken<LinkedHashMap<String, TaskState>>() {}.getType();
+            LinkedHashMap tempstates = new LinkedHashMap<>();
+            for (Path file : ds) {
+                LOG.info(String.format("======= BaseTask is loading file : %s" ,file.toString()));
+                tempstates = PicnoUtils.loadJsonTT(file.toString(), stMapType);
+                if (pathbup != null){
+//                    PicnoUtils.saveJson(pathbup+file.getFileName(), tempstates, true);
+                }
+                taskstates.putAll(tempstates);
+            }
+        }catch(IOException e) {
+            LOG.info(String.format("Exception when loading states @ %s is : %s" , taskid, e.getCause().getMessage()));
+            
+        }
+        
+        Controller ctrl = Controller.getInstance();
+        ctrl.removeSMEventListener("all", this);
+        
+        for ( String k : taskstates.keySet()){
+            TaskState ts = taskstates.get(k);
+            if (ts.getStatetype().toUpperCase().equals("SIGNAL")){
+                SMEvent smevt = new SMEvent()
+                .setTask(this)
+                .setTaskstate(ts);  
+                ctrl.addSMEventListener(k, smevt );
+            }
+        }
+        
         
     }
     

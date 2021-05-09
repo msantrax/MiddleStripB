@@ -215,10 +215,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         sidebar_btreport.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.FILE_PDF_ALT, "black", 4));
         sidebar_btbroadcast.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.SHARE_ALT, "black", 4));
         sidebar_btloadfile.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.ARCHIVE, "black", 4));
-        
-        
-        
-        
+  
         
 //        FXMLLoader fxmlLoader;
 //        AnchorPane apane;
@@ -371,6 +368,8 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         instance = this;
         
         asvpdevice.connect();
+        
+        ctx.current_anatask.Restart();
        
     }
     
@@ -552,12 +551,11 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                 Controller.getInstance().processSignal(nxt);
             }
           
-            showSnack(tmout, payload.vstring); 
+            showSnack(tmout, tst.notifymessage); 
         }
         else{
            showSnack(payload.long1, payload.vstring);  
         }
-        
         
         return true;
     }
@@ -581,21 +579,36 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     }
     
     
+    // ================================================= DIALOG SERVICES =========================================================
+    
+    public Parent currentdlgpane;
+    public AnchorPane getInputDialog() { return inputdialog;}
+    
+    
+    public void hideInputDialog(){    
+        inputdialog.getChildren().remove(currentdlgpane);
+        inputdialog.setVisible(false);
+    }
     
     @smstate (state = "SHOWINPUTDIALOG")
     public boolean st_showInputDialog(SMTraffic smm){
 
         VirnaPayload payload = smm.getPayload();
+        TaskState tst;
         
         if (payload.vobject instanceof BaseAnaTask){
             BaseAnaTask tsk = (BaseAnaTask)payload.vobject;
-            TaskState tst = tsk.getCurrent_taskstate();
-            ArrayList<String> load = (ArrayList<String>)tst.getLoad();
-
+            if (tsk.getCurrent_taskstate() == null){
+                tst = (TaskState) payload.getCaller();
+            }
+            else{
+                tst = tsk.getCurrent_taskstate();
+            }
+            
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    SimpleStringProperty result = showInputDialog(load.get(0), load.get(1));
+                    SimpleStringProperty result = showInputDialog(tst.getSparam1(), tst.getSparam2());
                     if (result != null){
                         result.addListener(new ChangeListener<String>() {
                             @Override
@@ -605,18 +618,15 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                                 if (nv != null && !nv.isEmpty() && !nv.equals("cancel")){
                                     LOG.info(String.format("Validated."));
                                     SMTraffic nxt = tsk.goNext(tst.getImediate());
-                                    VirnaPayload pld = nxt.getPayload();
-                                    BaseAnaTask ntsk = (BaseAnaTask)payload.vobject;
-                                    TaskState ntst = tsk.getCurrent_taskstate();
-                                    ntst.setStatecmd("SETSETRADUMPGAIN="+nv);
                                     if (nxt != null){
+                                        TaskState tskst = tsk.current_taskstate;
+                                        tskst.setSparam1(nv);
                                         Controller.getInstance().processSignal(nxt);
                                     }    
                                 }
                                 else{
                                     LOG.info(String.format("Canceled"));
                                     SMTraffic nxt = tsk.goNext(tst.getFailed());
-                                    
                                     if (nxt != null){
                                         Controller.getInstance().processSignal(nxt);
                                     } 
@@ -627,11 +637,11 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                 }
             });    
             
-            
-            SMTraffic nxt = tsk.goNext(tst.getImediate());
-            if (nxt != null){
-                Controller.getInstance().processSignal(nxt);
-            }
+//            
+//            SMTraffic nxt = tsk.goNext(tst.getImediate());
+//            if (nxt != null){
+//                Controller.getInstance().processSignal(nxt);
+//            }
           
            
         }
@@ -661,14 +671,6 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     }
     
     
-    public Parent currentdlgpane;
-    public AnchorPane getInputDialog() { return inputdialog;}
-    
-    
-    public void hideInputDialog(){    
-        inputdialog.getChildren().remove(currentdlgpane);
-        inputdialog.setVisible(false);
-    }
     
     public SimpleStringProperty showInputDialog(String header, String value){
         
@@ -693,6 +695,110 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         return null;
     }
     
+    
+    @smstate (state = "SHOWQUESTIONDIALOG")
+    public boolean st_showQuestionDialog(SMTraffic smm){
+
+        VirnaPayload payload = smm.getPayload();
+        TaskState tst;
+        
+        if (payload.vobject instanceof BaseAnaTask){
+            BaseAnaTask tsk = (BaseAnaTask)payload.vobject;
+            if (tsk.getCurrent_taskstate() == null){
+                tst = (TaskState) payload.getCaller();
+            }
+            else{
+                tst = tsk.getCurrent_taskstate();
+            }
+            
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    DialogMessageBuilder dmb = new DialogMessageBuilder()
+                            .add("Teste Operacional", "-fx-font-family: Lato-Bold; -fx-font-size: 22px;")
+                            .add("Novo Item na Lista", "")
+                            .enableButton("cancel", "Remove", "remove", false)
+                            .enableButton("aux", "Auxiliar", "aux", false)
+                            ;
+                    
+                    SimpleStringProperty result = showQuestionDialog("Header do Dialogo", dmb);
+                    if (result != null){
+                        result.addListener(new ChangeListener<String>() {
+                            @Override
+                            public void changed(ObservableValue <? extends String> prop, String ov, String nv) {
+                                LOG.info(String.format("Question dlg voltou  : %s ", nv));
+                                hideInputDialog();
+                                
+                            }
+                        });
+                    } 
+                }
+            });    
+            
+        }
+        else{
+           
+        }
+   
+        return true;
+    }
+    
+    
+    
+    
+    public SimpleStringProperty showQuestionDialog(String header, DialogMessageBuilder dmb){
+        
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXFQuestionDialog.fxml"));
+            currentdlgpane = fxmlLoader.load();
+            FXFQuestionDialogController dlgc = fxmlLoader.<FXFQuestionDialogController>getController();
+            
+            dlgc.setHeader(header);
+            dlgc.setStatus(dmb);
+            AnchorPane ap = (AnchorPane)currentdlgpane;
+            ap.setPrefHeight(dlgc.getDlg_height());
+            ap.setPrefWidth(inputdialog.getWidth());
+//            inputdialog.setPrefWidth(ap.getWidth());
+            
+            inputdialog.getChildren().add(currentdlgpane);
+            inputdialog.setVisible(true);
+            //inputdialog.setPrefHeight(400);
+            return dlgc.result;
+      
+        } catch (IOException ex) {
+            LOG.severe("Severe !!!");
+        }
+ 
+        return null;
+    }
+    
+    
+    
+    
+    public SimpleStringProperty showListDialog(String header, FXFListDialogBuilder dmb){
+      
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXFListDialog.fxml"));
+            currentdlgpane = fxmlLoader.load();
+            FXFListDialogController dlgc = fxmlLoader.<FXFListDialogController>getController();
+            
+            dlgc.setHeader(header);
+            dlgc.setStatus(dmb);
+            AnchorPane ap = (AnchorPane)currentdlgpane;
+            ap.setPrefHeight(dlgc.getDlg_height());
+            
+            inputdialog.getChildren().add(currentdlgpane);
+            inputdialog.setVisible(true);
+            //inputdialog.setPrefHeight(400);
+            return dlgc.result;
+      
+        } catch (IOException ex) {
+            LOG.severe("Severe !!!");
+            //Logger.getLogger(FXFWindowManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+ 
+        return null;
+    }
     
     
     

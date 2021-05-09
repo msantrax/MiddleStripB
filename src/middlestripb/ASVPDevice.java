@@ -665,50 +665,7 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
        
         return true;
     }
-    
-    
-//    @smstate (state = "SCALEMAINAXIS")
-//    public boolean st_scaleMainAxis(SMTraffic smm){
-//        
-//        VirnaPayload pld = smm.getPayload();
-//        
-//        if (pld.vobject instanceof BaseAnaTask){
-//            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
-//            TaskState tst = tsk.getCurrent_taskstate();
-//            //tsk.auxchart.getxAxis()
-//            AuxChart chart = tsk.auxchart;
-//            AuxChartDescriptor acd = tsk.ctx.auxcharts.get(tsk.taskid);
-//            
-//            Platform.runLater(() -> {
-//                
-//                if ( Double.compare(tst.getParam2(), tst.getParam1()) == 0){
-//                    chart.getyAxis().setLowerBound(acd.ymin);
-//                    chart.getyAxis().setUpperBound(acd.ymax);
-//                }
-//                else{
-//                    if (tst.getFlag()){
-//                        chart.getCompanionYAxis().setLowerBound(tst.getParam2());
-//                        chart.getCompanionYAxis().setUpperBound(tst.getParam1()); 
-//                    }
-//                    else{
-//                        chart.getyAxis().setLowerBound(tst.getParam2());
-//                        chart.getyAxis().setUpperBound(tst.getParam1());
-//                    }
-//                }
-//
-//                SMTraffic nxt = tsk.goNext(tst.getImediate());
-//                if (nxt != null){
-//                    Controller.getInstance().processSignal(nxt);
-//                }
-//            });
-//        }
-//        else{
-//            log.info(String.format("Notify Aux"));
-//        }
-//       
-//        return true;
-//    }
-    
+ 
     
     @smstate (state = "DELAYTASK")
     public boolean st_delayTask(SMTraffic smm){
@@ -788,7 +745,7 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
     
     
     
-    public String formatMessage (String tpl, BaseAnaTask tsk){
+    public String formatMessage (String tpl, BaseAnaTask tsk, TaskState tskst){
         
         tpl = tpl+" ";
         String pat = "(&\\w*\\s)";
@@ -803,13 +760,23 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
             String varname = mr.group();
             String varvalue;
             String name = varname.replace("&", "").trim();
-            if (name.startsWith("_")){
-                name = name.replace("_", "");
-                varvalue = vp.SPeek(name);
+            
+            if (name.toUpperCase().equals("SPARAM1")){
+                varvalue = tskst.getSparam1();
+            }
+            else if (name.toUpperCase().equals("SPARAM2")){
+                varvalue = tskst.getSparam2();
             }
             else{
-                varvalue = vp.SPop(name);
+                if (name.startsWith("_")){
+                    name = name.replace("_", "");
+                    varvalue = vp.SPeek(name);
+                }
+                else{
+                    varvalue = vp.SPop(name);
+                } 
             }
+            
             ntpl = ntpl.replace(varname, varvalue+" ");           
         }
     
@@ -822,7 +789,7 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
         if (!tst.getNotifymessage().isEmpty()){
             Platform.runLater(() -> {
                 AuxChartDescriptor cd = ctx.auxcharts.get(tsk.taskid);                   
-                cd.overlay.addMessage(formatMessage(tst.getNotifymessage(), tsk));
+                cd.overlay.addMessage(formatMessage(tst.getNotifymessage(), tsk, tst));
             });
         }
         
@@ -896,7 +863,8 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
                 }
                 String message = "?";
                 message = tst.getNotifymessage();
-                cd.overlay.addMessage(message);
+                
+                cd.overlay.addMessage(formatMessage(message, tsk, tst));
                 
                 SMTraffic nxt = tsk.goNext(tst.getImediate());
                 if (nxt != null){
@@ -1161,3 +1129,50 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
 //        return true;
 //    }
 //    
+
+
+
+   
+    
+//    @smstate (state = "SCALEMAINAXIS")
+//    public boolean st_scaleMainAxis(SMTraffic smm){
+//        
+//        VirnaPayload pld = smm.getPayload();
+//        
+//        if (pld.vobject instanceof BaseAnaTask){
+//            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
+//            TaskState tst = tsk.getCurrent_taskstate();
+//            //tsk.auxchart.getxAxis()
+//            AuxChart chart = tsk.auxchart;
+//            AuxChartDescriptor acd = tsk.ctx.auxcharts.get(tsk.taskid);
+//            
+//            Platform.runLater(() -> {
+//                
+//                if ( Double.compare(tst.getParam2(), tst.getParam1()) == 0){
+//                    chart.getyAxis().setLowerBound(acd.ymin);
+//                    chart.getyAxis().setUpperBound(acd.ymax);
+//                }
+//                else{
+//                    if (tst.getFlag()){
+//                        chart.getCompanionYAxis().setLowerBound(tst.getParam2());
+//                        chart.getCompanionYAxis().setUpperBound(tst.getParam1()); 
+//                    }
+//                    else{
+//                        chart.getyAxis().setLowerBound(tst.getParam2());
+//                        chart.getyAxis().setUpperBound(tst.getParam1());
+//                    }
+//                }
+//
+//                SMTraffic nxt = tsk.goNext(tst.getImediate());
+//                if (nxt != null){
+//                    Controller.getInstance().processSignal(nxt);
+//                }
+//            });
+//        }
+//        else{
+//            log.info(String.format("Notify Aux"));
+//        }
+//       
+//        return true;
+//    }
+    

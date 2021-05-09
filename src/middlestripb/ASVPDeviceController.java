@@ -83,20 +83,20 @@ public class ASVPDeviceController extends AnchorPane implements Initializable {
     @FXML
     void pause_action(MouseEvent event) {
        setStatus (Status.PAUSED);
-       ctrl.publishSMEvent("PAUSE_ACTION", null);
+       ctrl.publishSMEvent("pause_action", null);
        
     }
 
     @FXML
     void start_action(MouseEvent event) {
         setStatus (Status.RUNNING);
-        ctrl.publishSMEvent("START_ACTION", null);
+        ctrl.publishSMEvent("start_action", null);
     }
     
     @FXML
     void stop_action(MouseEvent event) {
         setStatus (Status.STOPPED);
-        ctrl.publishSMEvent("STOP_ACTION", null);
+        ctrl.publishSMEvent("stop_action", null);
     }
         
    

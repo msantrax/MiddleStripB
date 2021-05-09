@@ -10,7 +10,6 @@ import Entities.Entity;
 import Entities.Isotherm;
 import com.mongodb.client.model.Filters;
 import com.opus.syssupport.SMEvent;
-import com.opus.syssupport.SMEventListener;
 import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.SignalListener;
 import com.opus.syssupport.StateDescriptor;
@@ -24,6 +23,7 @@ import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
@@ -264,22 +264,56 @@ public class Controller implements SignalListener, TickListener, VirnaServicePro
     /** Método de remoção do registro do listener do dispositivo  */
     public void removeSMEventListener ( String eventkey, BaseAnaTask task){
         
-        ArrayList<SMEvent> smevtpool;
-        smevtpool = smeventlisteners.get(eventkey);
-        if (smevtpool != null){
+        ArrayList<SMEvent> smevtpool = new ArrayList<>();
+        
+        if (eventkey.equals("all")){
+            
+            ArrayList<SMEvent> removelist = new ArrayList<>();
+            
+            for (String smkey :  smeventlisteners.keySet()){
+                
+                for (SMEvent smevt : smeventlisteners.get(smkey)){
+                    if (smevt.getTask() == task){
+                        // Yes , he has
+                        log.info(String.format("Event route removed link to %s (all)",smevt.getTask().toString()));
+                        //smeventlisteners.get(smkey).remove(smevt);
+                        smeventlisteners.get(smkey).remove(smevt);
+                        break;
+                    }
+                }
+            }
+            return;
+        }
+        else{
+            smevtpool = smeventlisteners.get(eventkey);
+        }
+        
+      
+        if (smevtpool != null){     
             // Verify if this key has a listener of class task
+            ArrayList<SMEvent> removelist = new ArrayList<>();
             for (SMEvent smevt : smevtpool){
                 if (smevt.getTask() == task){
                     // Yes , he has
-                    smevtpool.remove(smevt);
-                    log.info(String.format("Event route removed link to %s on key %s",
-                    smevt.getTask().toString(), eventkey));
+                    
+                    removelist.add(smevt);
                 }
-                log.info(String.format("There is no link to %s on key %s",
-                    task.toString(), eventkey));
+                else{
+                    log.info(String.format("There is no link to %s on key %s",
+                    task.toString(), eventkey)); 
+                }
             }
-            log.info(String.format("There is no key to %s on event routes",
-                    eventkey));
+            
+            for (SMEvent toremove : removelist){
+                smevtpool.remove(toremove);
+                log.info(String.format("Event route removed link to %s on key %s",
+                toremove.getTask().toString(), eventkey));
+            }
+            
+            
+            if (removelist.isEmpty()){
+                log.info(String.format("There is no key to %s on event routes",eventkey));
+            }
             
         }
     }
@@ -294,19 +328,21 @@ public class Controller implements SignalListener, TickListener, VirnaServicePro
         if (smevtpool != null){
             // Verify if this key has a listener of class task
             for (SMEvent smevt : smevtpool){
-                TaskState taskstate = smevt.getTaskstate();
-                //SMTraffic nxt = smevt.getTask().getNext(eventkey);
-                SMTraffic nxt = new SMTraffic(0l, 0l, 0, taskstate.getCallstate(), smevt.getTask().getClass(),
-                                    new VirnaPayload()
-                                        .setObjectType(eventkey)
-                                        .setObject(smevt.getTask())
-                                        .setString(taskstate.getStatecmd())
-                                        .setCaller(taskstate)
-                                );
-                
-                log.info(String.format("Activating event %s on %s",
-                eventkey, smevt.getTask().toString()));
-                Controller.getInstance().processSignal(nxt);             
+                if (smevt != null){
+                    TaskState taskstate = smevt.getTaskstate();
+                    //SMTraffic nxt = smevt.getTask().getNext(eventkey);
+                    SMTraffic nxt = new SMTraffic(0l, 0l, 0, taskstate.getCallstate(), smevt.getTask().getClass(),
+                                        new VirnaPayload()
+                                            .setObjectType(eventkey)
+                                            .setObject(smevt.getTask())
+                                            .setString(taskstate.getStatecmd())
+                                            .setCaller(taskstate)
+                                    );
+
+                    log.info(String.format("Activating event %s on %s",
+                    eventkey, smevt.getTask().toString()));
+                    Controller.getInstance().processSignal(nxt);
+                }
             }
         }
         else{

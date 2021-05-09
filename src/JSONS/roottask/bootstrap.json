@@ -2,9 +2,11 @@
   "TASKINIT": {
     "callstate": "TASKIDLE",
     "statecmd": "",
+    "realm": "roottask",
+    "statetype": "CMD",
     "notifymessage": "Taskinit  @ checkP0 task is on !!!",
     "logmessage": "",
-    "imediate": "",
+    "imediate": "SETAUTO_RESET",
     "failed": "",
     "timedout": "",
     "timeout": 0,
@@ -31,9 +33,11 @@
   "SETAUTO_RESET": {
     "callstate": "SETAUTO",
     "statecmd": "RESTARTINSTRU",
-    "notifymessage": "Set auto to: \u0026VPDOUBLE1",
+    "realm": "roottask",
+    "statetype": "CMD",
+    "notifymessage": "Setauto @ Root task...",
     "logmessage": "",
-    "imediate": "SCALETOORIGINAL",
+    "imediate": "",
     "failed": "",
     "timedout": "TASKTIMERCALLBACK",
     "timeout": 3000,
@@ -46,19 +50,19 @@
     "param1": 0.0,
     "param2": 0.0,
     "param3": 0.0
-  }
+  },
   
-  
-  ,
-  "START_ACTION": {
-    "callstate": "NOTIFYAUX",
+  "roottask_snackinit": {
+    "callstate": "SHOWSNACK",
     "statecmd": "",
-    "notifymessage": "Start event received",
-    "logmessage": "Start event was received",
+    "realm": "roottask",
+    "statetype": "CMD",
+    "notifymessage": "Root Task is doing initial setup",
+    "logmessage": "",
     "imediate": "",
     "failed": "",
     "timedout": "",
-    "timeout": 0,
+    "timeout": 10000,
     "loopcount": 0,
     "load": {},
     "loadtype": "",
@@ -70,46 +74,5 @@
     "param3": 0.0
   }
   
-  ,
-  "STOP_ACTION": {
-    "callstate": "NOTIFYAUX",
-    "statecmd": "",
-    "notifymessage": "Stop event received",
-    "logmessage": "Stop event was received",
-    "imediate": "",
-    "failed": "",
-    "timedout": "",
-    "timeout": 0,
-    "loopcount": 0,
-    "load": {},
-    "loadtype": "",
-    "flag": false,
-    "sparam1": "",
-    "sparam2": "",
-    "param1": 0.0,
-    "param2": 0.0,
-    "param3": 0.0
-  }
-  
-  ,
-  "PAUSE_ACTION": {
-    "callstate": "NOTIFYAUX",
-    "statecmd": "",
-    "notifymessage": "Pause event received",
-    "logmessage": "Pause event was received",
-    "imediate": "",
-    "failed": "",
-    "timedout": "",
-    "timeout": 0,
-    "loopcount": 0,
-    "load": {},
-    "loadtype": "",
-    "flag": false,
-    "sparam1": "",
-    "sparam2": "",
-    "param1": 0.0,
-    "param2": 0.0,
-    "param3": 0.0
-  }
   
 }
