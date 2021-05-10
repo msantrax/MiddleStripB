@@ -83,7 +83,9 @@ public class FXFQuestionDialogController extends AnchorPane {
         
         ok_button.setDisable(false);
         ok_button.setText("O.K.");
-        ok_button.requestFocus();      
+        ok_button.requestFocus(); 
+        
+        
     }
     
     public void setHeader (String defheader){

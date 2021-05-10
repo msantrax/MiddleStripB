@@ -9,6 +9,7 @@ package middlestripb;
 import Entities.Entity;
 import Entities.Point;
 import cern.extjfx.chart.XYChartPane;
+import com.google.gson.internal.LinkedTreeMap;
 import com.opus.fxsupport.PropertyLinkDescriptor;
 import com.opus.fxsupport.FXFController;
 import com.opus.glyphs.FontAwesomeIcon;
@@ -21,10 +22,8 @@ import java.io.IOException;
 
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -45,7 +44,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
@@ -710,25 +708,45 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
             else{
                 tst = tsk.getCurrent_taskstate();
             }
-            
+   
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    DialogMessageBuilder dmb = new DialogMessageBuilder()
-                            .add("Teste Operacional", "-fx-font-family: Lato-Bold; -fx-font-size: 22px;")
-                            .add("Novo Item na Lista", "")
-                            .enableButton("cancel", "Remove", "remove", false)
-                            .enableButton("aux", "Auxiliar", "aux", false)
-                            ;
                     
-                    SimpleStringProperty result = showQuestionDialog("Header do Dialogo", dmb);
+                    DialogMessageBuilder dmb = new DialogMessageBuilder();
+                    
+                    LinkedTreeMap ltm = (LinkedTreeMap) tst.getLoad();
+                    ltm.forEach((k,v) -> {
+//                        System.out.println(String.format("map : %s = %s", k, v));
+                        if (k.equals("cancel") || k.equals("aux")){
+                            dmb.enableButton((String)k, (String)v, (String)k, false);
+                        }
+                        else{
+                            dmb.add((String) k, (String)v);
+                        }
+                    });
+ 
+                    SimpleStringProperty result = showQuestionDialog(tst.getSparam1(), dmb);
+                    
                     if (result != null){
                         result.addListener(new ChangeListener<String>() {
                             @Override
                             public void changed(ObservableValue <? extends String> prop, String ov, String nv) {
                                 LOG.info(String.format("Question dlg voltou  : %s ", nv));
                                 hideInputDialog();
-                                
+                                SMTraffic nxt;
+                                if (nv != null && !nv.isEmpty() && nv.equals("ok")){
+                                    nxt = tsk.goNext(tst.getImediate());  
+                                }
+                                else if (nv != null && !nv.isEmpty() && nv.equals("aux")){
+                                    nxt = tsk.goNext(tst.getTimedout());   
+                                }
+                                else{
+                                    nxt = tsk.goNext(tst.getFailed());
+                                }
+                                if (nxt != null){
+                                    Controller.getInstance().processSignal(nxt);
+                                }
                             }
                         });
                     } 

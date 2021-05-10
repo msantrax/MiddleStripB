@@ -17,7 +17,7 @@
       </Text>
       <Button fx:id="ok_button" disable="true" layoutX="363.0" layoutY="208.0" mnemonicParsing="false" onAction="#ok_action" prefWidth="125.0" text="O.K." AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="50.0" />
       <Button fx:id="cancel_button" cancelButton="true" layoutX="188.0" layoutY="197.0" mnemonicParsing="false" onAction="#cancel_action" prefWidth="125.0" text="Cancelar" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="185.0" />
-      <TextFlow fx:id="textflow" layoutX="30.0" layoutY="65.0" lineSpacing="5.0" prefHeight="120.0" prefWidth="430.0" styleClass="fxf-qdlg" AnchorPane.topAnchor="65.0" />
+      <TextFlow fx:id="textflow" layoutX="30.0" layoutY="65.0" lineSpacing="5.0" styleClass="fxf-qdlg" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="65.0" />
       <Button fx:id="aux_button" cancelButton="true" layoutX="137.0" layoutY="208.0" mnemonicParsing="false" onAction="#aux_action" prefWidth="125.0" text="aux" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="320.0" />
    </children>
 </AnchorPane>

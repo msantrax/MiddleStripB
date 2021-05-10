@@ -42,8 +42,8 @@
     },
     "loadtype": "",
     "flag": false,
-    "sparam1": "Header do Choice Dialog - test2",
-    "sparam2": "",
+    "sparam1": "Input Dialog Phrase 1",
+    "sparam2": "Input dialog Phrase 2 - more datailed",
     "param1": 0.0,
     "param2": 0.0,
     "param3": 0.0
