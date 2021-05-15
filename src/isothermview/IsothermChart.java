@@ -25,6 +25,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import middlestripb.BaseAnaTask;
 import middlestripb.Context;
 import middlestripb.Controller;
 import middlestripb.FX1Controller;
@@ -41,6 +42,7 @@ public class IsothermChart implements SignalListener {
     private FX1Controller anct;
     private Controller ctrl;
     private Context ctx;
+    private BaseAnaTask task;
     
     private ObservableList<XYChart.Data<Number, Number>> adspoints;
     private ObservableList<XYChart.Data<Number, Number>> despoints;
@@ -57,8 +59,9 @@ public class IsothermChart implements SignalListener {
     
     
     
-    public IsothermChart(FX1Controller anct) {
+    public IsothermChart(FX1Controller anct, BaseAnaTask task) {
         this.anct = anct;
+        this.task = task;
         this.ctrl = Controller.getInstance();
         this.ctx = Context.getInstance();
     }
@@ -114,7 +117,7 @@ public class IsothermChart implements SignalListener {
             }
             
             anct.showInfoPane("isotherminfo");
-            ctx.geIsoTimeDomainPoints();
+            task.geIsoTimeDomainPoints();
             anct.getAuxchart().refreshChart("isotimedomain");
         }
         
@@ -129,7 +132,7 @@ public class IsothermChart implements SignalListener {
             lineChart.getData().clear();
             Context ctx = Context.getInstance();
             
-            adspoints = ctx.getIsoDataDomainPoints( true, true, true);
+            adspoints = task.getIsoDataDomainPoints( true, true, true);
             ads_series = new XYChart.Series<>("Adsorption", adspoints);
             lineChart.getData().add((javafx.scene.chart.XYChart.Series<Number, Number>)ads_series);
 //            Node n1 = ads_series.nodeProperty().get();
@@ -138,7 +141,7 @@ public class IsothermChart implements SignalListener {
             Node sdn = ads_series.getNode();
             sdn.setOnMouseClicked(e -> System.out.println("Click on series"));
 
-            despoints = ctx.getIsoDataDomainPoints( false, true, true);
+            despoints = task.getIsoDataDomainPoints( false, true, true);
             des_series = new XYChart.Series<>("Desorption", despoints);
             lineChart.getData().add(des_series);
 //            Node n2 = des_series.nodeProperty().get();

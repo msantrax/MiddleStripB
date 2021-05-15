@@ -104,6 +104,12 @@ public class FXFInputDialogController extends AnchorPane {
     }
     
     
+    public void enableOKButton (boolean enable){
+        
+        ok_button.setDisable(!enable);
+    }
+    
+    
 
 }
 

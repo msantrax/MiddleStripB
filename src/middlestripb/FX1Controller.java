@@ -576,7 +576,8 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    SimpleStringProperty result = showInputDialog(tst.getSparam1(), tst.getSparam2());
+                    
+                    SimpleStringProperty result = showInputDialog(tst.getSparam1(), tst.getSparam2(), tst.getFlag());
                     if (result != null){
                         result.addListener(new ChangeListener<String>() {
                             @Override
@@ -617,7 +618,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
            Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    SimpleStringProperty result = showInputDialog(payload.vstring, payload.getServicestatus());
+                    SimpleStringProperty result = showInputDialog(payload.vstring, payload.getServicestatus(), false);
                     if (result != null){
                         result.addListener(new ChangeListener<String>() {
                             @Override
@@ -640,7 +641,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     
     
     
-    public SimpleStringProperty showInputDialog(String header, String value){
+    public SimpleStringProperty showInputDialog(String header, String value, boolean enableok){
         
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXFInputDialog.fxml"));
@@ -649,6 +650,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
             
             dlgc.setHeader(header);
             dlgc.setDefvalue(value);
+            dlgc.enableOKButton(enableok);
             
             inputdialog.getChildren().add(currentdlgpane);
             //inputdialog.setMaxSize(200.0, 200.0);

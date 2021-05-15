@@ -6,7 +6,7 @@
     "statetype": "CMD",
     "notifymessage": "Taskinit  @ checkP0 task is on !!!",
     "logmessage": "",
-    "imediate": "viewisotask_snackinit",
+    "imediate": "startevent_input1",
     "failed": "",
     "timedout": "",
     "timeout": 0,
@@ -22,17 +22,42 @@
     
   },
   
-  "SETAUTO_RESET": {
-    "callstate": "SETAUTO",
-    "statecmd": "RESTARTINSTRU",
-    "realm": "roottask",
+  
+  
+  "startevent_input1": {
+    "callstate": "SHOWINPUTDIALOG",
+    "statecmd": "",
+    "realm": "viewiso",
     "statetype": "CMD",
-    "notifymessage": "Setauto @ Root task...",
+    "notifymessage": "",
+    "logmessage": "",
+    "imediate": "startevent_input1_callbackok",
+    "failed": "startevent_input1_callbackcancel",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": true,
+    "sparam1": "Select Analysis to Load and View",
+    "sparam2": "1615509387066",
+    "param1": 0.0,
+    "param2": 0.0,
+    "param3": 0.0
+  },
+  
+  
+  "startevent_input1_callbackok": {
+    "callstate": "LOADISOVIEW",
+    "statecmd": "",
+    "realm": "viewiso",
+    "statetype": "CMD",
+    "notifymessage": "Input 1 callback aproved = &sparam1 ",
     "logmessage": "",
     "imediate": "",
     "failed": "",
-    "timedout": "TASKTIMERCALLBACK",
-    "timeout": 3000,
+    "timedout": "",
+    "timeout": 0,
     "loopcount": 0,
     "load": {},
     "loadtype": "",
@@ -43,6 +68,35 @@
     "param2": 0.0,
     "param3": 0.0
   },
+  
+  
+  "startevent_input1_callbackcancel": {
+    "callstate": "NOTIFYAUX",
+    "statecmd": "",
+    "realm": "checkp0",
+    "statetype": "CMD",
+    "notifymessage": "Input 1 callback is cancelled",
+    "logmessage": "Start event was received",
+    "imediate": "",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "sparam1": "",
+    "sparam2": "",
+    "param1": 0.0,
+    "param2": 0.0,
+    "param3": 0.0
+  },
+  
+  
+  
+  
+  
+  
   
   "viewisotask_snackinit": {
     "callstate": "SHOWSNACK",

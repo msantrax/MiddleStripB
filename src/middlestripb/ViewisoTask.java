@@ -9,33 +9,21 @@ import Entities.Entity;
 import Entities.Isotherm;
 import Entities.Point;
 import cern.extjfx.chart.XYChartPane;
-import com.google.gson.reflect.TypeToken;
 import com.mongodb.client.model.Filters;
-import com.opus.syssupport.PicnoUtils;
 import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.VirnaPayload;
 import com.opus.syssupport.smstate;
 import isothermview.IsothermChart;
-import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Side;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.chart.XYChart;
-import javafx.scene.image.Image;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Rectangle;
 
 /**
  *
@@ -76,15 +64,13 @@ public class ViewisoTask extends BaseAnaTask {
     @Override
     public void prepareGo(){ 
         
-        FX1Controller anct = ctx.getFXController();
+        anct = ctx.getFXController();
         
-        isothermchart = new IsothermChart(anct);
+        isothermchart = new IsothermChart(anct, this);
         mainchartpane = isothermchart.createCernChart();
         mainchartpane.getStylesheets().add(getClass().getClassLoader().getResource("middlestripb/isochart.css").toExternalForm());
         
         createGraph(true);
-        
-        
         
         
         // Setup the journal
@@ -107,7 +93,6 @@ public class ViewisoTask extends BaseAnaTask {
         anct.showMainChart(mainchartpane);
         anct.showInfoPane("isotherminfo");
         
-
         
         auxchart = anct.getAuxchart(); 
         auxchart.refreshChart(taskid);
@@ -125,7 +110,6 @@ public class ViewisoTask extends BaseAnaTask {
     @Override
     public void Go(){
         
-        
         if (createGraph(true)){
             Platform.runLater(() -> {
                 FX1Controller fx1 = FX1Controller.getInstance();
@@ -133,7 +117,7 @@ public class ViewisoTask extends BaseAnaTask {
             });    
         }
 
-        SMTraffic nxt = goNext("viewisotask_snackinit");
+        SMTraffic nxt = goNext("startevent_input1");
         if (nxt != null){
             Controller.getInstance().processSignal(nxt);
         }
@@ -317,7 +301,7 @@ public class ViewisoTask extends BaseAnaTask {
         chdesc.ymin = chdesc.ymin - (chdesc.ymin / 10);
         chdesc.ymax = chdesc.ymax + (chdesc.ymax / 10);
 
-        chdesc.series.put("main_data", FXCollections.observableArrayList(data));
+        chdesc.series.put("main", FXCollections.observableArrayList(data));
         
         chdesc.overlay.addMessage(String.format("Loaded %d points", isopoints.size()));
         chdesc.overlay.addMessage("No companion Yaxis requested");
@@ -328,7 +312,7 @@ public class ViewisoTask extends BaseAnaTask {
 //        chdesc.addYRange ("rangey", "Range Y", 0.0, 122.56 , null, null, null);
 //        chdesc.addXRange ("rangex", "Range X", 10000.0, 15000.0 , null, null);
         
-        chdesc.auxlabel = "\u0394P̣";
+//        chdesc.auxlabel = "\u0394P̣";
         
         
         chdesc.dirty = false;
@@ -378,7 +362,9 @@ public class ViewisoTask extends BaseAnaTask {
         Platform.runLater(() -> {
             isothermchart.refreshChart();
             geIsoTimeDomainPoints();
-            anct.getAuxchart().refreshChart("isotimedomain");
+            auxchart.refreshChart("isotimedomain");
+            
+            
         });         
           
     }
@@ -392,44 +378,71 @@ public class ViewisoTask extends BaseAnaTask {
         
         VirnaPayload payload = smm.getPayload();
         String substate = payload.getCallerstate();
-        
+        TaskState tst;
         Long suid = 0L ;
         
-        switch(substate){
+        if (payload.vobject instanceof BaseAnaTask){
+            BaseAnaTask tsk = (BaseAnaTask)payload.vobject;
+            if (tsk.getCurrent_taskstate() == null){
+                tst = (TaskState) payload.getCaller();
+            }
+            else{
+                tst = tsk.getCurrent_taskstate();
+            }
             
-            case "ASKUSER" :
-                suid = 1615509387066L;
-                appctrl.processSignal(new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
-                                   new VirnaPayload()
-                                            .setCallerstate("LOADPHASE1")
-                                            .setLong1(suid)
-                                            .setInt1(10)));  
-                break;
+            String sid = tst.getSparam1();
             
-            case "LOADPHASE1" :
-                EntityDescriptor ed = new EntityDescriptor()
-                .setClazz(Isotherm.class)
-                .setBson(Filters.eq("iso_num", payload.int1))
-                .setCascade(Boolean.FALSE)
-                .setAction(new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
-                        new VirnaPayload().setCallerstate("LOADPHASE2")));         
-                MongoLink.getInstance().getTask_descriptors().offer(ed);
-                break;
-                
-            case "LOADPHASE2" :
-                Entity etph2 = (Entity)payload.vobject;
-                etph2.loadChildren(false, new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
-                        new VirnaPayload().setCallerstate("LOADPHASE3"))); 
-                break;
-                
-            case "LOADPHASE3" :
-                Entity et = (Entity)payload.vobject;
-                et.loadChildren(false, null);
-                
-                setIsotherm((Isotherm)et);
-                updateIsothermChart();
-                break;
-          
+            try {
+                Long lid = Long.parseLong(sid);
+                appctrl.processSignal(new SMTraffic(0l, 0l, 0, "LOADISOVIEW", this.getClass(),
+                                           new VirnaPayload()
+                                                    .setCallerstate("LOADPHASE1")
+                                                    .setLong1(lid)
+                                                    .setInt1(10))); 
+            } catch (NumberFormatException ex) {
+                LOG.severe("Severe !!!");
+            }
+            
+            
+        }
+        else{
+            switch(substate){
+            
+                case "ASKUSER" :
+                    suid = 1615509387066L;
+                    appctrl.processSignal(new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
+                                       new VirnaPayload()
+                                                .setCallerstate("LOADPHASE1")
+                                                .setLong1(suid)
+                                                .setInt1(10)));  
+                    break;
+
+                case "LOADPHASE1" :
+                    EntityDescriptor ed = new EntityDescriptor()
+                    .setClazz(Isotherm.class)
+                    .setBson(Filters.eq("iso_num", payload.int1))
+                    .setCascade(Boolean.FALSE)
+                    .setAction(new SMTraffic(0l, 0l, 0, "LOADISOVIEW", this.getClass(),
+                            new VirnaPayload().setCallerstate("LOADPHASE2")));         
+                    MongoLink.getInstance().getTask_descriptors().offer(ed);
+                    break;
+
+                case "LOADPHASE2" :
+                    Entity etph2 = (Entity)payload.vobject;
+                    etph2.loadChildren(false, new SMTraffic(0l, 0l, 0, "LOADISOVIEW", this.getClass(),
+                            new VirnaPayload().setCallerstate("LOADPHASE3"))); 
+                    break;
+
+                case "LOADPHASE3" :
+                    Entity et = (Entity)payload.vobject;
+                    et.loadChildren(false, null);
+
+                    setIsotherm((Isotherm)et);
+                    updateIsothermChart();
+                    break;
+
+            }
+         
         }
         
         return true;
@@ -443,6 +456,7 @@ public class ViewisoTask extends BaseAnaTask {
         
         VirnaPayload payload = smm.getPayload();
         String substate = payload.getCallerstate();
+        
     
         switch(substate){
             

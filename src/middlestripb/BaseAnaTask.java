@@ -18,8 +18,9 @@ import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.chart.XYChart;
 
 /**
  *
@@ -207,4 +208,16 @@ public class BaseAnaTask {
     public void setCurrent_taskstate(String state) {
         this.current_taskstate = taskstates.get(state);
     }
+    
+    
+    public void geIsoTimeDomainPoints() {
+        
+    }
+    
+    public ObservableList<XYChart.Data<Number, Number>> getIsoDataDomainPoints(boolean adsorption, boolean ppo, boolean volg) {
+       return null;
+    }
+    
+    
+    
 }
