@@ -62,7 +62,7 @@
                         <Insets top="10.0" />
                      </padding>
                   </VBox>
-                  <VBox style="-fx-border-color: white;" HBox.hgrow="ALWAYS">
+                  <VBox fx:id="appvbox" style="-fx-border-color: white;" HBox.hgrow="ALWAYS">
                      <children>
                         <HBox fx:id="toppane" prefHeight="200.0" style="-fx-background-color: transparent;">
                            <children>
@@ -79,17 +79,17 @@
                               <Insets />
                            </VBox.margin>
                         </HBox>
-                        <AnchorPane prefHeight="500.0" style="-fx-border-color: white;">
+                        <AnchorPane fx:id="middlepane" prefHeight="500.0" style="-fx-border-color: white;">
                            <children>
                               <SplitPane fx:id="opsplit" dividerPositions="0.6, 0.5" layoutX="-8.0" layoutY="-8.0" prefHeight="502.0" prefWidth="1700.0" style="-fx-border-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <items>
-                                    <HiddenSidesPane fx:id="mainchartpane" animationDuration="100.0ms" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="666.0" style="-fx-background-color: white; -fx-border-color: white;" triggerDistance="20.0">
+                                    <HiddenSidesPane fx:id="mainhspane" animationDuration="100.0ms" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="666.0" style="-fx-background-color: white; -fx-border-color: white;" triggerDistance="20.0">
                                        <opaqueInsets>
                                           <Insets />
                                        </opaqueInsets>
                                     </HiddenSidesPane>
                                     <StackPane fx:id="infopane" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="350.0" style="-fx-background-color: white;" />
-                                    <HiddenSidesPane fx:id="auxpane" prefHeight="500.0" prefWidth="604.0" style="-fx-background-color: white;" />
+                                    <HiddenSidesPane fx:id="auxhspane" prefHeight="500.0" prefWidth="604.0" style="-fx-background-color: white;" />
                                 </items>
                               </SplitPane>
                            </children>

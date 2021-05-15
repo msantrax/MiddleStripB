@@ -21,7 +21,6 @@
     "param3": 0.0
   },
   
-  
   "startevent_input1": {
     "callstate": "SHOWQUESTIONDIALOG",
     "statecmd": "",
@@ -136,6 +135,7 @@
     "param2": 30.0,
     "param3": 0.0
   },
+  
   "startevent_reset_yaxis": {
     "callstate": "CONFIGAXIS",
     "statecmd": "UPDATEY",
@@ -157,6 +157,7 @@
     "param2": 1000.0,
     "param3": 0.0
   },
+  
   "startevent_reset_companionaxis": {
     "callstate": "CONFIGAXIS",
     "statecmd": "UPDATECOMPANION",
@@ -178,6 +179,7 @@
     "param2": 0.5,
     "param3": 0.0
   },
+  
   "startevent_set_dp_rangeband": {
     "callstate": "SETRANGEBAND",
     "statecmd": "SETY",

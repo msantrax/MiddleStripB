@@ -754,62 +754,6 @@ public class Controller implements SignalListener, TickListener, VirnaServicePro
 // ============================================== ISOTHERM SERVIVES ============================================================    
     
     
-    @smstate (state = "LOADISO")
-    public boolean st_loadIso(SMTraffic smm){
-        
-        VirnaPayload payload = smm.getPayload();
-        String substate = payload.getCallerstate();
-        
-        Long suid = 0L ;
-        
-        switch(substate){
-            
-            case "ASKUSER" :
-                suid = 1615509387066L;
-                processSignal(new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
-                                   new VirnaPayload()
-                                            .setCallerstate("LOADPHASE1")
-                                            .setLong1(suid)
-                                            .setInt1(10)));  
-                break;
-            
-            case "LOADPHASE1" :
-                EntityDescriptor ed = new EntityDescriptor()
-                .setClazz(Isotherm.class)
-                .setBson(Filters.eq("iso_num", payload.int1))
-                .setCascade(Boolean.FALSE)
-                .setAction(new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
-                        new VirnaPayload().setCallerstate("LOADPHASE2")));         
-                mongolink.getTask_descriptors().offer(ed);
-                break;
-                
-            case "LOADPHASE2" :
-                Entity etph2 = (Entity)payload.vobject;
-                etph2.loadChildren(false, new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
-                        new VirnaPayload().setCallerstate("LOADPHASE3"))); 
-                break;
-                
-            case "LOADPHASE3" :
-                Entity et = (Entity)payload.vobject;
-                et.loadChildren(false, null);
-                context.setIsotherm((Isotherm)et);
-                anct.updateIsothermChart();
-                // Load Isotherm time domain points
-                context.geIsoTimeDomainPoints();
-                break;
-          
-        }
-        
-        return true;
-    }
-    
-    @smstate (state = "UPDATEISOTHERMCHART")
-    public boolean st_updateIsothermChart(SMTraffic smm){
-        
-        //log.info(String.format("Loading Chart  %s ", "TESTE"));
-        anct.updateIsothermChart();
-        return true;
-    }
     
     
     @smstate (state = "RESETCHARTS")
@@ -822,6 +766,8 @@ public class Controller implements SignalListener, TickListener, VirnaServicePro
         return true;
     }
 
+    
+    
     
     // ============================================== DUMMY TEST STATES============================================================    
     

@@ -9,6 +9,7 @@ import com.opus.glyphs.FontAwesomeIcon;
 import com.opus.glyphs.GlyphIcon;
 import com.opus.glyphs.GlyphsBuilder;
 import java.util.logging.Logger;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
@@ -69,9 +70,19 @@ public class RootTaskController extends AnchorPane {
  
         
         lb_autoreport.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.PAUSE, "black", 1.5));
+        
+        
         lb_autotransmit.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.PAUSE, "black", 1.5));
         lb_xducercal.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.CHECK, "green", 1.5));
         lb_sampleholdercal.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.CHECK, "green", 1.5));
+        lb_sampleholdercal.setOnMousePressed(new EventHandler<MouseEvent>(){
+                @Override 
+                public void handle(MouseEvent event) {
+                    LOG.info(String.format("Cell calibration called"));
+ 
+                }  
+            });   
+        
         lb_controlstandardcal.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.CLOSE, "red", 1.5));
         
     }
@@ -137,6 +148,9 @@ public class RootTaskController extends AnchorPane {
         if (failed) LOG.warning(String.format("Failed to set Control Painel buttom %s with %s", phase, status));
         
     }
+    
+    
+    
     
     
     

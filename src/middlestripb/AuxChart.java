@@ -146,7 +146,7 @@ public class AuxChart implements SignalListener{
     
             
             for (String skey : cd.series.keySet()){
-                if (skey.contains("main")){
+                if (skey.contains("main") || skey.contains("Doses")){
                     ObservableList<XYChart.Data<Number, Number>> serie = cd.series.get(skey);
                     main_series = new XYChart.Series<>(skey, serie);
                     ctx.auxmain_series = main_series.getData();
@@ -194,8 +194,10 @@ public class AuxChart implements SignalListener{
                         suppChart.getData().add((javafx.scene.chart.XYChart.Series<Number, Number>)companion_series);
                     }
                 }
-         
                 getChartPane().getOverlayCharts().add(suppChart);
+            }
+            else{
+                
             }
             
             if (companion_series != null){

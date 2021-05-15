@@ -1,0 +1,70 @@
+{
+  "TASKINIT": {
+    "callstate": "TASKIDLE",
+    "statecmd": "",
+    "realm": "viewisotask",
+    "statetype": "CMD",
+    "notifymessage": "Taskinit  @ checkP0 task is on !!!",
+    "logmessage": "",
+    "imediate": "viewisotask_snackinit",
+    "failed": "",
+    "timedout": "",
+    "timeout": 0,
+    "loopcount": 0,
+    "load": "",
+    "loadtype": "",
+    "flag": false,
+    "sparam1": "",
+    "sparam2": "",
+    "param1": 0.0,
+    "param2": 0.0,
+    "param3": 0.0
+    
+  },
+  
+  "SETAUTO_RESET": {
+    "callstate": "SETAUTO",
+    "statecmd": "RESTARTINSTRU",
+    "realm": "roottask",
+    "statetype": "CMD",
+    "notifymessage": "Setauto @ Root task...",
+    "logmessage": "",
+    "imediate": "",
+    "failed": "",
+    "timedout": "TASKTIMERCALLBACK",
+    "timeout": 3000,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "sparam1": "",
+    "sparam2": "",
+    "param1": 0.0,
+    "param2": 0.0,
+    "param3": 0.0
+  },
+  
+  "viewisotask_snackinit": {
+    "callstate": "SHOWSNACK",
+    "statecmd": "",
+    "realm": "viewisotask",
+    "statetype": "CMD",
+    "notifymessage": "Viewiso Task is doing initial setup",
+    "logmessage": "",
+    "imediate": "",
+    "failed": "",
+    "timedout": "",
+    "timeout": 2000,
+    "loopcount": 0,
+    "load": {},
+    "loadtype": "",
+    "flag": false,
+    "sparam1": "",
+    "sparam2": "",
+    "param1": 0.0,
+    "param2": 0.0,
+    "param3": 0.0
+  }
+  
+  
+}

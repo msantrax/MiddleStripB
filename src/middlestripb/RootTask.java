@@ -89,23 +89,33 @@ public class RootTask extends BaseAnaTask {
         super.Go();
     }
     
+    
+    
     @Override
     public void Restart(){
-        super.Go();
         FX1Controller anct = ctx.getFXController();
-//        anct.showInfoPane("asvpdevice");
-//        anct.showMainChart(controlpane);
+        
+        super.Go();
+        
+        anct.showInfoPane("asvpdevice");
+        
+        anct.showMainChart(controlpane);
+        
+        
+        
+        
         auxchart = anct.getAuxchart(); 
         auxchart.refreshChart(taskid);
         
         // Setup the journal
         if (journal == null){
-            journal = new JournalSideNode(Side.TOP, anct.getAuxpane());
+            journal = new JournalSideNode(Side.TOP, anct.getAuxhspane());
             ctx.journals.put(this, journal);   
             journal.addEntry("Root Task is initializing...");
         }
+        
         ctx.current_journal = journal;
-        ctx.getFXController().getAuxpane().setTop(journal);
+        ctx.getFXController().getAuxhspane().setTop(journal);
         AuxChartDescriptor cd = ctx.auxcharts.get(taskid);               
         
         
@@ -123,9 +133,7 @@ public class RootTask extends BaseAnaTask {
                 auxchart = fx1.getAuxchart(); 
             });    
         }
-        
-        
-        
+
         SMTraffic nxt = goNext("SETAUTO_RESET");
         if (nxt != null){
             Controller.getInstance().processSignal(nxt);

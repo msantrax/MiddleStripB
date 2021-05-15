@@ -34,7 +34,7 @@
          </tooltip>
       </Label>
       <Label fx:id="lb_xducercal" graphicTextGap="10.0" layoutX="367.0" layoutY="239.0" prefWidth="200.0" styleClass="controlpanelbuttonsmall" text="Transducer Calibration" AnchorPane.bottomAnchor="130.0" AnchorPane.rightAnchor="55.0" />
-      <Label fx:id="lb_sampleholdercal" graphicTextGap="10.0" layoutX="367.0" layoutY="282.0" prefWidth="200.0" styleClass="controlpanelbuttonsmall" text="Sample Holder Calibration" AnchorPane.bottomAnchor="90.0" AnchorPane.rightAnchor="55.0" />
+      <Label fx:id="lb_sampleholdercal" graphicTextGap="10.0" layoutX="367.0" layoutY="282.0" prefWidth="200.0" styleClass="controlpanelbuttonsmall" text="Sample Cell Calibration" AnchorPane.bottomAnchor="90.0" AnchorPane.rightAnchor="55.0" />
       <Label fx:id="lb_controlstandardcal" graphicTextGap="10.0" layoutX="367.0" layoutY="327.0" prefWidth="200.0" styleClass="controlpanelbuttonsmall" text="Control Standard" AnchorPane.bottomAnchor="50.0" AnchorPane.rightAnchor="55.0" />
       <Label alignment="CENTER" layoutX="417.0" layoutY="209.0" prefWidth="240.0" style="-fx-border-color: white white dodgerblue white; -fx-text-fill: dodgerblue;" text="Traceability" textAlignment="CENTER" AnchorPane.bottomAnchor="160.0" AnchorPane.rightAnchor="40.0">
          <font>

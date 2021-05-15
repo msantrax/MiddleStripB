@@ -44,6 +44,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
@@ -66,41 +67,56 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
 
     private static final Logger LOG = Logger.getLogger(FX1Controller.class.getName());
     
-    private String profilepath = ""; 
-    private Controller appctrl = Controller.getInstance();
-    
-    private IsothermChart isothermchart; 
-    private AuxChart auxchart;
-    
-    private XYChartPane chartpane;
-    private XYChartPane auxchartpane;
-    
-    private ASVPDevice asvpdevice;
+    // Debug flag to prevent load of unwanted graph panes
+    public final class SpeedLoad {
+        public static final boolean ON = true;
+    } 
 
-    private LinkedHashMap<String, AnchorPane> infopanes;
-    private String current_infopane;
+   
+    private String profilepath = ""; 
     
+    
+    private Controller appctrl = Controller.getInstance();
+    private ASVPDevice asvpdevice;
     private Context ctx;
     private MongoLink mongolink;
     
     
+    private AuxChart auxchart;
+    private XYChartPane auxchartpane;
+    
+  
+    public LinkedHashMap<String, AnchorPane> infopanes;
+    public String current_infopane;
+    
+   
     private Parent preppane;
     private PrepController prepctrl;
+ 
     
     private ToggleButton station1bt;
     private ToggleButton station2bt;
     
     
     
-    @FXML
-    private ResourceBundle resources;
+//    @FXML
+//    private ResourceBundle resources;
+//
+//    @FXML
+//    private URL location;
+//
+//    @FXML
+//    private Label lb_profile;
 
+    
     @FXML
-    private URL location;
-
+    private StackPane rootpane;
+    
+    
+    // Sidebar - Main operations buttons
     @FXML
-    private Label lb_profile;
-
+    private VBox sidebar;
+    
     @FXML
     private Label sidebar_btcycle;
 
@@ -116,64 +132,69 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     @FXML
     private Label sidebar_btloadfile;
 
+    
+    
+    // Top Pane -------------------------------------- Sample info
     @FXML
     private HBox toppane;
     
     @FXML
     private VBox tpn_naveg;
-
-    @FXML
-    private VBox sidebar;
-    
     
     @FXML
     private HiddenSidesPane tophspane;
     
     
+    // MiddlePane ------------------------------------ App main operations dock
     @FXML
     private SplitPane opsplit;
 
     @FXML
-    private HiddenSidesPane mainchartpane;
+    private HiddenSidesPane mainhspane;
 
     @FXML
     private StackPane infopane;
 
     @FXML
-    private HiddenSidesPane auxpane;
+    private HiddenSidesPane auxhspane;
 
     
+    
+    // BottomPane ------------------------------------ Secondary operations dock
+    @FXML
+    private VBox bpn_naveg; // VBox to hold the navigation icons
 
     @FXML
-    private StackPane rootpane;
+    private HiddenSidesPane bpn_main; // Placeholder to preparation stuff
+
+    @FXML
+    private AnchorPane bpn_sinoptic; // placeholder to sinoptic panel
     
+    
+    
+    
+    // Support widgets ------------------------------------ Placeholders to utility widgets & dialogs
+    // Snack popup dialog support
     @FXML
     private TextFlow snack;
     
     @FXML
     private Text snacktext;
     
+    
     @FXML
     private AnchorPane inputdialog;
     
     
-    @FXML
-    private VBox bpn_naveg;
-
-    @FXML
-    private HiddenSidesPane bpn_main;
-
-    @FXML
-    private AnchorPane bpn_sinoptic;
+    
 
     
     
-    
+    // ============================================== Pane & Controller init =============================================
     public FX1Controller() {
         this.fxmlLoader = fxmlLoader; 
     }
-    
-    
+        
     public FX1Controller(FXMLLoader fxmlLoader) {
         this.fxmlLoader = fxmlLoader; 
     }
@@ -183,7 +204,6 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         this.fxmlLoader = fxmlLoader; 
         this.profilepath = profilepath;
     }
-    
 
     private static FX1Controller instance; 
     public static FX1Controller getInstance(){
@@ -196,146 +216,145 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        LOG.info(String.format("FX1Controller initializing with profile : %s", profilepath));
         
+//        LOG.info(String.format("FX1Controller initializing with profile : %s", profilepath));
+        
+
         ctx = Context.getInstance();
-        
-        Font exobold = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Exo-Bold.ttf").toExternalForm(), 10);
-        Font exo = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Exo-Regular.ttf").toExternalForm(), 10);
-        Font exothin = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Exo-Thin.ttf").toExternalForm(), 10);
-        
-        Font robotobold = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Roboto-Bold.ttf").toExternalForm(), 10);
-        Font roboto = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Roboto-Regular.ttf").toExternalForm(), 10);
+        // Apparently we should load fonts before use them on CSS -> TODO: Is that true ?
+        loadFonts();
         
         
+        // Init the sidebar main buttons -> TODO: Wouldn't be better to init them on code instead on FXML ?
         sidebar_btcycle.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.REFRESH, "black", 4));
         sidebar_btstore.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.DATABASE, "black", 4));
         sidebar_btreport.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.FILE_PDF_ALT, "black", 4));
         sidebar_btbroadcast.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.SHARE_ALT, "black", 4));
         sidebar_btloadfile.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.ARCHIVE, "black", 4));
   
+        // Disable to speed up load time if on development.
+//        loadUpperPane();
+//        loadBottomPane();
         
-//        FXMLLoader fxmlLoader;
-//        AnchorPane apane;
-//        
-//        // Load Preparation Panels
-//        try {
-//            fxmlLoader = new FXMLLoader(getClass().getResource("Prep.fxml"));
-//            preppane = fxmlLoader.load();
-//            prepctrl = fxmlLoader.<PrepController>getController();
-//        } catch (IOException ex) { 
-//            Logger.getLogger(RootTask.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        
-//        
-//        // Load Sample Panels
-//        try {
-//            URL spnl = getClass().getResource("SamplePanel.fxml");
-//            
-//            fxmlLoader = new FXMLLoader(spnl);
-//            apane = fxmlLoader.load();
-//            SamplePanelController sample1ctrl = fxmlLoader.<SamplePanelController>getController();
-//            sample1ctrl.setPane(apane);
-//            sample1ctrl.setPanelId("sample1");
-//            ctx.samplepanels.put(sample1ctrl.getPanelId(), sample1ctrl);
-//            
-//            
-//            fxmlLoader = new FXMLLoader(spnl);
-//            apane = fxmlLoader.load();
-//            SamplePanelController sample2ctrl = fxmlLoader.<SamplePanelController>getController();
-//            sample2ctrl.setPane(apane);
-//            sample2ctrl.setPanelId("sample2");
-//            ctx.samplepanels.put(sample2ctrl.getPanelId(), sample2ctrl);
-//            
-//            
-//        } catch (IOException ex) { 
-//            LOG.severe(String.format("Failed to load Sample Panels due %s", ex.getCause().getMessage()));
-//        }
-//        
-//        
-//        // Load SamplePanel Naveg Buttons  =================================================================
-//        ToggleGroup tg = new ToggleGroup();
-//        Tooltip tt;
-//        
-//        
-//        //
-//        Rectangle station1icon = new Rectangle(32, 60);
-//        station1icon.setFill(new ImagePattern(
-//                new Image(getClass().getClassLoader().getResource("middlestripb/station1.png").toExternalForm()), 
-//                0, 0, 1, 1, true));
-//        station1bt = new ToggleButton();
-//        station1bt.setGraphic(station1icon);
-//        station1bt.setId("fxf-prepbt");
-//        tt = new Tooltip("Show Analysis on Station 1");
-//        tt.setShowDelay(Duration.millis(500));
-//        station1bt.setTooltip(tt);
-//        tpn_naveg.getChildren().add(station1bt);
-//        station1bt.setToggleGroup(tg);
-//        station1bt.selectedProperty().addListener(((observable, oldValue, newValue) -> {
-//            if (!oldValue){
-////                LOG.info(String.format("sample1 selected"));
-//                sidebar.setStyle("-fx-effect: dropshadow(three-pass-box, blue, 10, 0, 3, 0);");
-//                tophspane.setContent(ctx.samplepanels.get("sample1").getPane());
-//                
-//            }
-//        }));
-//        
-//       
-//        Rectangle station2icon = new Rectangle(32, 60);
-//        station2icon.setFill(new ImagePattern(
-//                new Image(getClass().getClassLoader().getResource("middlestripb/station2.png").toExternalForm()), 
-//                0, 0, 1, 1, true));
-//        station2bt = new ToggleButton();
-//        station2bt.setGraphic(station2icon);
-//        station2bt.setId("fxf-prepbt");
-//        tt = new Tooltip("Show Analysis on Station 2");
-//        tt.setShowDelay(Duration.millis(500));
-//        station2bt.setTooltip(tt);
-//        tpn_naveg.getChildren().add(station2bt);
-//        station2bt.setToggleGroup(tg);
-//        station2bt.selectedProperty().addListener(((observable, oldValue, newValue) -> {
-//            if (!oldValue){
-////                LOG.info(String.format("sample2 selected"));
-//                sidebar.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 3, 0);");
-//                tophspane.setContent(ctx.samplepanels.get("sample2").getPane());
-//                
-//            }
-//        }));
-//        
-//        
-//        // Load Sinoptic Panel  ===================================================================================
-//        Rectangle sinop = new Rectangle(440, 150);
-//        sinop.setFill(new ImagePattern(
-//                new Image(getClass().getClassLoader().getResource("middlestripb/sinop.png").toExternalForm()), 
-//                0, 0, 1, 1, true)); 
-//        AnchorPane.setTopAnchor(sinop,20.0);
-//        AnchorPane.setLeftAnchor(sinop,0.0);
-//        bpn_sinoptic.getChildren().add(sinop);
-//              
-//        
-//        bpn_main.setContent(preppane);
-//        station1bt.setSelected(true);
-//        
-        
-
-        // Load InitBanner
-        Image inibanner = new Image(getClass().getClassLoader().getResource("middlestripb/asvpa.png").toExternalForm());
-        Rectangle initbanner = new Rectangle(284, 420);
-        initbanner.setFill(new ImagePattern(inibanner, 0, 0, 1, 1, true));
-        AnchorPane bannerpane = new AnchorPane(initbanner);
-        AnchorPane.setLeftAnchor(initbanner, 40.0);
-        AnchorPane.setTopAnchor(initbanner, 30.0);
-        bannerpane.getStyleClass().add("info-pane");
         
         infopanes = new LinkedHashMap<>();
-        infopanes.put("initbanner", bannerpane);
+        infopanes.put("initbanner", loadBanner());
       
         update();
+    
+    }
+    
+    private void loadUpperPane(){
+        
+        
+        FXMLLoader fxmlLoader;
+        AnchorPane apane;
+        
+        // Load Sample Panels
+        try {
+            URL spnl = getClass().getResource("SamplePanel.fxml");
+            
+            fxmlLoader = new FXMLLoader(spnl);
+            apane = fxmlLoader.load();
+            SamplePanelController sample1ctrl = fxmlLoader.<SamplePanelController>getController();
+            sample1ctrl.setPane(apane);
+            sample1ctrl.setPanelId("sample1");
+            ctx.samplepanels.put(sample1ctrl.getPanelId(), sample1ctrl);
+            
+            
+            fxmlLoader = new FXMLLoader(spnl);
+            apane = fxmlLoader.load();
+            SamplePanelController sample2ctrl = fxmlLoader.<SamplePanelController>getController();
+            sample2ctrl.setPane(apane);
+            sample2ctrl.setPanelId("sample2");
+            ctx.samplepanels.put(sample2ctrl.getPanelId(), sample2ctrl);
+            
+            
+        } catch (IOException ex) { 
+            LOG.severe(String.format("Failed to load Sample Panels due %s", ex.getCause().getMessage()));
+        }
+        
+        
+        // Load SamplePanel Naveg Buttons  =================================================================
+        ToggleGroup tg = new ToggleGroup();
+        Tooltip tt;
+        
+        
+        //
+        Rectangle station1icon = new Rectangle(32, 60);
+        station1icon.setFill(new ImagePattern(
+                new Image(getClass().getClassLoader().getResource("middlestripb/station1.png").toExternalForm()), 
+                0, 0, 1, 1, true));
+        station1bt = new ToggleButton();
+        station1bt.setGraphic(station1icon);
+        station1bt.setId("fxf-prepbt");
+        tt = new Tooltip("Show Analysis on Station 1");
+        tt.setShowDelay(Duration.millis(500));
+        station1bt.setTooltip(tt);
+        tpn_naveg.getChildren().add(station1bt);
+        station1bt.setToggleGroup(tg);
+        station1bt.selectedProperty().addListener(((observable, oldValue, newValue) -> {
+            if (!oldValue){
+//                LOG.info(String.format("sample1 selected"));
+                sidebar.setStyle("-fx-effect: dropshadow(three-pass-box, blue, 10, 0, 3, 0);");
+                tophspane.setContent(ctx.samplepanels.get("sample1").getPane());
+                
+            }
+        }));
+        
+       
+        Rectangle station2icon = new Rectangle(32, 60);
+        station2icon.setFill(new ImagePattern(
+                new Image(getClass().getClassLoader().getResource("middlestripb/station2.png").toExternalForm()), 
+                0, 0, 1, 1, true));
+        station2bt = new ToggleButton();
+        station2bt.setGraphic(station2icon);
+        station2bt.setId("fxf-prepbt");
+        tt = new Tooltip("Show Analysis on Station 2");
+        tt.setShowDelay(Duration.millis(500));
+        station2bt.setTooltip(tt);
+        tpn_naveg.getChildren().add(station2bt);
+        station2bt.setToggleGroup(tg);
+        station2bt.selectedProperty().addListener(((observable, oldValue, newValue) -> {
+            if (!oldValue){
+//                LOG.info(String.format("sample2 selected"));
+                sidebar.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 3, 0);");
+                tophspane.setContent(ctx.samplepanels.get("sample2").getPane());
+                
+            }
+        }));
+     
     }
     
     
-    
-    
+    private void loadBottomPane(){
+        
+        FXMLLoader fxmlLoader;
+        
+        // Load Preparation Panels
+        try {
+            fxmlLoader = new FXMLLoader(getClass().getResource("Prep.fxml"));
+            preppane = fxmlLoader.load();
+            prepctrl = fxmlLoader.<PrepController>getController();
+        } catch (IOException ex) { 
+            LOG.severe("Failed to load bottom pane");
+        }
+      
+        // Load Sinoptic Panel  ===================================================================================
+        Rectangle sinop = new Rectangle(440, 150);
+        sinop.setFill(new ImagePattern(
+                new Image(getClass().getClassLoader().getResource("middlestripb/sinop.png").toExternalForm()), 
+                0, 0, 1, 1, true)); 
+        AnchorPane.setTopAnchor(sinop,20.0);
+        AnchorPane.setLeftAnchor(sinop,0.0);
+        bpn_sinoptic.getChildren().add(sinop);
+              
+        
+        bpn_main.setContent(preppane);
+        
+        
+        
+    }
        
     @Override
     public void update(){
@@ -344,6 +363,8 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         mongolink = MongoLink.getInstance();
         asvpdevice = ASVPDevice.getInstance();
         appctrl.setFXANController(this);
+        ctx.setFXController(this);
+        
         
         vs = new ValidationSupport(); 
         validators = new LinkedHashMap<>();
@@ -357,7 +378,8 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         
         infopanes.put("asvpdevice", asvpdevctrl);
         infopanes.put("isotherminfo", new IsothermInfoController(this) );
-        infopanes.put("pointinfo", new PointInfoController(this) );           
+        infopanes.put("pointinfo", new PointInfoController(this) ); 
+        
         infopane.getChildren().addAll(infopanes.values());
         
         
@@ -366,19 +388,16 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         instance = this;
         
         asvpdevice.connect();
-        
-        ctx.current_anatask.Restart();
-       
+ 
     }
     
     
+    
+    
+    
+    
     public void loadMainCharts(){
-        
-        isothermchart = new IsothermChart(this);
-        chartpane = isothermchart.createCernChart();
-        chartpane.getStylesheets().add(getClass().getClassLoader().getResource("middlestripb/isochart.css").toExternalForm());
-        
-        
+    
         setAuxchart(new AuxChart());
         auxchartpane = getAuxchart().createCernChart();
         auxchartpane.getStylesheets().add(getClass().getClassLoader().getResource("middlestripb/auxchart.css").toExternalForm());
@@ -387,51 +406,46 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         ctx.switchTask ("roottask");
 //        ctx.journals.put(ctx.current_anatask, new JournalSideNode(Side.TOP, getAuxpane()));
 
-
-        ctx.setFXController(this);
         
         Platform.runLater(() -> {
             
             showInfoPane("initbanner");
             
-            chartpane.setMinWidth(mainchartpane.getWidth());
-            chartpane.setMinHeight(mainchartpane.getHeight());            
+//            mainchartpane.setMinWidth(mainhspane.getWidth());
+//            mainchartpane.setMinHeight(mainhspane.getHeight());            
             
-            mainchartpane.setContent(ctx.current_anatask.getMainPane());
+            mainhspane.setContent(ctx.current_anatask.getMainPane());
             
-            ChartsToolbar chtb = new ChartsToolbar(Side.LEFT, mainchartpane);
-            mainchartpane.setLeft(chtb);
+            ChartsToolbar chtb = new ChartsToolbar(Side.LEFT, mainhspane);
+            mainhspane.setLeft(chtb);
                       
             
-            auxchartpane.setMinWidth(getAuxpane().getWidth());
-            auxchartpane.setMinHeight(getAuxpane().getHeight());
-            getAuxpane().setContent(auxchartpane);
+            auxchartpane.setMinWidth(getAuxhspane().getWidth());
+            auxchartpane.setMinHeight(getAuxhspane().getHeight());
+            getAuxhspane().setContent(auxchartpane);
+            
 //            getAuxpane().setTop(ctx.journals.get(ctx.current_anatask));
             
-            
-//            prepctrl.loadCharts(bpn_main, bpn_naveg) ;
-
-                       
-//            String mes2 = "Virna7 Initial Config - Currente available tasks are :|CheckP01|BaseTask1|\tTask nr 3";
-//            String mes3 = "Connection with Antares Controller is";
-//            logsidenode.addEntry(mes2);
-//            logsidenode.addEntry(mes3);
-  
+            if (prepctrl != null) {
+                prepctrl.loadCharts(bpn_main, bpn_naveg);
+                station1bt.setSelected(true);
+            }
    
-            // Scan Controllers for machine states
+            
+            // Scan Controllers for app machine states
             appctrl.loadStates(AuxChart.class, this.auxchart);
             appctrl.loadStates(PrepController.class, this.prepctrl);
-     
             
+         
             
         });
     }
     
     
-    
+    // ========================================= Visualization & Plumbing Support ============================================== 
     public void showMainChart(Node content){
       
-        mainchartpane.setContent(content);
+        mainhspane.setContent(content);
     }
     
     
@@ -442,7 +456,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         }
     }
 
-    public void showInfoPane (String id){
+    public void showInfoPane(String id){
         
         clearInfoPanes();
         AnchorPane ap = infopanes.get(id);
@@ -453,76 +467,32 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     }
 
     
-    
-    @smstate (state = "ACTIVATEPOINT")
-    public boolean st_activatePoint(SMTraffic smm){
+    // ========================================= Auxiliary init functions ==================================================== 
+    private AnchorPane loadBanner(){
         
-        VirnaPayload payload = smm.getPayload();
-        String substate = payload.getCallerstate();
-    
-        switch(substate){
-            
-            case "REGISTERPOINT" :
-                PointInfoCTX ptctx = ctx.registerPoint(payload.double1, true);
-                if (ptctx != null){
-                    Point pt = ptctx.getPoint();
-                    if (pt.getDoses().get(0) instanceof Long){
-                        pt.loadChildren(false, new SMTraffic(0l, 0l, 0, "ACTIVATEPOINT", this.getClass(),
-                                                new VirnaPayload()
-                                                    .setDouble1(payload.double1)
-                                                    .setCallerstate("LOADPHASE3"))); 
-                    }
-                    else{
-                        appctrl.processSignal(new SMTraffic(0l, 0l, 0, "ACTIVATEPOINT", this.getClass(),
-                                                new VirnaPayload()
-                                                    .setCallerstate("PREPARECTX")
-                                                    .setDouble1(payload.double1) ));  
-                    }             
-                }
-                else{
-                    LOG.severe(" No point to register !!!");
-                }
-                break;
-                
-            case "LOADPHASE3" :
-                Entity ph3et = (Entity)payload.vobject;
-                ph3et.loadChildren(false, null);
-                appctrl.processSignal(new SMTraffic(0l, 0l, 0, "ACTIVATEPOINT", this.getClass(),
-                                                new VirnaPayload()
-                                                    .setCallerstate("UPDATEUI")
-                                                    .setDouble1(payload.double1) )); 
-                break;
-            
-            case "UPDATEUI" :
-                PointInfoCTX uptctx = ctx.updatePoint(payload.double1);
-                PointInfoController pic = (PointInfoController)infopanes.get("pointinfo");
-                uptctx.update();
-                pic.update(uptctx);
-                
-                if (!current_infopane.equals("pointinfo")){
-                    showInfoPane("pointinfo");
-                }
-                
-//                ctx.current_auxdescriptor = uptctx.chdesc;
-                getAuxchart().refreshChart("point");
-                
-        }
-    
-        return true;
-    }    
-     
-    
-    public void activatePoint (Double Pressure){
-        ctx.registerPoint(Pressure, true);    
+        // Load InitBanner
+        Image inibanner = new Image(getClass().getClassLoader().getResource("middlestripb/asvpa.png").toExternalForm());
+        Rectangle initbanner = new Rectangle(284, 420);
+        initbanner.setFill(new ImagePattern(inibanner, 0, 0, 1, 1, true));
+        AnchorPane bannerpane = new AnchorPane(initbanner);
+        AnchorPane.setLeftAnchor(initbanner, 40.0) ;
+        AnchorPane.setTopAnchor(initbanner, 30.0);
+        bannerpane.getStyleClass().add("info-pane");
+        
+        return bannerpane;
     }
     
     
     
-    public void updateIsothermChart(){
-        isothermchart.refreshChart();
-        showInfoPane("isotherminfo");
-        ctx.geIsoTimeDomainPoints();
-        getAuxchart().refreshChart("isotimedomain");
+    private void loadFonts(){
+        
+        Font exobold = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Exo-Bold.ttf").toExternalForm(), 10);
+        Font exo = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Exo-Regular.ttf").toExternalForm(), 10);
+        Font exothin = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Exo-Thin.ttf").toExternalForm(), 10);
+        
+        Font robotobold = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Roboto-Bold.ttf").toExternalForm(), 10);
+        Font roboto = Font.loadFont(getClass().getClassLoader().getResource("middlestripb/Roboto-Regular.ttf").toExternalForm(), 10);
+        
     }
     
     
@@ -962,10 +932,10 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                                    new VirnaPayload()));
         }
         else{
-//            ctx.switchTask("roottask");
+            ctx.switchTask("roottask");
             
-            showInfoPane("asvpdevice");
-            ctx.switchTask("checkp0task");
+//            showInfoPane("asvpdevice");
+//            ctx.switchTask("checkp0task");
         }
         
        
@@ -1072,8 +1042,22 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     
     @FXML
     void btloadfile_action(MouseEvent event) {
-        appctrl.processSignal(new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
-                                   new VirnaPayload().setCallerstate("ASKUSER")));
+        
+        ViewisoTask vit = (ViewisoTask)ctx.anatasks.get("viewisotask");
+        
+        if ( vit == null){
+            vit = new ViewisoTask(null, ctx);
+            ctx.anatasks.put("viewisotask", vit );
+            appctrl.loadStates(ViewisoTask.class, vit);
+            vit.prepareGo();
+        }
+        
+        vit.Restart();
+   
+        
+        
+//        appctrl.processSignal(new SMTraffic(0l, 0l, 0, "LOADISO", this.getClass(),
+//                                   new VirnaPayload().setCallerstate("ASKUSER")));
         
     }
    
@@ -1112,8 +1096,8 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         this.auxchart = auxchart;
     }
 
-    public HiddenSidesPane getAuxpane() {
-        return auxpane;
+    public HiddenSidesPane getAuxhspane() {
+        return auxhspane;
     }
 
     

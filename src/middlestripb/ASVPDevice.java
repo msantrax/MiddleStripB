@@ -252,9 +252,7 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
             BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
             TaskState tst = tsk.getCurrent_taskstate();
             AuxChartDescriptor cd = ctx.auxcharts.get(tsk.taskid);
-            
-            
-            
+  
             Platform.runLater(() -> {
                 XValueIndicator<Number> indicator = AuxChartDescriptor.XValIndicatorFactory (
                         "showindicator1", "Stab Init", tsk.current_dts, null);

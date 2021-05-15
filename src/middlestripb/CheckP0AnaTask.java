@@ -70,12 +70,12 @@ public class CheckP0AnaTask extends BaseAnaTask {
         
         // Setup the journal
         if (journal == null){
-            journal = new JournalSideNode(Side.TOP, ctx.getFXController().getAuxpane());
+            journal = new JournalSideNode(Side.TOP, ctx.getFXController().getAuxhspane());
             ctx.journals.put(this, journal);   
             journal.addEntry("CheckP0 Task (Determine Zero&ATM pressures) is initializing...");
         }
         ctx.current_journal = journal;
-        ctx.getFXController().getAuxpane().setTop(journal);
+        ctx.getFXController().getAuxhspane().setTop(journal);
         
         if (dataframe == null){
             asvpdev.loadTaskConfig(CalcP0.class, "checkp0task", 1617981872798l);
@@ -83,6 +83,7 @@ public class CheckP0AnaTask extends BaseAnaTask {
         else{
             Go();
         }
+        
     }
     
     @Override
