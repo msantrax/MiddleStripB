@@ -271,7 +271,6 @@ public class Controller implements SignalListener, TickListener, VirnaServicePro
             ArrayList<SMEvent> removelist = new ArrayList<>();
             
             for (String smkey :  smeventlisteners.keySet()){
-                
                 for (SMEvent smevt : smeventlisteners.get(smkey)){
                     if (smevt.getTask() == task){
                         // Yes , he has
@@ -295,7 +294,6 @@ public class Controller implements SignalListener, TickListener, VirnaServicePro
             for (SMEvent smevt : smevtpool){
                 if (smevt.getTask() == task){
                     // Yes , he has
-                    
                     removelist.add(smevt);
                 }
                 else{
@@ -491,7 +489,7 @@ public class Controller implements SignalListener, TickListener, VirnaServicePro
                 }
                 else{
                     statesptr.put(annot.state(), stdesc);
-//                    log.info(String.format("Registering state %s @ %s", stdesc.getSID(), stdesc.getClazz().getName()));
+                    log.info(String.format("Registering state %s @ %s", stdesc.getSID(), stdesc.getClazz().getName()));
                 }
             }
         }
@@ -694,9 +692,26 @@ public class Controller implements SignalListener, TickListener, VirnaServicePro
     @smstate (state = "TASKIDLE")
     public boolean st_taskIdle(SMTraffic smm){
         
-        VirnaPayload payload = smm.getPayload();
+        VirnaPayload pld = smm.getPayload();
         
-        log.info(String.format("Task Idle"));
+        if (pld.vobject instanceof BaseAnaTask){
+            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
+            TaskState tst = tsk.getCurrent_taskstate();
+            // Correct if we're comming from event dispatch
+            if (pld.getCaller() != null){
+                tst = (TaskState)pld.getCaller();
+            }
+
+            SMTraffic nxt = tsk.goNext(tst.getImediate());
+            if (nxt != null){
+                processSignal(nxt);
+            }
+            log.info(String.format("Task Idle was called from script @ %s", tsk.taskid));
+                
+        }
+        else{
+            log.info(String.format("Task Idle"));
+        }
         
         return true;
     }

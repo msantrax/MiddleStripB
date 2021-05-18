@@ -216,9 +216,6 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
-//        LOG.info(String.format("FX1Controller initializing with profile : %s", profilepath));
-        
 
         ctx = Context.getInstance();
         // Apparently we should load fonts before use them on CSS -> TODO: Is that true ?
@@ -233,13 +230,15 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         sidebar_btloadfile.setGraphic(GlyphsBuilder.getAwesomeGlyph(FontAwesomeIcon.ARCHIVE, "black", 4));
   
         // Disable to speed up load time if on development.
-//        loadUpperPane();
-//        loadBottomPane();
+        loadUpperPane();
+        loadBottomPane();
         
         
         infopanes = new LinkedHashMap<>();
         infopanes.put("initbanner", loadBanner());
-      
+        
+        
+        
         update();
     
     }
@@ -351,15 +350,12 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
               
         
         bpn_main.setContent(preppane);
-        
-        
-        
+    
     }
        
     @Override
     public void update(){
       
-        
         mongolink = MongoLink.getInstance();
         asvpdevice = ASVPDevice.getInstance();
         appctrl.setFXANController(this);
@@ -370,18 +366,18 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         validators = new LinkedHashMap<>();
         
         setUIState("FRESHANALYSIS");
-        
-        
+               
         ASVPDeviceController asvpdevctrl = new ASVPDeviceController(appctrl, this, asvpdevice);
         asvpdevice.setASVPDevController(asvpdevctrl);
  
-        
         infopanes.put("asvpdevice", asvpdevctrl);
-        infopanes.put("isotherminfo", new IsothermInfoController(this) );
-        infopanes.put("pointinfo", new PointInfoController(this) ); 
+//        infopanes.put("isotherminfo", new IsothermInfoController(this) );
+//        infopanes.put("pointinfo", new PointInfoController(this) ); 
         
-        infopane.getChildren().addAll(infopanes.values());
+        getInfopane().getChildren().addAll(infopanes.values());
         
+        
+        ctx.initDefaultTasks();
         
         loadMainCharts();
         
@@ -391,11 +387,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
  
     }
     
-    
-    
-    
-    
-    
+        
     public void loadMainCharts(){
     
         setAuxchart(new AuxChart());
@@ -405,7 +397,6 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                
         ctx.switchTask ("roottask");
 //        ctx.journals.put(ctx.current_anatask, new JournalSideNode(Side.TOP, getAuxpane()));
-
         
         Platform.runLater(() -> {
             
@@ -431,13 +422,10 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                 station1bt.setSelected(true);
             }
    
-            
             // Scan Controllers for app machine states
             appctrl.loadStates(AuxChart.class, this.auxchart);
             appctrl.loadStates(PrepController.class, this.prepctrl);
-            
-         
-            
+                        
         });
     }
     
@@ -1100,6 +1088,10 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
 
     public HiddenSidesPane getAuxhspane() {
         return auxhspane;
+    }
+
+    public StackPane getInfopane() {
+        return infopane;
     }
 
     

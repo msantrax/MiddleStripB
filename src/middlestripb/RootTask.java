@@ -5,10 +5,12 @@
  */
 package middlestripb;
 
+import cern.extjfx.chart.plugins.XValueIndicator;
 import com.google.gson.reflect.TypeToken;
 import com.opus.syssupport.PicnoUtils;
 import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.VirnaPayload;
+import com.opus.syssupport.smstate;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
@@ -32,7 +34,7 @@ import javafx.scene.shape.Rectangle;
  */
 public class RootTask extends BaseAnaTask {
 
-    private static final Logger LOG = Logger.getLogger(RootTask.class.getName());
+    private static final Logger log = Logger.getLogger(RootTask.class.getName());
         
     private AuxChartDescriptor chdesc;
     
@@ -42,14 +44,10 @@ public class RootTask extends BaseAnaTask {
     
     public Parent controlpane;
     public RootTaskController rtctrl;
-    
-    
     private JournalSideNode journal;
    
     
-    
-    
-    public RootTask(ASVPDevice asvpdev, Context ctx) {
+    public RootTask(ASVPDevice asvpdev, Context ctx, String script) {
         
         super(asvpdev, ctx);
         taskid = "roottask";
@@ -66,7 +64,10 @@ public class RootTask extends BaseAnaTask {
             Logger.getLogger(RootTask.class.getName()).log(Level.SEVERE, null, ex);
         }
    
-        this.initStates();
+        Controller appctrl = Controller.getInstance();
+        appctrl.loadStates(RootTask.class, this);
+        
+        this.initStates(script);
         
     }
 
@@ -85,7 +86,6 @@ public class RootTask extends BaseAnaTask {
     
     @Override
     public void prepareGo(){ 
-        
         super.Go();
     }
     
@@ -100,10 +100,7 @@ public class RootTask extends BaseAnaTask {
         anct.showInfoPane("asvpdevice");
         
         anct.showMainChart(controlpane);
-        
-        
-        
-        
+  
         auxchart = anct.getAuxchart(); 
         auxchart.refreshChart(taskid);
         
@@ -120,7 +117,8 @@ public class RootTask extends BaseAnaTask {
         
         
         Go();
-      
+  
+        
     }
     
     
@@ -134,56 +132,25 @@ public class RootTask extends BaseAnaTask {
             });    
         }
 
-        SMTraffic nxt = goNext("SETAUTO_RESET");
+        SMTraffic nxt = goNext("TASKINIT");
         if (nxt != null){
             Controller.getInstance().processSignal(nxt);
         }
         
     }
     
-   
+    
+    
     @Override
-    public void initStates(){
+    public void initStates(String script){
         
-        super.initStates();
+        super.initStates(script);
         
         setCurrent_taskstate(getTaskstates().get("TASKINIT"));
 
     }
     
-    
-    @Override
-    public SMTraffic goNext(String nextstate){   
-       
-        //LOG.info(String.format("CheckP0 going next state : %s", nextstate));
-        setCurrent_taskstate(getTaskstates().get(nextstate));
-        if (getCurrent_taskstate() != null){
-            return new SMTraffic(0l, 0l, 0, getCurrent_taskstate().getCallstate(), this.getClass(),
-                                    new VirnaPayload()
-                                        .setObject(this)
-                                        .setString(getCurrent_taskstate().getStatecmd())
-                                );
-        }
-        return null;
-    }
-    
-    @Override
-    public SMTraffic getNext(String nextstate){   
-       
-        //LOG.info(String.format("CheckP0 going next state : %s", nextstate));
-        TaskState taskstate = getTaskstates().get(nextstate);
-        if (taskstate != null){
-            return new SMTraffic(0l, 0l, 0, taskstate.getCallstate(), this.getClass(),
-                                    new VirnaPayload()
-                                        .setObjectType(nextstate)
-                                        .setObject(this)
-                                        .setString(taskstate.getStatecmd())
-                                );
-        }
-        return null;
-    }
-    
-    
+ 
     
     @Override
     public boolean createGraph(Boolean clear) {
@@ -193,7 +160,7 @@ public class RootTask extends BaseAnaTask {
         
         if (chdesc == null){
             chdesc = new AuxChartDescriptor();
-            chdesc.overlay.label.setText("Time Domain Chart");
+            chdesc.overlay.label.setText("Root aux chart");
             chdesc.overlay.clearMessages();
         }
         else if (!chdesc.dirty){
@@ -224,7 +191,6 @@ public class RootTask extends BaseAnaTask {
 //        chdesc.auxlabel = "Delta P";
 //        chdesc.series.put("companion_data", FXCollections.observableArrayList());
         
-   
         chdesc.dirty = false;
         ctx.auxcharts.put(this.taskid, chdesc);
         return true;
@@ -232,6 +198,99 @@ public class RootTask extends BaseAnaTask {
     }
     
     
+    // ================================================= SERVICE STATES ========================================================
+    
+    @smstate (state = "CALLSCRIPT")
+    public boolean st_callScript(SMTraffic smm){
+        
+        VirnaPayload pld = smm.getPayload();
+        
+        if (pld.vobject instanceof BaseAnaTask){
+            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
+            TaskState tst = tsk.getCurrent_taskstate();
+            
+            loadScript(tst.getStatecmd());
+            
+            
+            SMTraffic nxt = tsk.goNext(tst.getImediate());
+            
+            if (nxt != null){
+                Controller.getInstance().processSignal(nxt);
+            }
+        }
+        else{
+            log.info(String.format("Notify Aux"));
+        }
+    
+        return true; 
+    }
+    
+    
+    
+    
+    
+    
+    
+    @smstate (state = "ISP0UPDATED")
+    public boolean st_isP0Updated(SMTraffic smm){
+        
+        VirnaPayload pld = smm.getPayload();
+        
+        if (pld.vobject instanceof BaseAnaTask){
+            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
+            TaskState tst = tsk.getCurrent_taskstate();
+            
+            
+            SMTraffic nxt = tsk.goNext(tst.getImediate());
+            
+            if (nxt != null){
+                Controller.getInstance().processSignal(nxt);
+            }
+        }
+        else{
+            log.info(String.format("Notify Aux"));
+        }
+    
+        return true;
+     
+    }
   
 }
 
+
+
+
+
+   
+//    @Override
+//    public SMTraffic goNext(String nextstate){   
+//       
+//        //LOG.info(String.format("CheckP0 going next state : %s", nextstate));
+//        setCurrent_taskstate(getTaskstates().get(nextstate));
+//        if (getCurrent_taskstate() != null){
+//            return new SMTraffic(0l, 0l, 0, getCurrent_taskstate().getCallstate(), this.getClass(),
+//                                    new VirnaPayload()
+//                                        .setObject(this)
+//                                        .setString(getCurrent_taskstate().getStatecmd())
+//                                );
+//        }
+//        return null;
+//    }
+//    
+//    @Override
+//    public SMTraffic getNext(String nextstate){   
+//       
+//        //LOG.info(String.format("CheckP0 going next state : %s", nextstate));
+//        TaskState taskstate = getTaskstates().get(nextstate);
+//        if (taskstate != null){
+//            return new SMTraffic(0l, 0l, 0, taskstate.getCallstate(), this.getClass(),
+//                                    new VirnaPayload()
+//                                        .setObjectType(nextstate)
+//                                        .setObject(this)
+//                                        .setString(taskstate.getStatecmd())
+//                                );
+//        }
+//        return null;
+//    }
+//    
+    

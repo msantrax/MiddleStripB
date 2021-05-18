@@ -50,12 +50,13 @@ public class CheckP0AnaTask extends BaseAnaTask {
     
     
     
-    public CheckP0AnaTask(ASVPDevice asvpdev, Context ctx) {
+    public CheckP0AnaTask(ASVPDevice asvpdev, Context ctx, String script) {
         
         super(asvpdev, ctx);
         taskid = "checkp0";
         
-        this.initStates();
+        this.initStates(script);
+        
  
 //        dtfr = CalcP0.getInstance(1L);
 //        dtfr.setDesc("Iniciado via codigo java");
@@ -133,9 +134,9 @@ public class CheckP0AnaTask extends BaseAnaTask {
     
    
     @Override
-    public void initStates(){
+    public void initStates(String script){
         
-        super.initStates();
+        super.initStates(script);
         
         
 //        varpool.Push("MESSAGE1", varpool.new VarInfo("VarPool Message 1", "String"));
@@ -164,6 +165,7 @@ public class CheckP0AnaTask extends BaseAnaTask {
         else if (!lockedstate.isEmpty()){
             state = lockedstate;
         }
+        
         
         setCurrent_taskstate(getTaskstates().get(state));
         if (getCurrent_taskstate() != null){
@@ -317,37 +319,7 @@ public class CheckP0AnaTask extends BaseAnaTask {
         
         chdesc.auxlabel = "Delta P";
         chdesc.series.put("companion_data", FXCollections.observableArrayList());
-        
-        
-        
-        
-        
-        
-        
-        // Using Prof   ===========================================================
-//        chdesc.xlabel = prof.getChrt_Xlabel();
-//        chdesc.ylabel = prof.getChrt_Ymainlabel();
-//
-//        chdesc.xmin = prof.getChrt_Xmainmin();
-//        chdesc.xmax = prof.getChrt_Xmainmax();
-//        chdesc.ymin = prof.getChrt_Ymainmin();
-//        chdesc.ymax = prof.getChrt_Ymainmax();
-//        
-//        Double dws = (chdesc.xmax - chdesc.xmin) * 4 ;
-//        windowsize =  dws.intValue();
-//        chdesc.windowsize = this.windowsize;
-//
-//        chdesc.series.put("main_data", FXCollections.observableArrayList());
-//        
-//        chdesc.overlay.addMessage(String.format("Loaded :"+ prof.getDesc()));
-//
-//        chdesc.addYVal ("buildtgt", String.format("Build Target: %6.2f mmHg", prof.getBprs()), prof.getBprs(), null, 0.2);
-////        chdesc.addYRange("dvthrs", "\u0394P̣ Threshold", 0.0, 1.0, auxchart.getCompanionYAxis(), null, null);
-//        
-//        chdesc.auxlabel = prof.getChrt_Ycomplabel();
-//        chdesc.series.put("companion_data", FXCollections.observableArrayList());
-        
-        
+ 
         chdesc.dirty = false;
         ctx.auxcharts.put(this.taskid, chdesc);
         return true;

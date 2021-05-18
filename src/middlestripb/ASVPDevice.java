@@ -140,13 +140,6 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
         datacalibs.put("setra", getPropCalib ("setra"));
         ctx.setAsvpdev(this);
         
-        ctx.anatasks.put("roottask", new RootTask(this, ctx));
-        ctx.anatasks.put("checkp0task", new CheckP0AnaTask(this, ctx));
-        
-        
-        ctx.current_anatask = ctx.anatasks.get("nulltask");
-        
-        
     }
     
     

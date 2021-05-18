@@ -66,6 +66,17 @@ public class ViewisoTask extends BaseAnaTask {
         
         anct = ctx.getFXController();
         
+        
+        IsothermInfoController iic = new IsothermInfoController(anct);
+        anct.infopanes.put("isotherminfo", iic );
+        anct.getInfopane().getChildren().add(iic);
+        
+        PointInfoController pic = new PointInfoController(anct);
+        anct.infopanes.put("pointinfo", pic );
+        anct.getInfopane().getChildren().add(pic);
+        
+        
+        
         isothermchart = new IsothermChart(anct, this);
         mainchartpane = isothermchart.createCernChart();
         mainchartpane.getStylesheets().add(getClass().getClassLoader().getResource("middlestripb/isochart.css").toExternalForm());

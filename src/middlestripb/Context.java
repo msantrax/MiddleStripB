@@ -5,16 +5,11 @@
  */
 package middlestripb;
 
-import Entities.Isotherm;
-import Entities.Point;
-import com.opus.syssupport.SMTraffic;
-import com.opus.syssupport.VirnaPayload;
+import Entities.CalcP0;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.logging.Logger;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart;
@@ -34,8 +29,6 @@ public class Context {
         return instance;
     }
     
-    
-    
     public LinkedHashMap<String, AuxChartDescriptor> auxcharts;
     public AuxChartDescriptor current_auxdescriptor;
 
@@ -49,23 +42,21 @@ public class Context {
     public SamplePanelController current_samplepanel;
     
     
-    
-    
+    //public CalcP0 calcp0;
     
     
     public Context() {
-        
         
         auxcharts = new LinkedHashMap<>();
         anatasks = new LinkedHashMap<>();
         journals = new LinkedHashMap<>();
         samplepanels = new LinkedHashMap<>();
         
-        
     }
     
     private ASVPDevice asvpdev;
     public void setAsvpdev (ASVPDevice dev) { this.asvpdev = dev;}
+    public ASVPDevice getAsvpdev() {return this.asvpdev;}
     
     private FX1Controller anct;
     public void setFXController (FX1Controller anct) { this.anct = anct;}
@@ -73,15 +64,16 @@ public class Context {
     
     
     // ========================================== DATA REDIRECTION ===========================================================
- 
-    private List<XYChart.Data<Number, Number>> maindata = new ArrayList<>();
-    private List<XYChart.Data<Number, Number>> companiondata = new ArrayList<>();
-    
     public ObservableList<Data<Number, Number>> auxmain_series;
     public ObservableList<Data<Number, Number>> auxcompanion_series;
     
- 
     
+    // ============================================== CONTEXT INSPECTION =======================================================
+    
+    public boolean isP0Updated(long timeout) { 
+        
+        return true;
+    }
     
     
     // ============================================== TASK MANAGEMENT ===========================================================
@@ -101,11 +93,26 @@ public class Context {
         } 
     }
     
+    public void initDefaultTasks(){
+        
+        anatasks.put("roottask", new RootTask(asvpdev, this, "/home/opus/ASVPANA/Scripts/roottask"));
+        anatasks.put("checkp0task", new CheckP0AnaTask(asvpdev, this, "/home/opus/ASVPANA/Scripts/checkp0"));
+        
+        current_anatask = anatasks.get("roottask");
+        
+    }
+    
+    
+    
+    
+    
+    
     public Double getSecTS (Long end, Long init){
         
         Double dbl = (Long.valueOf(end - init).doubleValue()) / 1000 ;
         return dbl;
     }
+    
     
     
     
@@ -117,7 +124,6 @@ public class Context {
 //        ArrayList<Point>chartpoints = getIsotherm().getObjPoints();
         
         // Some dummy data to test ...
-        
         if (id.equals("prep1_path")){
             data.add(new XYChart.Data<>(0.0, 25.0));
             data.add(new XYChart.Data<>(60.0, 25.0));

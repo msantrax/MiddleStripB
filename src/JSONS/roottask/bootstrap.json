@@ -6,7 +6,7 @@
     "statetype": "CMD",
     "notifymessage": "",
     "logmessage": "",
-    "imediate": "startevent_input1",
+    "imediate": "",
     "failed": "",
     "timedout": "",
     "timeout": 0,
