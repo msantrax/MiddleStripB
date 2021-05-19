@@ -734,53 +734,12 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
     }
     
     
-    
-    
-    public String formatMessage (String tpl, BaseAnaTask tsk, TaskState tskst){
-        
-        tpl = tpl+" ";
-        String pat = "(&\\w*\\s)";
-        Pattern p = Pattern.compile(pat);
-        
-        Matcher m = p.matcher(tpl);
-        VarPool vp = tsk.getVarPool();
-        String ntpl = tpl;
-        
-        while (m.find()){
-            MatchResult mr = m.toMatchResult();
-            String varname = mr.group();
-            String varvalue;
-            String name = varname.replace("&", "").trim();
-            
-            if (name.toUpperCase().equals("SPARAM1")){
-                varvalue = tskst.getSparam1();
-            }
-            else if (name.toUpperCase().equals("SPARAM2")){
-                varvalue = tskst.getSparam2();
-            }
-            else{
-                if (name.startsWith("_")){
-                    name = name.replace("_", "");
-                    varvalue = vp.SPeek(name);
-                }
-                else{
-                    varvalue = vp.SPop(name);
-                } 
-            }
-            
-            ntpl = ntpl.replace(varname, varvalue+" ");           
-        }
-    
-        return ntpl;
-    }
-    
-    
     public void updateNotify(BaseAnaTask tsk, TaskState tst){
         
-        if (!tst.getNotifymessage().isEmpty()){
+        if (!tst.getNotifymessage().isBlank()){
             Platform.runLater(() -> {
                 AuxChartDescriptor cd = ctx.auxcharts.get(tsk.taskid);                   
-                cd.overlay.addMessage(formatMessage(tst.getNotifymessage(), tsk, tst));
+                cd.overlay.addMessage(tsk.formatMessage(tst.getNotifymessage(), tsk, tst));
             });
         }
         
@@ -836,6 +795,12 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
         return true;
     }
     
+    
+    
+    
+    
+    
+    
     @smstate (state = "NOTIFYAUX")
     public boolean st_notifyAux(SMTraffic smm){
         
@@ -852,10 +817,8 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
                 if (pld.getCaller() != null){
                     tst = (TaskState)pld.getCaller();
                 }
-                String message = "?";
-                message = tst.getNotifymessage();
                 
-                cd.overlay.addMessage(formatMessage(message, tsk, tst));
+                tsk.updateNotifications(tst);
                 
                 SMTraffic nxt = tsk.goNext(tst.getImediate());
                 if (nxt != null){

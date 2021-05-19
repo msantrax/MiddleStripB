@@ -243,7 +243,12 @@ public class Controller implements SignalListener, TickListener, VirnaServicePro
     public void addSMEventListener (String eventkey, SMEvent event){
         
         ArrayList<SMEvent> smevtpool;
+        //eventkey = eventkey.replaceFirst("(\\w*_)(\\w*_).*", "");
+        String[] tks = eventkey.split("_");
+        eventkey = eventkey.replace(tks[0]+"_", "");
+    
         smevtpool = smeventlisteners.get(eventkey);
+        
         // There is no event with this key registered, create one 
         if (smevtpool == null){
             smevtpool = new ArrayList<SMEvent>();
@@ -702,6 +707,8 @@ public class Controller implements SignalListener, TickListener, VirnaServicePro
                 tst = (TaskState)pld.getCaller();
             }
 
+            tsk.updateNotifications(tst);
+            
             SMTraffic nxt = tsk.goNext(tst.getImediate());
             if (nxt != null){
                 processSignal(nxt);

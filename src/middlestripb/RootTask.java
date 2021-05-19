@@ -209,13 +209,39 @@ public class RootTask extends BaseAnaTask {
             BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
             TaskState tst = tsk.getCurrent_taskstate();
             
+            // Should be loaded first to preserve realm info ?
+            VirnaPayload tos = new VirnaPayload()
+                    .setString(tst.getImediate())
+                    .setObjectType(tsk.currentrealm);
+            taskstack.push(tos);
+
+            // Now, branch to new realm.
             loadScript(tst.getStatecmd());
+           
+        }
+        else{
+            log.info(String.format("Notify Aux"));
+        }
+    
+        return true; 
+    }
+    
+    @smstate (state = "RETURNSCRIPT")
+    public boolean st_returnScript(SMTraffic smm){
+        
+        VirnaPayload pld = smm.getPayload();
+        
+        if (pld.vobject instanceof BaseAnaTask){
+            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
+            TaskState tst = tsk.getCurrent_taskstate();
             
-            
-            SMTraffic nxt = tsk.goNext(tst.getImediate());
-            
-            if (nxt != null){
-                Controller.getInstance().processSignal(nxt);
+            VirnaPayload tos = taskstack.pop();
+            if (tos != null){
+                currentrealm = tos.objecttype;
+                SMTraffic nxt = tsk.goNext(tos.vstring);
+                if (nxt != null){
+                    Controller.getInstance().processSignal(nxt);
+                } 
             }
         }
         else{
@@ -227,7 +253,39 @@ public class RootTask extends BaseAnaTask {
     
     
     
+    @smstate (state = "IS_XDUCER_UPDATED")
+    public boolean st_isXducerUpdated(SMTraffic smm){
+        
+        VirnaPayload pld = smm.getPayload();
+        
+        if (pld.vobject instanceof BaseAnaTask){
+            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
+            TaskState tst = tsk.getCurrent_taskstate();
+            Double timegap = tst.getParam1();
+            
+            SMTraffic nxt;
+            if (false){
+                // Calibration OK
+                nxt = tsk.goNext(tst.getImediate());
+            }
+            else{
+                nxt = tsk.goNext(tst.getFailed());
+            }
+            
+            tsk.updateNotifications(tst);
+            
+            if (nxt != null){
+                Controller.getInstance().processSignal(nxt);
+            }
+            
+        }
+        else{
+            log.info(String.format("Notify Aux"));
+        }
     
+        return true;
+     
+    }
     
     
     
@@ -254,6 +312,45 @@ public class RootTask extends BaseAnaTask {
         return true;
      
     }
+    
+    
+    @smstate (state = "STARTANALYSIS")
+    public boolean st_startAanlysis(SMTraffic smm){
+        
+        VirnaPayload pld = smm.getPayload();
+        
+        if (pld.vobject instanceof BaseAnaTask){
+            BaseAnaTask tsk = (BaseAnaTask)pld.vobject;
+            
+            TaskState tst = tsk.getCurrent_taskstate();
+            if (tst == null){
+                tst=tsk.taskstates.get(tsk.taskid+"_"+pld.objecttype);
+            }
+            
+           
+            tsk.updateNotifications(tst);
+            
+            ctx.anatasks.put("checkp0task", new CheckP0AnaTask(asvpdev, ctx, "/home/opus/ASVPANA/Scripts/checkp0"));
+            //ctx.current_anatask = ctx.anatasks.get("checkp0task");
+            
+            ctx.switchTask ("checkp0task");
+            
+            
+            SMTraffic nxt = tsk.goNext(tst.getImediate());
+            if (nxt != null){
+                Controller.getInstance().processSignal(nxt);
+            }
+        }
+        else{
+            log.info(String.format("Notify Aux"));
+        }
+    
+        return true;
+     
+    }
+    
+    
+    
   
 }
 

@@ -56,6 +56,7 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 import org.controlsfx.control.HiddenSidesPane;
@@ -507,7 +508,10 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                 Controller.getInstance().processSignal(nxt);
             }
           
-            showSnack(tmout, tst.notifymessage); 
+            tsk.updateNotifications(tst);
+            
+            showSnack(tmout, tst.notifymessage);
+            
         }
         else{
            showSnack(payload.long1, payload.vstring);  
@@ -521,8 +525,10 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         
         Long showperiod = (period == null || period == 0l) ? 2500 : period;
         
+        snacktext.setTextAlignment(TextAlignment.CENTER);
+        
         snacktext.setText(message);
-        LOG.info(String.format("SNACK is showing : %s", message));
+        //LOG.info(String.format("SNACK is showing : %s", message));
         
         snack.setVisible(true);
         
@@ -922,8 +928,9 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                                    new VirnaPayload()));
         }
         else{
-            ctx.switchTask("roottask");
-            
+            //ctx.switchTask("roottask");
+            appctrl.publishSMEvent("start_action", null);
+       
 //            showInfoPane("asvpdevice");
 //            ctx.switchTask("checkp0task");
         }
@@ -1036,7 +1043,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
         ViewisoTask vit = (ViewisoTask)ctx.anatasks.get("viewisotask");
         
         if ( vit == null){
-            vit = new ViewisoTask(null, ctx);
+            vit = new ViewisoTask(null, ctx, "/home/opus/ASVPANA/Scripts/viewisotask");
             ctx.anatasks.put("viewisotask", vit );
             appctrl.loadStates(ViewisoTask.class, vit);
             vit.prepareGo();

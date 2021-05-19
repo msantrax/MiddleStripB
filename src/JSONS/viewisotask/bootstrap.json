@@ -23,11 +23,10 @@
   },
   
   
-  
   "startevent_input1": {
     "callstate": "SHOWINPUTDIALOG",
     "statecmd": "",
-    "realm": "viewiso",
+    "realm": "viewisotask",
     "statetype": "CMD",
     "notifymessage": "",
     "logmessage": "",
@@ -50,7 +49,7 @@
   "startevent_input1_callbackok": {
     "callstate": "LOADISOVIEW",
     "statecmd": "",
-    "realm": "viewiso",
+    "realm": "viewisotask",
     "statetype": "CMD",
     "notifymessage": "Input 1 callback aproved = &sparam1 ",
     "logmessage": "",
@@ -73,7 +72,7 @@
   "startevent_input1_callbackcancel": {
     "callstate": "NOTIFYAUX",
     "statecmd": "",
-    "realm": "checkp0",
+    "realm": "viewisotask",
     "statetype": "CMD",
     "notifymessage": "Input 1 callback is cancelled",
     "logmessage": "Start event was received",
@@ -94,11 +93,7 @@
   
   
   
-  
-  
-  
-  
-  "viewisotask_snackinit": {
+  "snackinit": {
     "callstate": "SHOWSNACK",
     "statecmd": "",
     "realm": "viewisotask",

@@ -10,7 +10,6 @@ import com.opus.syssupport.PicnoUtils;
 import com.opus.syssupport.SMEvent;
 import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.VirnaPayload;
-import com.opus.syssupport.smstate;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.DirectoryStream;
@@ -19,7 +18,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Stack;
 import java.util.logging.Logger;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -69,6 +72,7 @@ public class BaseAnaTask {
     
     public String scriptsrootpath = "";
     public String currentrealm = "";
+    public Stack<VirnaPayload> taskstack;
     
     
     public BaseAnaTask(ASVPDevice asvpdev, Context ctx) {
@@ -76,6 +80,7 @@ public class BaseAnaTask {
         this.ctx = ctx;
         
         events = new LinkedHashMap<>();
+        taskstack = new Stack();
         samplering = new SampleRing(5);
         
     }
@@ -174,7 +179,6 @@ public class BaseAnaTask {
 //                    PicnoUtils.saveJson(pathbup+file.getFileName(), tempstates, true);
                 }
                 
-                
             }
         }catch(IOException e) {
             log.info(String.format("Exception when loading states @ %s is : %s" , taskid, e.getCause().getMessage()));
@@ -201,10 +205,10 @@ public class BaseAnaTask {
         
        //LOG.info(String.format("CheckP0 going next state : %s", nextstate));
         
-        setCurrent_taskstate(getTaskstates().get(currentrealm + "_" + nextstate));
-        
-        
-        
+       
+        String nstate = currentrealm + "_" + nextstate;
+        setCurrent_taskstate(getTaskstates().get(nstate));
+   
         if (getCurrent_taskstate() != null){
             return new SMTraffic(0l, 0l, 0, getCurrent_taskstate().getCallstate(), this.getClass(),
                                     new VirnaPayload()
@@ -231,6 +235,63 @@ public class BaseAnaTask {
     }
     
     
+    
+    public String formatMessage (String tpl, BaseAnaTask tsk, TaskState tskst){
+        
+        tpl = tpl+" ";
+        String pat = "(&\\w*\\s)";
+        Pattern p = Pattern.compile(pat);
+        
+        Matcher m = p.matcher(tpl);
+        VarPool vp = tsk.getVarPool();
+        String ntpl = tpl;
+        
+        while (m.find()){
+            MatchResult mr = m.toMatchResult();
+            String varname = mr.group();
+            String varvalue;
+            String name = varname.replace("&", "").trim();
+            
+            if (name.toUpperCase().equals("SPARAM1")){
+                varvalue = tskst.getSparam1();
+            }
+            else if (name.toUpperCase().equals("SPARAM2")){
+                varvalue = tskst.getSparam2();
+            }
+            else{
+                if (name.startsWith("_")){
+                    name = name.replace("_", "");
+                    varvalue = vp.SPeek(name);
+                }
+                else{
+                    varvalue = vp.SPop(name);
+                } 
+            }
+            
+            ntpl = ntpl.replace(varname, varvalue+" ");           
+        }
+    
+        return ntpl;
+    }
+    
+    
+    
+    
+    public void updateNotifications(TaskState tst ){
+    
+        AuxChartDescriptor cd = ctx.auxcharts.get(taskid);
+        
+        
+        Platform.runLater(() -> {
+            String message = "?";
+            message = tst.getNotifymessage();
+            if (message != null && !message.isBlank()) cd.overlay.addMessage(formatMessage(message, this, tst));
+
+            message = tst.logmessage;
+            if (message != null && !message.isBlank()) ctx.current_journal.addEntry(formatMessage(message, this, tst));
+        });
+        
+    }
     
     
     

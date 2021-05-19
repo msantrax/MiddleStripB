@@ -65,7 +65,7 @@ public class RootTaskSeed extends BaseAnaTask {
             });    
         }
         
-        this.initStates();
+        //initStates();
         
         SMTraffic nxt = goNext("SETAUTO_RESET");
         if (nxt != null){
@@ -75,25 +75,25 @@ public class RootTaskSeed extends BaseAnaTask {
     }
     
    
-    @Override
-    public void initStates(){
-        
-        taskstates = new LinkedHashMap<>();
-        initVarPool();
-        
-        try {
-            Type stMapType = new TypeToken<LinkedHashMap<String, TaskState>>() {}.getType();
-            taskstates = PicnoUtils.loadJsonTT(ASVPDevice.JSONS + "checkp0_states.json", stMapType);
-        } catch (IOException ex) {
-            Logger.getLogger(RootTaskSeed.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-
-        
-        setCurrent_taskstate(getTaskstates().get("TASKINIT"));
-
-    }
-    
+//    @Override
+//    public void initStates(){
+//        
+//        taskstates = new LinkedHashMap<>();
+//        initVarPool();
+//        
+//        try {
+//            Type stMapType = new TypeToken<LinkedHashMap<String, TaskState>>() {}.getType();
+//            taskstates = PicnoUtils.loadJsonTT(ASVPDevice.JSONS + "checkp0_states.json", stMapType);
+//        } catch (IOException ex) {
+//            Logger.getLogger(RootTaskSeed.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        
+//
+//        
+//        setCurrent_taskstate(getTaskstates().get("TASKINIT"));
+//
+//    }
+//    
     
     @Override
     public SMTraffic goNext(String nextstate){   

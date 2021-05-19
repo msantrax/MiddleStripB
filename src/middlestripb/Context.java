@@ -96,7 +96,7 @@ public class Context {
     public void initDefaultTasks(){
         
         anatasks.put("roottask", new RootTask(asvpdev, this, "/home/opus/ASVPANA/Scripts/roottask"));
-        anatasks.put("checkp0task", new CheckP0AnaTask(asvpdev, this, "/home/opus/ASVPANA/Scripts/checkp0"));
+        //anatasks.put("checkp0task", new CheckP0AnaTask(asvpdev, this, "/home/opus/ASVPANA/Scripts/checkp0"));
         
         current_anatask = anatasks.get("roottask");
         

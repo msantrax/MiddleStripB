@@ -47,7 +47,7 @@ public class ViewisoTask extends BaseAnaTask {
     
     
     
-    public ViewisoTask(FX1Controller anct, Context ctx) {
+    public ViewisoTask(FX1Controller anct, Context ctx, String script) {
         
         super(null, ctx);
         
@@ -55,7 +55,7 @@ public class ViewisoTask extends BaseAnaTask {
         this.anct = anct;
         taskid = "viewisotask";
        
-        this.initStates();
+        initStates(script);
         
     }
 
@@ -136,45 +136,45 @@ public class ViewisoTask extends BaseAnaTask {
     }
     
     
-    @Override
-    public void initStates(){
-        
-        super.initStates();
-        setCurrent_taskstate(getTaskstates().get("viewisotask"));
-
-    }
+//    @Override
+//    public void initStates(){
+//        
+//        super.initStates();
+//        setCurrent_taskstate(getTaskstates().get("viewisotask"));
+//
+//    }
+//    
     
-    
-    @Override
-    public SMTraffic goNext(String nextstate){   
-       
-        //LOG.info(String.format("CheckP0 going next state : %s", nextstate));
-        setCurrent_taskstate(getTaskstates().get(nextstate));
-        if (getCurrent_taskstate() != null){
-            return new SMTraffic(0l, 0l, 0, getCurrent_taskstate().getCallstate(), this.getClass(),
-                                    new VirnaPayload()
-                                        .setObject(this)
-                                        .setString(getCurrent_taskstate().getStatecmd())
-                                );
-        }
-        return null;
-    }
-    
-    @Override
-    public SMTraffic getNext(String nextstate){   
-       
-        //LOG.info(String.format("CheckP0 going next state : %s", nextstate));
-        TaskState taskstate = getTaskstates().get(nextstate);
-        if (taskstate != null){
-            return new SMTraffic(0l, 0l, 0, taskstate.getCallstate(), this.getClass(),
-                                    new VirnaPayload()
-                                        .setObjectType(nextstate)
-                                        .setObject(this)
-                                        .setString(taskstate.getStatecmd())
-                                );
-        }
-        return null;
-    }
+//    @Override
+//    public SMTraffic goNext(String nextstate){   
+//       
+//        //LOG.info(String.format("CheckP0 going next state : %s", nextstate));
+//        setCurrent_taskstate(getTaskstates().get(nextstate));
+//        if (getCurrent_taskstate() != null){
+//            return new SMTraffic(0l, 0l, 0, getCurrent_taskstate().getCallstate(), this.getClass(),
+//                                    new VirnaPayload()
+//                                        .setObject(this)
+//                                        .setString(getCurrent_taskstate().getStatecmd())
+//                                );
+//        }
+//        return null;
+//    }
+//    
+//    @Override
+//    public SMTraffic getNext(String nextstate){   
+//       
+//        //LOG.info(String.format("CheckP0 going next state : %s", nextstate));
+//        TaskState taskstate = getTaskstates().get(nextstate);
+//        if (taskstate != null){
+//            return new SMTraffic(0l, 0l, 0, taskstate.getCallstate(), this.getClass(),
+//                                    new VirnaPayload()
+//                                        .setObjectType(nextstate)
+//                                        .setObject(this)
+//                                        .setString(taskstate.getStatecmd())
+//                                );
+//        }
+//        return null;
+//    }
     
     
     @Override

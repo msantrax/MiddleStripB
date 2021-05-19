@@ -69,22 +69,23 @@ public class CheckP0AnaTask extends BaseAnaTask {
         
         super.Go();
         
-        // Setup the journal
-        if (journal == null){
-            journal = new JournalSideNode(Side.TOP, ctx.getFXController().getAuxhspane());
-            ctx.journals.put(this, journal);   
-            journal.addEntry("CheckP0 Task (Determine Zero&ATM pressures) is initializing...");
-        }
-        ctx.current_journal = journal;
-        ctx.getFXController().getAuxhspane().setTop(journal);
-        
-        if (dataframe == null){
-            asvpdev.loadTaskConfig(CalcP0.class, "checkp0task", 1617981872798l);
-        }
-        else{
-            Go();
-        }
-        
+        Platform.runLater(() -> {
+            // Setup the journal
+            if (journal == null){
+                journal = new JournalSideNode(Side.TOP, ctx.getFXController().getAuxhspane());
+                ctx.journals.put(this, journal);   
+                journal.addEntry("CheckP0 Task (Determine Zero&ATM pressures) is initializing...");
+            }
+            ctx.current_journal = journal;
+            ctx.getFXController().getAuxhspane().setTop(journal);
+
+            if (dataframe == null){
+                asvpdev.loadTaskConfig(CalcP0.class, "checkp0task", 1617981872798l);
+            }
+            else{
+                Go();
+            }
+        });
     }
     
     @Override
@@ -109,6 +110,7 @@ public class CheckP0AnaTask extends BaseAnaTask {
                 FX1Controller fx1 = FX1Controller.getInstance();
                 auxchart = fx1.getAuxchart(); 
                 auxchart.refreshChart("checkp0");
+                fx1.showInfoPane("asvpdevice");
             });    
         }
         
