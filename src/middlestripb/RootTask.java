@@ -83,7 +83,6 @@ public class RootTask extends BaseAnaTask {
     }
     
     
-    
     @Override
     public void prepareGo(){ 
         super.Go();
@@ -216,7 +215,7 @@ public class RootTask extends BaseAnaTask {
             taskstack.push(tos);
 
             // Now, branch to new realm.
-            loadScript(tst.getStatecmd());
+            tsk.loadScript(tst.getStatecmd());
            
         }
         else{
@@ -327,14 +326,14 @@ public class RootTask extends BaseAnaTask {
                 tst=tsk.taskstates.get(tsk.taskid+"_"+pld.objecttype);
             }
             
-           
             tsk.updateNotifications(tst);
             
-            ctx.anatasks.put("checkp0task", new CheckP0AnaTask(asvpdev, ctx, "/home/opus/ASVPANA/Scripts/checkp0"));
-            //ctx.current_anatask = ctx.anatasks.get("checkp0task");
-            
+            ctx.anatasks.put("checkp0task", new CheckP0AnaTask(asvpdev, ctx, "/home/opus/ASVPANA/Scripts/checkp0")); 
             ctx.switchTask ("checkp0task");
             
+            Platform.runLater(() -> {
+                ctx.getFXController().showMainChart(controlpane);
+            });
             
             SMTraffic nxt = tsk.goNext(tst.getImediate());
             if (nxt != null){

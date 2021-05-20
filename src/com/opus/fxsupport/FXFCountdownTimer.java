@@ -8,7 +8,6 @@ package com.opus.fxsupport;
 
 import com.opus.syssupport.SMTraffic;
 import com.opus.syssupport.TickListener;
-import com.opus.syssupport.VirnaPayload;
 import com.opus.syssupport.VirnaServiceProvider;
 import java.util.logging.Logger;
 import java.io.IOException;
@@ -27,6 +26,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Arc;
 import middlestripb.BaseAnaTask;
+import middlestripb.TaskState;
 
 
 /**
@@ -288,7 +288,6 @@ public class FXFCountdownTimer extends AnchorPane implements Initializable, Tick
     public FXFCountdownTimer pushBar(long duration, String color, String message, 
                                 String init_event, String end_event, SMTraffic init_task){
         
-        
         FXFCountdownTimerBar ctbar = new FXFCountdownTimerBar(this, bars.size(), duration, color, message, 
                                 init_event, end_event, init_task);
         bars.add(ctbar);
@@ -305,7 +304,8 @@ public class FXFCountdownTimer extends AnchorPane implements Initializable, Tick
             
             if (timeout_state != null){
                 BaseAnaTask bat = (BaseAnaTask)timeout_state.getPayload().vobject;
-                bat.setCurrent_taskstate(timeout_state.getPayload().objecttype);
+                //TaskState ts = bat.(timeout_state.getPayload().objecttype);
+                bat.setCurrent_taskstate(bat.currentrealm+"_"+timeout_state.getPayload().objecttype);
                 ctrl.processSignal(timeout_state);
             }
             

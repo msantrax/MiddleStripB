@@ -494,7 +494,7 @@ public class Controller implements SignalListener, TickListener, VirnaServicePro
                 }
                 else{
                     statesptr.put(annot.state(), stdesc);
-                    log.info(String.format("Registering state %s @ %s", stdesc.getSID(), stdesc.getClazz().getName()));
+                    //log.info(String.format("Registering state %s @ %s", stdesc.getSID(), stdesc.getClazz().getName()));
                 }
             }
         }

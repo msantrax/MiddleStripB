@@ -54,6 +54,7 @@ public class CheckP0AnaTask extends BaseAnaTask {
         
         super(asvpdev, ctx);
         taskid = "checkp0";
+        scriptsrootpath = "/home/opus/ASVPANA/Scripts/checkp0";
         
         this.initStates(script);
         
@@ -105,6 +106,7 @@ public class CheckP0AnaTask extends BaseAnaTask {
         dtfr = this.getDataframe();
         prof = (CalcP0_pf)dtfr.calcp0_pf;
         
+        
         if (createGraph(true)){
             Platform.runLater(() -> {
                 FX1Controller fx1 = FX1Controller.getInstance();
@@ -135,68 +137,67 @@ public class CheckP0AnaTask extends BaseAnaTask {
     }
     
    
-    @Override
-    public void initStates(String script){
-        
-        super.initStates(script);
-        
-        
-//        varpool.Push("MESSAGE1", varpool.new VarInfo("VarPool Message 1", "String"));
-//        varpool.Push("MESSAGE2", "VarPool message 2");
-//        varpool.Push("VPDOUBLE1", varpool.new VarInfo(37.2, "DoubleNF"));
-//        varpool.Push("TSTAMP", System.currentTimeMillis());
-//        String tst = "Teste da &MESSAGE1 que aponta para a &VPDOUBLE1";
-//        String sout = asvpdev.formatMessage(tst, this);
-        
-        setCurrent_taskstate(getTaskstates().get("TASKINIT"));
-        LOG.info(String.format("CheckP0 task stats init"));
-    }
-    
-    
-    @Override
-    public SMTraffic goNext(String nextstate){   
-       
-        LOG.info(String.format("CheckP0 going next state : %s", nextstate));
-        
-        String state = nextstate;
-        
-        if (lockedstate.contains("LOCK")){
-            lockedstate = nextstate;
-            return null;
-        }
-        else if (!lockedstate.isEmpty()){
-            state = lockedstate;
-        }
-        
-        
-        setCurrent_taskstate(getTaskstates().get(state));
-        if (getCurrent_taskstate() != null){
-            return new SMTraffic(0l, 0l, 0, getCurrent_taskstate().getCallstate(), this.getClass(),
-                                    new VirnaPayload()
-                                        .setObject(this)
-                                        .setString(getCurrent_taskstate().getStatecmd())
-                                );
-        }
-        return null;
-        
-    }
-    
-    @Override
-    public SMTraffic getNext(String nextstate){   
-       
-        //LOG.info(String.format("CheckP0 going next state : %s", nextstate));
-        TaskState taskstate = getTaskstates().get(nextstate);
-        if (taskstate != null){
-            return new SMTraffic(0l, 0l, 0, taskstate.getCallstate(), this.getClass(),
-                                    new VirnaPayload()
-                                        .setObjectType(nextstate)
-                                        .setObject(this)
-                                        .setString(taskstate.getStatecmd())
-                                );
-        }
-        return null;
-    }
-    
+//    @Override
+//    public void initStates(String script){
+//        
+//        super.initStates(script);
+//  
+////        varpool.Push("MESSAGE1", varpool.new VarInfo("VarPool Message 1", "String"));
+////        varpool.Push("MESSAGE2", "VarPool message 2");
+////        varpool.Push("VPDOUBLE1", varpool.new VarInfo(37.2, "DoubleNF"));
+////        varpool.Push("TSTAMP", System.currentTimeMillis());
+////        String tst = "Teste da &MESSAGE1 que aponta para a &VPDOUBLE1";
+////        String sout = asvpdev.formatMessage(tst, this);
+//        
+//        setCurrent_taskstate(getTaskstates().get("TASKINIT"));
+//        //LOG.info(String.format("CheckP0 task stats init"));
+//    }
+//    
+//    
+//    @Override
+//    public SMTraffic goNext(String nextstate){   
+//       
+//        LOG.info(String.format("CheckP0 going next state : %s", nextstate));
+//        
+//        String state = nextstate;
+//        
+////        if (lockedstate.contains("LOCK")){
+////            lockedstate = nextstate;
+////            return null;
+////        }
+////        else if (!lockedstate.isEmpty()){
+////            state = lockedstate;
+////        }
+//        
+//        
+//        setCurrent_taskstate(getTaskstates().get(state));
+//        if (getCurrent_taskstate() != null){
+//            return new SMTraffic(0l, 0l, 0, getCurrent_taskstate().getCallstate(), this.getClass(),
+//                                    new VirnaPayload()
+//                                        .setObject(this)
+//                                        .setString(getCurrent_taskstate().getStatecmd())
+//                                );
+//        }
+//        return null;
+//        
+//    }
+//    
+//    @Override
+//    public SMTraffic getNext(String nextstate){   
+//       
+//        //LOG.info(String.format("CheckP0 going next state : %s", nextstate));
+//        TaskState taskstate = getTaskstates().get(nextstate);
+//        if (taskstate != null){
+//            return new SMTraffic(0l, 0l, 0, taskstate.getCallstate(), this.getClass(),
+//                                    new VirnaPayload()
+//                                        .setObjectType(nextstate)
+//                                        .setObject(this)
+//                                        .setString(taskstate.getStatecmd())
+//                                );
+//        }
+//        return null;
+//    }
+//    
     
     
     

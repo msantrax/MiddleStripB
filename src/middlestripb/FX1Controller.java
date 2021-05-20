@@ -928,11 +928,7 @@ public class FX1Controller extends FXFController implements com.opus.fxsupport.F
                                    new VirnaPayload()));
         }
         else{
-            //ctx.switchTask("roottask");
-            appctrl.publishSMEvent("start_action", null);
-       
-//            showInfoPane("asvpdevice");
-//            ctx.switchTask("checkp0task");
+            appctrl.publishSMEvent("analise_action", null);
         }
         
        

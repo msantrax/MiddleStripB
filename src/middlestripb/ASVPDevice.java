@@ -202,9 +202,7 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
                 break;
         
         }
-        
-        
-        
+
         return true;
     }
     
@@ -406,7 +404,29 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
                             ctrl.setAlarm (-1l, -4, alarm_config, timeout, 0);
                         }
                         break;
-                    
+                        
+                    case "SETY":
+                        if (yvi != null){
+                            chart.getChartPane().getPlugins().remove(xvi);
+                            acd.yvalindicators.remove(tst.getSparam1());
+                        }
+                        yvi = AuxChartDescriptor.YValIndicatorFactory(tst.getSparam1(), tst.getSparam2(), 
+                                tst.getParam1(), null, tst.getParam2());
+                        acd.yvalindicators.put(tst.getSparam1(), yvi);
+                        chart.getChartPane().getPlugins().add(yvi);
+                        
+                        timeout = tst.getTimeout();
+                        if ( timeout != null && timeout != 0L){
+                            SMTraffic alarm_config = new SMTraffic(0l, 1l, 0, "REMOVECHARTEVENT", this.getClass(),
+                                    new VirnaPayload().setObjectType("YValue")
+                                            .setString(tst.getSparam1())
+                                            .setObject(tsk)
+                            );
+                            ctrl.setAlarm (-1l, -4, alarm_config, timeout, 0);
+                        }
+                        break;
+                        
+                        
                         
                     default:
                         break;
@@ -685,7 +705,9 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
                         asvpdevctrl.activateLed("wait", true, true);
                         if(tst.getChronosegs() != null && !tst.getChronosegs().isEmpty()){
                             FXFCountdownTimer cdt = asvpdevctrl.getCDT();
-                            cdt.setTimeout_state(tsk.getNext(tst.getTimedout()));
+                            SMTraffic nxt = tsk.getNext(tst.getTimedout());
+                            cdt.setTimeout_state(nxt);
+                            
                             cdt.clearCounter();
                             cdt.clearBars();
                             
@@ -794,12 +816,6 @@ public class ASVPDevice implements SerialDevice.SerialDeviceListener{
         
         return true;
     }
-    
-    
-    
-    
-    
-    
     
     @smstate (state = "NOTIFYAUX")
     public boolean st_notifyAux(SMTraffic smm){
